@@ -1,3 +1,7 @@
+<?php
+// Silence is golden.
+?>
+
 <div class="dl-wrapper">
     <h2>DL URL Replacer</h2>
     <div class="tabs">

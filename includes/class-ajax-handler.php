@@ -24,12 +24,19 @@ class AjaxHandler
 	{
 		global $wpdb;
 
-		$type = sanitize_text_field($_POST['type']);
-		$find = esc_sql($_POST['find']);
-		$replace = esc_sql($_POST['replace']);
+		$type    = sanitize_text_field(wp_unslash($_POST['type']));
+		$find    = sanitize_text_field(esc_sql(wp_unslash($_POST['find'])));
+		$replace = sanitize_text_field(esc_sql(wp_unslash($_POST['replace'])));
 
-		$tables = $wpdb->get_results("SHOW TABLES", ARRAY_N);
-		$results = [];
+
+		$cache_key = 'dl_url_replacer_tables';
+		$tables = wp_cache_get($cache_key);
+
+		if ($tables === false) {
+			$tables = $wpdb->get_results('SHOW TABLES', ARRAY_N);
+			wp_cache_set($cache_key, $tables, '', 3600); // Cache for 1 hour
+		}
+
 
 		foreach ($tables as $tableRow)
 		{
@@ -39,8 +46,13 @@ class AjaxHandler
 			{
 				if (strpos($column['Type'], 'text') !== false || strpos($column['Type'], 'char') !== false)
 				{
-					$query = "UPDATE `$table` SET `{$column['Field']}` = REPLACE(`{$column['Field']}`, %s, %s)";
-					$updated = $wpdb->query($wpdb->prepare($query, $find, $replace));
+					$updated = $wpdb->query(
+						$wpdb->prepare(
+							"UPDATE `$table` SET `{$column['Field']}` = REPLACE(`{$column['Field']}`, %s, %s)",
+							$find,
+							$replace
+						)
+					);
 					if ($updated)
 					{
 						$results[] = ['table' => $table, 'column' => $column['Field'], 'rows_affected' => $updated];
@@ -49,18 +61,11 @@ class AjaxHandler
 			}
 		}
 
-		// Log to file
-		file_put_contents(plugin_dir_path(__FILE__) . '../logs/log-' . date('Y-m-d') . '.txt', print_r($results, true) , FILE_APPEND);
+		// Log to file with PHPCS-compliant date function and safe output
+		$log_file = plugin_dir_path(__FILE__) . '../logs/log-' . gmdate('Y-m-d') . '.txt';
+		file_put_contents($log_file, json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), FILE_APPEND);
 
-		// Send JSON response
-		if (empty($results))
-		{
-			wp_send_json_error(['message' => 'No replacements made.']);
-		}
-		else
-		{
-			wp_send_json_success(['message' => 'Replacements completed successfully.', 'results' => $results]);
-		}
+		wp_send_json_success($results);
 	}
 }
 new AjaxHandler();

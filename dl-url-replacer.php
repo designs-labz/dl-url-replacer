@@ -11,12 +11,22 @@
  * Author URI:            https://designslabz.com/
  * License:               GPL-3.0-or-later
  * License URI:           https://www.gnu.org/licenses/gpl-3.0.html
- * Text Domain:           designslabz
+ * Text Domain:           dl-url-replacer
  * GitHub Plugin URI:     https://github.com/team-designslabz/dl-url-replacer
  * GitHub Branch:         main
  */
 
 defined("ABSPATH") || exit();
+
+// Define plugin version
+/**
+ * Plugin version.
+ *
+ * @since 1.0.0
+ *
+ * @var string
+ */
+define( 'DL_URL_REPLACER_VERSION', '1.0.0' );
 
 // Load main class
 require_once plugin_dir_path(__FILE__) . "includes/class-dl-url-replacer.php";

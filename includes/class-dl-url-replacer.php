@@ -48,9 +48,9 @@ class Main
 	{
 		if (strpos($hook, 'dl-url-replacer') === false) return;
 
-		wp_enqueue_style('dl-url-replacer-style', plugin_dir_url(__FILE__) . '../admin/assets/css/style.css' . '?ver=' . time() , [], null);
+		wp_enqueue_style( 'dl-url-replacer-style', plugin_dir_url( __FILE__ ) . '../admin/assets/css/style.css', array(), DL_URL_REPLACER_VERSION );
 
-		wp_enqueue_script('dl-url-replacer-script', plugin_dir_url(__FILE__) . '../admin/assets/js/script.bundle.js' . '?ver=' . time() , [], null, true);
+		wp_enqueue_script( 'dl-url-replacer-script', plugin_dir_url( __FILE__ ) . '../admin/assets/js/script.bundle.js', array( 'jquery' ), DL_URL_REPLACER_VERSION, true );
 
 		wp_localize_script('dl-url-replacer-script', 'dlUrlReplacerAjax', ['ajax_url' => admin_url('admin-ajax.php') ]);
 	}
