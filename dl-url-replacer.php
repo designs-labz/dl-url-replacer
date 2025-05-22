@@ -11,7 +11,7 @@
  * Author URI:            https://designslabz.com/
  * License:               GPL-3.0-or-later
  * License URI:           https://www.gnu.org/licenses/gpl-3.0.html
- * Text Domain:           dl-url-replacer
+ * Text Domain:           dl-url-and-text-replacer
  * GitHub Plugin URI:     https://github.com/team-designslabz/dl-url-replacer
  * GitHub Branch:         main
  */
