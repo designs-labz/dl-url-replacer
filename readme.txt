@@ -1,6 +1,6 @@
 === DL URL and Text Replacer ===
 Contributors: designs_labz
-Donate link: https://github.com/designs-labz/dl-url-replacer
+Donate link: https://github.com/designs-labz/dl-url-and-text-replacer
 Tags: url, replace, tools, admin
 Requires at least: 6.1
 Tested up to: 6.8
@@ -27,7 +27,7 @@ DL URL Replacer is a powerful admin tool that allows you to search and replace a
 
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/dl-url-replacer` directory, or install the plugin through the WordPress plugins screen directly.
+1. Upload the plugin files to the `/wp-content/plugins/dl-url-and-text-replacer` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
 3. Navigate to Tools > DL URL Replacer to access the plugin.
 

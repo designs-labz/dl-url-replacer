@@ -1,5 +1,5 @@
 {
-    "name": "dl-url-replacer",
+    "name": "dl-url-and-text-replacer",
     "version": "1.0.0",
     "scripts": {
         "build": "webpack",

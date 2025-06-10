@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:           DL URL and Text Replacer
- * Plugin URI:            https://github.com/team-designslabz/dl-url-replacer
+ * Plugin URI:            https://github.com/team-designslabz/dl-url-and-text-replacer
  * Description:           Easily replace URLs and custom text within your WordPress database. Includes AJAX-based progress, detailed logging, and a modern UI for efficient management.
  * Version:               1.0.0
  * Requires PHP:          7.4
@@ -12,7 +12,7 @@
  * License:               GPL-3.0-or-later
  * License URI:           https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain:           dl-url-and-text-replacer
- * GitHub Plugin URI:     https://github.com/team-designslabz/dl-url-replacer
+ * GitHub Plugin URI:     https://github.com/team-designslabz/dl-url-and-text-replacer
  * GitHub Branch:         main
  */
 
@@ -29,7 +29,7 @@ defined("ABSPATH") || exit();
 define( 'DL_URL_REPLACER_VERSION', '1.0.0' );
 
 // Load main class
-require_once plugin_dir_path(__FILE__) . "includes/class-dl-url-replacer.php";
+require_once plugin_dir_path(__FILE__) . "includes/class-dl-url-and-text-replacer.php";
 
 // Initialize plugin
 /**
