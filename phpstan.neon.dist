@@ -1,0 +1,10 @@
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+	level: 6
+	phpVersion: 80100
+	paths:
+		- designslabz-relocate.php
+		- uninstall.php
+		- src

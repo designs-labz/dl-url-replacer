@@ -1,0 +1,34 @@
+.dlz-relocate .dlz-summary {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 0.5em 2em;
+	margin: 1em 0 1.5em;
+}
+
+.dlz-relocate .dlz-summary dt {
+	font-weight: 600;
+}
+
+.dlz-relocate .dlz-summary dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.dlz-relocate .dlz-table-scroll {
+	overflow-x: auto;
+}
+
+.dlz-relocate .dlz-tables th[scope="row"] {
+	font-weight: 400;
+}
+
+.dlz-relocate .dlz-tables code {
+	padding: 0;
+	background: none;
+}
+
+.dlz-relocate .dlz-tables .num {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}

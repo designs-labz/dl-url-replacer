@@ -1,59 +1,32 @@
-=== DL URL and Text Replacer ===
+=== DesignsLabz Relocate – Search Replace & Migration ===
 Contributors: designs_labz
-Donate link: https://github.com/designs-labz/dl-url-and-text-replacer
-Tags: url, replace, tools, admin
-Requires at least: 6.1
+Tags: search replace, migration, database, urls, serialized
+Requires at least: 6.5
 Tested up to: 6.8
-Requires PHP: 7.4
-Stable tag: 1.0.0
-License: GPL-3.0-or-later
+Requires PHP: 8.1
+Stable tag: 0.1.0
+License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-DL URL and Text Replacer helps you search and replace any URL or text across your WordPress database directly from the dashboard.
+Safely search and replace URLs and text across your WordPress database.
 
 == Description ==
 
-DL URL Replacer is a powerful admin tool that allows you to search and replace any URL or custom string across your entire WordPress database. Useful for domain migrations, content updates, or replacing old URLs.
+DesignsLabz Relocate is a search and replace tool for moving WordPress sites between domains, switching to HTTPS, or updating text across the database.
 
-**Features:**
-
-* Replace URLs or text strings in your WordPress database
-* Material design backend interface
-* AJAX-powered progress bar and logging
-* View summary of updated tables
-* Secure and optimized for large databases
-* Supports HTTPS replacement and custom text replacement
-* Built with OOP principles and follows WordPress standards
-
-== Installation ==
-
-1. Upload the plugin files to the `/wp-content/plugins/dl-url-and-text-replacer` directory, or install the plugin through the WordPress plugins screen directly.
-2. Activate the plugin through the 'Plugins' screen in WordPress.
-3. Navigate to Tools > DL URL Replacer to access the plugin.
+This is a development release. The full feature list will be published with 1.0.
 
 == Frequently Asked Questions ==
 
-= Is it safe to use on a live site? =
-Yes, but we strongly recommend backing up your database before performing replacements.
+= Does it support Multisite? =
 
-= Can I undo a replacement? =
-No. Changes are permanent. Always take a backup before running replacements.
+Not yet. On a Multisite network the plugin shows a notice and does not run.
 
-= Does it support multisite? =
-Multisite support has not been tested yet.
+= Who can use it? =
 
-== Screenshots ==
-
-1. Admin interface with material design
-2. Progress loader while processing
-3. Summary after completion
+Only users who can manage options and post unfiltered HTML, which by default means Administrators on a single site.
 
 == Changelog ==
 
-= 1.0.0 =
-* Initial release with core features.
-
-== Upgrade Notice ==
-
-= 1.0.0 =
-Initial release.
+= 0.1.0 =
+* Development release: admin screen, database overview and settings.
