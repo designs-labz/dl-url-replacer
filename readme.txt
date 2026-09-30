@@ -29,4 +29,4 @@ Only users who can manage options and post unfiltered HTML, which by default mea
 == Changelog ==
 
 = 0.1.0 =
-* Development release: dry-run search and replace, database overview and settings.
+* Development release: dry run and live search and replace with a before-image download, database overview and settings.

@@ -20,8 +20,8 @@ if ( isset( $args['error'] ) ) {
 $tables = $args['tables'];
 
 $groups = array(
-	'core' => array_filter( $tables, fn( $table ) => $table->prefixed ),
-	'other'     => array_filter( $tables, fn( $table ) => ! $table->prefixed ),
+	'core'  => array_filter( $tables, fn( $table ) => $table->prefixed ),
+	'other' => array_filter( $tables, fn( $table ) => ! $table->prefixed ),
 );
 ?>
 <form id="dlz-search-replace" class="dlz-form">
@@ -82,7 +82,7 @@ $groups = array(
 								<?php foreach ( $group_tables as $table ) : ?>
 									<li>
 										<label>
-											<input type="checkbox" name="tables[]" value="<?php echo esc_attr( $table->name ); ?>" data-group="<?php echo esc_attr( $group ); ?>" <?php checked( 'core' === $group ); ?>>
+											<input type="checkbox" name="tables[]" value="<?php echo esc_attr( $table->name ); ?>" data-group="<?php echo esc_attr( $group ); ?>" data-engine="<?php echo esc_attr( $table->engine ); ?>" <?php checked( 'core' === $group ); ?>>
 											<code><?php echo esc_html( $table->name ); ?></code>
 											<span class="dlz-picker-meta">
 												<?php
@@ -121,3 +121,27 @@ $groups = array(
 </div>
 
 <div id="dlz-results" class="dlz-results" hidden></div>
+
+<dialog id="dlz-confirm" class="dlz-dialog" aria-labelledby="dlz-confirm-title">
+	<form method="dialog">
+		<h2 id="dlz-confirm-title"><?php esc_html_e( 'Replace in the database?', 'designslabz-relocate' ); ?></h2>
+		<div id="dlz-confirm-summary"></div>
+		<ul id="dlz-confirm-warnings" class="dlz-warnings"></ul>
+		<p>
+			<label>
+				<input type="checkbox" id="dlz-confirm-before-image" checked>
+				<?php esc_html_e( 'Save the original value of everything that changes to a downloadable file (recommended)', 'designslabz-relocate' ); ?>
+			</label>
+		</p>
+		<p>
+			<label>
+				<input type="checkbox" id="dlz-confirm-backup">
+				<?php esc_html_e( 'I have a recent backup of this database. I understand the replacement is written straight to the database and is not undone automatically.', 'designslabz-relocate' ); ?>
+			</label>
+		</p>
+		<p class="dlz-dialog-actions">
+			<button type="submit" value="cancel" class="button" formnovalidate><?php esc_html_e( 'Cancel', 'designslabz-relocate' ); ?></button>
+			<button type="submit" value="confirm" class="button button-primary" id="dlz-confirm-submit" disabled><?php esc_html_e( 'Replace now', 'designslabz-relocate' ); ?></button>
+		</p>
+	</form>
+</dialog>

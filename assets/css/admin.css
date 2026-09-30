@@ -128,3 +128,43 @@
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
 }
+
+.dlz-relocate .dlz-apply {
+	margin-top: 2em;
+	padding: 1em 1.25em;
+	border-left: 4px solid #d63638;
+	background: #fff;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.dlz-relocate .dlz-apply h3 {
+	margin-top: 0;
+}
+
+.dlz-dialog {
+	max-width: 36em;
+	width: calc(100% - 32px);
+	padding: 1.5em;
+	border: 1px solid #c3c4c7;
+	box-shadow: 0 3px 30px rgba(0, 0, 0, 0.2);
+}
+
+.dlz-dialog::backdrop {
+	background: rgba(0, 0, 0, 0.5);
+}
+
+.dlz-dialog h2 {
+	margin-top: 0;
+}
+
+.dlz-dialog .dlz-warnings li {
+	margin-left: 1.5em;
+	list-style: disc;
+}
+
+.dlz-dialog .dlz-dialog-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.5em;
+	margin-bottom: 0;
+}

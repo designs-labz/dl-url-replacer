@@ -15,6 +15,9 @@ use RuntimeException;
  * one costs the same no matter how far into a large table it is, and rows
  * added or removed meanwhile do not shift later windows. Within a window only
  * rows whose text columns LIKE-match a search value are fetched in full.
+ *
+ * For a live job those rows are read with FOR UPDATE inside the caller's
+ * transaction, so nothing can change them between reading and writing.
  */
 final class TableBatch {
 
@@ -22,7 +25,8 @@ final class TableBatch {
 		private \wpdb $wpdb,
 		private Replacement $replacement,
 		private Replacer $replacer,
-		private int $size
+		private int $size,
+		private bool $lock_rows = false
 	) {}
 
 	/**
@@ -90,26 +94,50 @@ final class TableBatch {
 	}
 
 	/**
+	 * Writes the new values of changed rows. Any failure throws, so the caller
+	 * can roll the whole window back rather than leave it half applied.
+	 *
+	 * @param list<array{key: array<string, string>, before: array<string, string>, after: array<string, string>, counts: array<string, int>}> $rows
+	 * @throws RuntimeException When a row cannot be updated.
+	 */
+	public function apply( TableLayout $layout, array $rows ): void {
+		foreach ( $rows as $row ) {
+			$updated = $this->wpdb->update(
+				$layout->name,
+				$row['after'],
+				$row['key'],
+				array_fill( 0, count( $row['after'] ), '%s' ),
+				array_map( fn( bool $integer ): string => $integer ? '%d' : '%s', array_intersect_key( $layout->key, $row['key'] ) )
+			);
+
+			if ( false === $updated ) {
+				// wpdb refuses, without a database error, values the column's character set cannot store.
+				$error = '' !== $this->wpdb->last_error ? $this->wpdb->last_error : 'A new value contains characters the column cannot store.';
+
+				throw new RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+			}
+		}
+	}
+
+	/**
 	 * @param array<string, string>|null $after
 	 * @return list<array<string, string>>
 	 */
 	private function window_keys( TableLayout $layout, ?array $after ): array {
-		$columns = array_keys( $layout->key );
-		$list    = implode( ', ', array_fill( 0, count( $columns ), '%i' ) );
-		$sql     = 'SELECT ' . $list . ' FROM %i';
-		$args    = array_merge( $columns, array( $layout->name ) );
+		$columns    = array_keys( $layout->key );
+		$list       = implode( ', ', array_fill( 0, count( $columns ), '%i' ) );
+		$conditions = array( $this->filters( $layout ) );
 
 		if ( null !== $after ) {
-			[ $condition, $condition_args ] = $this->compare( $layout, $after, '>' );
-
-			$sql .= ' WHERE ' . $condition;
-			$args = array_merge( $args, $condition_args );
+			$conditions[] = $this->compare( $layout, $after, '>' );
 		}
 
-		$sql .= ' ORDER BY ' . $list . ' LIMIT %d';
-		$args = array_merge( $args, $columns, array( $this->size ) );
+		[ $where, $where_args ] = $this->all_of( $conditions );
 
-		return $this->query( $sql, $args );
+		return $this->query(
+			'SELECT ' . $list . ' FROM %i WHERE ' . $where . ' ORDER BY ' . $list . ' LIMIT %d',
+			array_merge( $columns, array( $layout->name ), $where_args, $columns, array( $this->size ) )
+		);
 	}
 
 	/**
@@ -118,22 +146,52 @@ final class TableBatch {
 	 * @return list<array<string, string|null>>
 	 */
 	private function matching_rows( TableLayout $layout, ?array $after, array $last ): array {
-		$columns = array_merge( array_keys( $layout->key ), array_keys( $layout->columns ) );
-
-		[ $until, $until_args ] = $this->compare( $layout, $last, '<=' );
-		[ $like, $like_args ]   = $this->like( $layout );
-
-		$sql  = 'SELECT ' . implode( ', ', array_fill( 0, count( $columns ), '%i' ) ) . ' FROM %i WHERE ' . $until . ' AND ' . $like;
-		$args = array_merge( $columns, array( $layout->name ), $until_args, $like_args );
+		$columns    = array_merge( array_keys( $layout->key ), array_keys( $layout->columns ) );
+		$conditions = array( $this->compare( $layout, $last, '<=' ), $this->like( $layout ), $this->filters( $layout ) );
 
 		if ( null !== $after ) {
-			[ $from, $from_args ] = $this->compare( $layout, $after, '>' );
-
-			$sql .= ' AND ' . $from;
-			$args = array_merge( $args, $from_args );
+			$conditions[] = $this->compare( $layout, $after, '>' );
 		}
 
-		return $this->query( $sql, $args );
+		[ $where, $where_args ] = $this->all_of( $conditions );
+
+		return $this->query(
+			'SELECT ' . implode( ', ', array_fill( 0, count( $columns ), '%i' ) ) . ' FROM %i WHERE ' . $where . ( $this->lock_rows ? ' FOR UPDATE' : '' ),
+			array_merge( $columns, array( $layout->name ), $where_args )
+		);
+	}
+
+	/**
+	 * The layout's row filters as IN / NOT IN conditions.
+	 *
+	 * @return array{0: string, 1: list<string>}
+	 */
+	private function filters( TableLayout $layout ): array {
+		$parts = array();
+		$args  = array();
+
+		foreach ( array(
+			'IN'     => $layout->only,
+			'NOT IN' => $layout->except,
+		) as $operator => $filters ) {
+			foreach ( $filters as $column => $values ) {
+				$parts[] = '%i ' . $operator . ' (' . implode( ', ', array_fill( 0, count( $values ), '%s' ) ) . ')';
+				$args    = array_merge( $args, array( $column ), $values );
+			}
+		}
+
+		return array( $parts ? implode( ' AND ', $parts ) : '1 = 1', $args );
+	}
+
+	/**
+	 * @param list<array{0: string, 1: list<string>}> $conditions
+	 * @return array{0: string, 1: list<string>}
+	 */
+	private function all_of( array $conditions ): array {
+		return array(
+			implode( ' AND ', array_column( $conditions, 0 ) ),
+			array_merge( ...array_column( $conditions, 1 ) ),
+		);
 	}
 
 	/**

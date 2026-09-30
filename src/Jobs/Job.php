@@ -8,8 +8,8 @@ use DesignsLabz\Relocate\Replace\Replacement;
 /**
  * One search and replace run: its settings, where it has got to, and what it found.
  *
- * @phpstan-type JobSettings array{case_sensitive: bool, whole_words: bool, url_variants: bool, skip_guids: bool, tables: list<string>}
- * @phpstan-type JobState array{table_index: int, last_key: array<string, string>|null, total_rows: int}
+ * @phpstan-type JobSettings array{case_sensitive: bool, whole_words: bool, url_variants: bool, skip_guids: bool, tables: list<string>, before_image?: bool}
+ * @phpstan-type JobState array{table_index: int, last_key: array<string, string>|null, total_rows: int, site_address_done?: bool, site_address_changed?: bool}
  */
 final class Job {
 
@@ -31,7 +31,8 @@ final class Job {
 		public string $created_at,
 		public ?string $started_at = null,
 		public ?string $finished_at = null,
-		public ?string $error_message = null
+		public ?string $error_message = null,
+		public string $before_image = ''
 	) {}
 
 	public function replacement(): Replacement {

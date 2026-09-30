@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace DesignsLabz\Relocate\Tests\Integration;
 
 use DesignsLabz\Relocate\Database\Schema;
+use DesignsLabz\Relocate\Jobs\BeforeImage;
 use DesignsLabz\Relocate\Jobs\Job;
 use DesignsLabz\Relocate\Jobs\JobRepository;
 use DesignsLabz\Relocate\Jobs\JobRunner;
@@ -111,6 +112,7 @@ final class JobRunnerTest extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		update_option( Settings::OPTION, array( 'batch_size' => 100 ) );
+		add_filter( 'dlz_relocate_step_seconds', '__return_zero' );
 	}
 
 	public function test_dry_run_matches_a_full_scan_and_changes_nothing(): void {
@@ -266,7 +268,7 @@ final class JobRunnerTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A new runner for every step, with no time budget: one window per step,
+	 * A new runner for every step, and no time budget (see set_up): one window per step,
 	 * the way separate REST requests resume from the saved position.
 	 *
 	 * @return array{0: Job, 1: int}
@@ -288,7 +290,7 @@ final class JobRunnerTest extends WP_UnitTestCase {
 
 		$schema = new Schema( $wpdb );
 
-		return new JobRunner( $wpdb, $schema, new JobRepository( $wpdb ), new Settings(), new Logger( $wpdb ), 0.0 );
+		return new JobRunner( $wpdb, $schema, new JobRepository( $wpdb ), new Settings(), new Logger( $wpdb ), new BeforeImage( $wpdb ) );
 	}
 
 	/**

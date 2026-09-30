@@ -41,6 +41,30 @@ final class JobRepository {
 	}
 
 	/**
+	 * Whether a live job was already started from this dry run.
+	 */
+	public function has_child( int $parent_id ): bool {
+		return null !== $this->wpdb->get_var( $this->wpdb->prepare( 'SELECT id FROM %i WHERE parent_id = %d LIMIT 1', $this->table(), $parent_id ) );
+	}
+
+	/**
+	 * A live job that has not finished yet. Failed jobs do not count: they may
+	 * be resumed, but they should not block every future replacement.
+	 */
+	public function active_live_job(): ?Job {
+		$id = $this->wpdb->get_var(
+			$this->wpdb->prepare(
+				'SELECT id FROM %i WHERE dry_run = 0 AND status IN (%s, %s) ORDER BY id DESC LIMIT 1',
+				$this->table(),
+				JobStatus::Pending->value,
+				JobStatus::Running->value
+			)
+		);
+
+		return null === $id ? null : $this->find( (int) $id );
+	}
+
+	/**
 	 * Saves the parts of a job that change while it runs.
 	 *
 	 * @throws RuntimeException When the job cannot be saved.
@@ -69,6 +93,7 @@ final class JobRepository {
 			'error_message' => $job->error_message,
 			'started_at'    => $job->started_at,
 			'finished_at'   => $job->finished_at,
+			'before_image'  => $job->before_image,
 			'updated_at'    => gmdate( 'Y-m-d H:i:s' ),
 		);
 	}
@@ -88,7 +113,8 @@ final class JobRepository {
 			(string) $row->created_at,
 			$row->started_at,
 			$row->finished_at,
-			$row->error_message
+			$row->error_message,
+			(string) $row->before_image
 		);
 	}
 

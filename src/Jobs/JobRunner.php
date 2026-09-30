@@ -18,10 +18,19 @@ use RuntimeException;
  * saving the job's position after every window. Whoever calls it (the admin
  * screen over REST, later WP-CLI) just keeps calling until the job finishes,
  * and an interrupted job carries on from its last saved window.
+ *
+ * For a live job each window is one transaction: the rows are read with
+ * FOR UPDATE, their original values go to the before-image file, the new
+ * values are written and the job's position is saved, then it commits. If
+ * anything fails the window rolls back as a whole, so resuming never applies
+ * a window twice.
  */
 final class JobRunner {
 
 	private const STEP_SECONDS = 10.0;
+
+	// Changing these moves the login cookie's name and path, so they are changed last.
+	private const SITE_ADDRESS_OPTIONS = array( 'siteurl', 'home' );
 
 	// Enough to diagnose a problem without flooding the log on a large site.
 	private const MAX_LOGGED_SKIPS = 50;
@@ -35,7 +44,7 @@ final class JobRunner {
 		private JobRepository $jobs,
 		private Settings $settings,
 		private Logger $logger,
-		private float $step_seconds = self::STEP_SECONDS
+		private BeforeImage $before_images
 	) {}
 
 	/**
@@ -45,7 +54,7 @@ final class JobRunner {
 	public function step( Job $job ): ?Job {
 		$id = $job->id;
 
-		if ( ! $this->lock( $id, 0 ) ) {
+		if ( ! $this->lock( $this->lock_name( $id ), 0 ) ) {
 			return null;
 		}
 
@@ -61,7 +70,7 @@ final class JobRunner {
 
 			return $job;
 		} finally {
-			$this->unlock( $id );
+			$this->unlock( $this->lock_name( $id ) );
 		}
 	}
 
@@ -73,7 +82,7 @@ final class JobRunner {
 		// Wait for a step in progress to finish rather than overwrite what it saves.
 		$id = $job->id;
 
-		if ( ! $this->lock( $id, (int) ceil( $this->step_seconds ) + 5 ) ) {
+		if ( ! $this->lock( $this->lock_name( $id ), (int) ceil( $this->step_seconds() ) + 5 ) ) {
 			return null;
 		}
 
@@ -84,11 +93,65 @@ final class JobRunner {
 				$job->finish( JobStatus::Cancelled );
 				$this->jobs->save( $job );
 				$this->logger->info( 'Job cancelled.', array(), $job->id );
+				$this->flush_cache( $job );
 			}
 
 			return $job;
 		} finally {
-			$this->unlock( $id );
+			$this->unlock( $this->lock_name( $id ) );
+		}
+	}
+
+	/**
+	 * Puts a failed job back to running so the next step carries on from its
+	 * last committed window. Anything else is returned unchanged.
+	 *
+	 * @return Job|null Null when a step is processing the job right now.
+	 * @throws RuntimeException When the job cannot be saved.
+	 */
+	public function resume( Job $job ): ?Job {
+		$id = $job->id;
+
+		if ( ! $this->lock( $this->lock_name( $id ), 0 ) ) {
+			return null;
+		}
+
+		try {
+			$job = $this->jobs->find( $id );
+
+			if ( null !== $job && JobStatus::Failed === $job->status ) {
+				$job->status        = JobStatus::Running;
+				$job->error_message = null;
+				$job->finished_at   = null;
+				$this->jobs->save( $job );
+				$this->logger->info( 'Job resumed.', array(), $job->id );
+			}
+
+			return $job;
+		} finally {
+			$this->unlock( $this->lock_name( $id ) );
+		}
+	}
+
+	/**
+	 * Runs $callback while holding a named lock, so two requests cannot both
+	 * pass the same checks before either has acted on them.
+	 *
+	 * @template T
+	 * @param callable(): T $callback
+	 * @return T|null Null when the lock could not be taken within a few seconds.
+	 */
+	public function exclusive( string $name, callable $callback ): mixed {
+		$lock = $this->wpdb->prefix . Installer::JOBS_TABLE . ':' . $name;
+
+		if ( ! $this->lock( $lock, 5 ) ) {
+			return null;
+		}
+
+		try {
+			return $callback();
+		} finally {
+			$this->unlock( $lock );
 		}
 	}
 
@@ -99,23 +162,33 @@ final class JobRunner {
 		}
 
 		$replacement = $job->replacement();
-		$batch       = new TableBatch( $this->wpdb, $replacement, new Replacer( $replacement ), $this->settings->batch_size() );
+		$batch       = new TableBatch( $this->wpdb, $replacement, new Replacer( $replacement ), $this->settings->batch_size(), ! $job->dry_run );
 		$deadline    = microtime( true ) + $this->step_seconds();
 
 		try {
 			while ( null !== $job->current_table() ) {
 				$this->process_window( $job, $batch, $job->current_table() );
-				$this->jobs->save( $job );
 
 				if ( microtime( true ) >= $deadline || $this->memory_is_low() ) {
+					$this->jobs->save( $job );
 					return;
 				}
 			}
 
+			$this->update_site_address( $job, $batch );
+
 			$job->finish( JobStatus::Completed );
 			$this->jobs->save( $job );
 			$this->logger->info( 'Job completed.', $job->report->totals(), $job->id );
+			$this->flush_cache( $job );
 		} catch ( RuntimeException $e ) {
+			// Forget whatever the failed window did to the job in memory: its changes were rolled back.
+			$saved = $this->jobs->find( $job->id );
+			if ( $saved ) {
+				$job->state  = $saved->state;
+				$job->report = $saved->report;
+			}
+
 			$job->finish(
 				JobStatus::Failed,
 				/* translators: 1: table name, 2: database error message. */
@@ -130,6 +203,7 @@ final class JobRunner {
 				),
 				$job->id
 			);
+			$this->flush_cache( $job );
 		}
 	}
 
@@ -138,18 +212,115 @@ final class JobRunner {
 
 		if ( null === $layout ) {
 			$this->next_table( $job );
+			$this->jobs->save( $job );
 			return;
 		}
 
-		$result = $batch->scan( $layout, $job->state['last_key'] );
+		if ( ! $job->dry_run && $this->wpdb->options === $table ) {
+			$layout = $layout->except( 'option_name', self::SITE_ADDRESS_OPTIONS );
+		}
 
-		$this->log_skipped( $job, $table, $result );
-		$job->report->add( $table, $result );
+		$this->in_transaction(
+			$job,
+			function () use ( $job, $batch, $layout, $table ): void {
+				$result = $batch->scan( $layout, $job->state['last_key'] );
 
-		if ( null === $result->last_key ) {
-			$this->next_table( $job );
-		} else {
-			$job->state['last_key'] = $result->last_key;
+				$this->write( $job, $batch, $layout, $result );
+				$this->log_skipped( $job, $table, $result );
+				$job->report->add( $table, $result );
+
+				if ( null === $result->last_key ) {
+					$this->next_table( $job );
+				} else {
+					$job->state['last_key'] = $result->last_key;
+				}
+
+				$this->jobs->save( $job );
+			}
+		);
+	}
+
+	/**
+	 * The siteurl and home options, held back from the options table until
+	 * everything else is done. Dry runs count them in the normal pass.
+	 */
+	private function update_site_address( Job $job, TableBatch $batch ): void {
+		$options = $this->wpdb->options;
+
+		if ( $job->dry_run || ! empty( $job->state['site_address_done'] ) || ! in_array( $options, $job->settings['tables'], true ) ) {
+			return;
+		}
+
+		$layout = $this->layout( $job, $options );
+
+		$this->in_transaction(
+			$job,
+			function () use ( $job, $batch, $layout, $options ): void {
+				if ( $layout ) {
+					$result = $batch->scan( $layout->only( 'option_name', self::SITE_ADDRESS_OPTIONS ), null );
+
+					$this->write( $job, $batch, $layout, $result );
+					$job->report->add( $options, $result );
+					$job->state['site_address_changed'] = (bool) $result->rows;
+				}
+
+				$job->state['site_address_done'] = true;
+				$this->jobs->save( $job );
+			}
+		);
+	}
+
+	/**
+	 * Saves the original values, then writes the new ones. Dry runs write nothing.
+	 */
+	private function write( Job $job, TableBatch $batch, TableLayout $layout, BatchResult $result ): void {
+		if ( $job->dry_run || ! $result->rows ) {
+			return;
+		}
+
+		if ( '' !== $job->before_image ) {
+			$this->before_images->append( $job->before_image, $layout, $result->rows );
+		}
+
+		$batch->apply( $layout, $result->rows );
+	}
+
+	/**
+	 * @param callable(): void $work
+	 * @throws RuntimeException When the work or the commit fails; the transaction is rolled back.
+	 */
+	private function in_transaction( Job $job, callable $work ): void {
+		if ( $job->dry_run ) {
+			$work();
+			return;
+		}
+
+		$this->query( 'START TRANSACTION' );
+
+		try {
+			$work();
+			$this->query( 'COMMIT' );
+		} catch ( RuntimeException $e ) {
+			$this->wpdb->query( 'ROLLBACK' );
+			throw $e;
+		}
+	}
+
+	/**
+	 * @throws RuntimeException When the statement fails.
+	 */
+	private function query( string $sql ): void {
+		if ( false === $this->wpdb->query( $sql ) ) {
+			throw new RuntimeException( $this->wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+		}
+	}
+
+	/**
+	 * Rows were changed behind the object cache's back, so anything it holds may be stale.
+	 */
+	private function flush_cache( Job $job ): void {
+		if ( ! $job->dry_run ) {
+			wp_cache_flush();
 		}
 	}
 
@@ -206,9 +377,18 @@ final class JobRunner {
 	}
 
 	private function step_seconds(): float {
-		$limit = (int) ini_get( 'max_execution_time' );
+		/**
+		 * Filters how long one step may work before it saves and returns.
+		 *
+		 * Lower it on hosts whose proxy or PHP time limits are strict. Each step
+		 * always finishes at least one window, so 0 means one window per request.
+		 *
+		 * @param float $seconds Default 10.
+		 */
+		$seconds = (float) apply_filters( 'dlz_relocate_step_seconds', self::STEP_SECONDS );
+		$limit   = (int) ini_get( 'max_execution_time' );
 
-		return $limit > 0 ? min( $this->step_seconds, $limit / 2 ) : $this->step_seconds;
+		return $limit > 0 ? min( $seconds, $limit / 2 ) : $seconds;
 	}
 
 	private function memory_is_low(): bool {
@@ -221,12 +401,12 @@ final class JobRunner {
 	 * A named database lock per job. MySQL releases it by itself if the request
 	 * dies, so a crashed step never leaves a job stuck.
 	 */
-	private function lock( int $job_id, int $timeout ): bool {
-		return '1' === $this->wpdb->get_var( $this->wpdb->prepare( 'SELECT GET_LOCK(SHA1(CONCAT(DATABASE(), %s)), %d)', $this->lock_name( $job_id ), $timeout ) );
+	private function lock( string $name, int $timeout ): bool {
+		return '1' === $this->wpdb->get_var( $this->wpdb->prepare( 'SELECT GET_LOCK(SHA1(CONCAT(DATABASE(), %s)), %d)', $name, $timeout ) );
 	}
 
-	private function unlock( int $job_id ): void {
-		$this->wpdb->query( $this->wpdb->prepare( 'SELECT RELEASE_LOCK(SHA1(CONCAT(DATABASE(), %s)))', $this->lock_name( $job_id ) ) );
+	private function unlock( string $name ): void {
+		$this->wpdb->query( $this->wpdb->prepare( 'SELECT RELEASE_LOCK(SHA1(CONCAT(DATABASE(), %s)))', $name ) );
 	}
 
 	private function lock_name( int $job_id ): string {
