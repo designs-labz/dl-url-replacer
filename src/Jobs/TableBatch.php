@@ -1,11 +1,11 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Jobs;
+namespace CraftRoq\Relocate\Jobs;
 
-use DesignsLabz\Relocate\Database\TableLayout;
-use DesignsLabz\Relocate\Replace\Replacement;
-use DesignsLabz\Relocate\Replace\Replacer;
+use CraftRoq\Relocate\Database\TableLayout;
+use CraftRoq\Relocate\Replace\Replacement;
+use CraftRoq\Relocate\Replace\Replacer;
 use RuntimeException;
 
 /**

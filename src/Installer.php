@@ -1,10 +1,10 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate;
+namespace CraftRoq\Relocate;
 
-use DesignsLabz\Relocate\Jobs\BeforeImage;
-use DesignsLabz\Relocate\Jobs\Cleanup;
+use CraftRoq\Relocate\Jobs\BeforeImage;
+use CraftRoq\Relocate\Jobs\Cleanup;
 
 /**
  * Creates and upgrades the plugin's tables, and removes them on uninstall.
@@ -12,13 +12,13 @@ use DesignsLabz\Relocate\Jobs\Cleanup;
 final class Installer {
 
 	/** Shared by every table this plugin creates, so they can be kept out of searches. */
-	public const TABLE_PREFIX = 'dlz_relocate_';
+	public const TABLE_PREFIX = 'crq_relocate_';
 
 	public const JOBS_TABLE = self::TABLE_PREFIX . 'jobs';
 	public const LOG_TABLE  = self::TABLE_PREFIX . 'log';
 
 	private const DB_VERSION        = 2;
-	private const DB_VERSION_OPTION = 'dlz_relocate_db_version';
+	private const DB_VERSION_OPTION = 'crq_relocate_db_version';
 
 	public function __construct( private \wpdb $wpdb ) {}
 
@@ -37,7 +37,7 @@ final class Installer {
 			if ( ! $this->table_exists( $this->wpdb->prefix . $table ) ) {
 				// Leave the stored version alone so the upgrade is retried on the next admin request.
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-				error_log( sprintf( 'DL Relocate DB: could not create table %s: %s', $this->wpdb->prefix . $table, $this->wpdb->last_error ) );
+				error_log( sprintf( 'CR Relocate DB: could not create table %s: %s', $this->wpdb->prefix . $table, $this->wpdb->last_error ) );
 				return;
 			}
 		}

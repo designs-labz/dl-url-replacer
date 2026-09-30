@@ -1,14 +1,14 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate;
+namespace CraftRoq\Relocate;
 
 /**
  * Plugin settings, stored as a single option and edited through the Settings API.
  */
 final class Settings {
 
-	public const OPTION = 'dlz_relocate_settings';
+	public const OPTION = 'crq_relocate_settings';
 
 	private const DEFAULTS = array(
 		'batch_size'     => 500,
@@ -37,31 +37,31 @@ final class Settings {
 			)
 		);
 
-		add_settings_section( 'processing', __( 'Processing', 'dl-relocate-db' ), '__return_false', self::OPTION );
+		add_settings_section( 'processing', __( 'Processing', 'cr-relocate-db' ), '__return_false', self::OPTION );
 
 		add_settings_field(
 			'batch_size',
-			__( 'Rows per batch', 'dl-relocate-db' ),
+			__( 'Rows per batch', 'cr-relocate-db' ),
 			array( $this, 'render_batch_size_field' ),
 			self::OPTION,
 			'processing',
-			array( 'label_for' => 'dlz-relocate-batch-size' )
+			array( 'label_for' => 'crq-relocate-batch-size' )
 		);
 
-		add_settings_section( 'data', __( 'Data', 'dl-relocate-db' ), '__return_false', self::OPTION );
+		add_settings_section( 'data', __( 'Data', 'cr-relocate-db' ), '__return_false', self::OPTION );
 
 		add_settings_field(
 			'retention_days',
-			__( 'Keep history for', 'dl-relocate-db' ),
+			__( 'Keep history for', 'cr-relocate-db' ),
 			array( $this, 'render_retention_days_field' ),
 			self::OPTION,
 			'data',
-			array( 'label_for' => 'dlz-relocate-retention-days' )
+			array( 'label_for' => 'crq-relocate-retention-days' )
 		);
 
 		add_settings_field(
 			'delete_data',
-			__( 'Uninstall', 'dl-relocate-db' ),
+			__( 'Uninstall', 'cr-relocate-db' ),
 			array( $this, 'render_delete_data_field' ),
 			self::OPTION,
 			'data'
@@ -84,34 +84,34 @@ final class Settings {
 
 	public function render_retention_days_field(): void {
 		printf(
-			'<input type="number" id="dlz-relocate-retention-days" name="%1$s[retention_days]" value="%2$d" min="0" max="%3$d" class="small-text" aria-describedby="dlz-relocate-retention-days-description"> %4$s<p class="description" id="dlz-relocate-retention-days-description">%5$s</p>',
+			'<input type="number" id="crq-relocate-retention-days" name="%1$s[retention_days]" value="%2$d" min="0" max="%3$d" class="small-text" aria-describedby="crq-relocate-retention-days-description"> %4$s<p class="description" id="crq-relocate-retention-days-description">%5$s</p>',
 			esc_attr( self::OPTION ),
 			(int) $this->retention_days(),
 			(int) self::MAX_RETENTION_DAYS,
-			esc_html__( 'days', 'dl-relocate-db' ),
-			esc_html__( 'Finished jobs, their files of original values, and log entries older than this are deleted once a day. Enter 0 to keep everything.', 'dl-relocate-db' )
+			esc_html__( 'days', 'cr-relocate-db' ),
+			esc_html__( 'Finished jobs, their files of original values, and log entries older than this are deleted once a day. Enter 0 to keep everything.', 'cr-relocate-db' )
 		);
 	}
 
 	public function render_batch_size_field(): void {
 		printf(
-			'<input type="number" id="dlz-relocate-batch-size" name="%1$s[batch_size]" value="%2$d" min="%3$d" max="%4$d" step="50" class="small-text" aria-describedby="dlz-relocate-batch-size-description"><p class="description" id="dlz-relocate-batch-size-description">%5$s</p>',
+			'<input type="number" id="crq-relocate-batch-size" name="%1$s[batch_size]" value="%2$d" min="%3$d" max="%4$d" step="50" class="small-text" aria-describedby="crq-relocate-batch-size-description"><p class="description" id="crq-relocate-batch-size-description">%5$s</p>',
 			esc_attr( self::OPTION ),
 			(int) $this->batch_size(),
 			(int) self::MIN_BATCH_SIZE,
 			(int) self::MAX_BATCH_SIZE,
-			esc_html__( 'How many rows are read from a table at a time. Lower it if processing runs out of memory on tables with very large rows, such as page builder content.', 'dl-relocate-db' )
+			esc_html__( 'How many rows are read from a table at a time. Lower it if processing runs out of memory on tables with very large rows, such as page builder content.', 'cr-relocate-db' )
 		);
 	}
 
 	public function render_delete_data_field(): void {
 		printf(
-			'<fieldset><legend class="screen-reader-text">%1$s</legend><label for="dlz-relocate-delete-data"><input type="checkbox" id="dlz-relocate-delete-data" name="%2$s[delete_data]" value="1" %3$s> %4$s</label><p class="description">%5$s</p></fieldset>',
-			esc_html__( 'Uninstall', 'dl-relocate-db' ),
+			'<fieldset><legend class="screen-reader-text">%1$s</legend><label for="crq-relocate-delete-data"><input type="checkbox" id="crq-relocate-delete-data" name="%2$s[delete_data]" value="1" %3$s> %4$s</label><p class="description">%5$s</p></fieldset>',
+			esc_html__( 'Uninstall', 'cr-relocate-db' ),
 			esc_attr( self::OPTION ),
 			checked( $this->delete_data_on_uninstall(), true, false ),
-			esc_html__( 'Delete all plugin data when the plugin is deleted', 'dl-relocate-db' ),
-			esc_html__( 'Removes the operation history, logs and settings. Your site content is not affected.', 'dl-relocate-db' )
+			esc_html__( 'Delete all plugin data when the plugin is deleted', 'cr-relocate-db' ),
+			esc_html__( 'Removes the operation history, logs and settings. Your site content is not affected.', 'cr-relocate-db' )
 		);
 	}
 

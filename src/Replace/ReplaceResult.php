@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Replace;
+namespace CraftRoq\Relocate\Replace;
 
 /**
  * The outcome of replacing within one value.

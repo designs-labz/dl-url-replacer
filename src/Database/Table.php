@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Database;
+namespace CraftRoq\Relocate\Database;
 
 /**
  * A database table as reported by information_schema.

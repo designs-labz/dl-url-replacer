@@ -1,15 +1,15 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Rest;
+namespace CraftRoq\Relocate\Rest;
 
-use DesignsLabz\Relocate\Jobs\Job;
-use DesignsLabz\Relocate\Jobs\JobRepository;
-use DesignsLabz\Relocate\Jobs\JobException;
-use DesignsLabz\Relocate\Jobs\JobRunner;
-use DesignsLabz\Relocate\Jobs\JobStarter;
-use DesignsLabz\Relocate\Logger;
-use DesignsLabz\Relocate\Plugin;
+use CraftRoq\Relocate\Jobs\Job;
+use CraftRoq\Relocate\Jobs\JobRepository;
+use CraftRoq\Relocate\Jobs\JobException;
+use CraftRoq\Relocate\Jobs\JobRunner;
+use CraftRoq\Relocate\Jobs\JobStarter;
+use CraftRoq\Relocate\Logger;
+use CraftRoq\Relocate\Plugin;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -24,7 +24,7 @@ use WP_REST_Server;
  */
 final class JobsController {
 
-	public const NAMESPACE = 'dlz-relocate/v1';
+	public const NAMESPACE = 'crq-relocate/v1';
 
 	public function __construct(
 		private JobRepository $jobs,
@@ -204,11 +204,11 @@ final class JobsController {
 			$job = $this->runner->step( $job );
 		} catch ( RuntimeException $e ) {
 			$this->logger->error( 'Could not save job progress.', array( 'error' => $e->getMessage() ), (int) $request['id'] );
-			return $this->error( 'dlz_relocate_database_error', __( 'The job’s progress could not be saved to the database.', 'dl-relocate-db' ), 500 );
+			return $this->error( 'crq_relocate_database_error', __( 'The job’s progress could not be saved to the database.', 'cr-relocate-db' ), 500 );
 		}
 
 		if ( ! $job ) {
-			return $this->error( 'dlz_relocate_job_busy', __( 'This job is already being processed in another browser tab.', 'dl-relocate-db' ), 409 );
+			return $this->error( 'crq_relocate_job_busy', __( 'This job is already being processed in another browser tab.', 'cr-relocate-db' ), 409 );
 		}
 
 		return rest_ensure_response( $this->formatter->format( $job ) );
@@ -225,7 +225,7 @@ final class JobsController {
 		}
 
 		if ( true !== $request['confirmed'] ) {
-			return $this->error( 'dlz_relocate_not_confirmed', __( 'Confirm the replacement before starting it.', 'dl-relocate-db' ) );
+			return $this->error( 'crq_relocate_not_confirmed', __( 'Confirm the replacement before starting it.', 'cr-relocate-db' ) );
 		}
 
 		return $this->started( fn(): Job => $this->starter->replacement( $dry_run, (bool) $request['before_image'] ) );
@@ -242,11 +242,11 @@ final class JobsController {
 			$job = $this->runner->resume( $job );
 		} catch ( RuntimeException $e ) {
 			$this->logger->error( 'Could not resume job.', array( 'error' => $e->getMessage() ), (int) $request['id'] );
-			return $this->error( 'dlz_relocate_database_error', __( 'The job could not be resumed.', 'dl-relocate-db' ), 500 );
+			return $this->error( 'crq_relocate_database_error', __( 'The job could not be resumed.', 'cr-relocate-db' ), 500 );
 		}
 
 		if ( ! $job ) {
-			return $this->error( 'dlz_relocate_job_busy', __( 'This job is already being processed in another browser tab.', 'dl-relocate-db' ), 409 );
+			return $this->error( 'crq_relocate_job_busy', __( 'This job is already being processed in another browser tab.', 'cr-relocate-db' ), 409 );
 		}
 
 		return rest_ensure_response( $this->formatter->format( $job ) );
@@ -263,11 +263,11 @@ final class JobsController {
 			$job = $this->runner->cancel( $job );
 		} catch ( RuntimeException $e ) {
 			$this->logger->error( 'Could not cancel job.', array( 'error' => $e->getMessage() ), (int) $request['id'] );
-			return $this->error( 'dlz_relocate_database_error', __( 'The job could not be cancelled.', 'dl-relocate-db' ), 500 );
+			return $this->error( 'crq_relocate_database_error', __( 'The job could not be cancelled.', 'cr-relocate-db' ), 500 );
 		}
 
 		if ( ! $job ) {
-			return $this->error( 'dlz_relocate_job_busy', __( 'The job is busy. Try cancelling again in a few seconds.', 'dl-relocate-db' ), 409 );
+			return $this->error( 'crq_relocate_job_busy', __( 'The job is busy. Try cancelling again in a few seconds.', 'cr-relocate-db' ), 409 );
 		}
 
 		return rest_ensure_response( $this->formatter->format( $job ) );
@@ -305,6 +305,6 @@ final class JobsController {
 	}
 
 	private function not_found(): WP_Error {
-		return $this->error( 'dlz_relocate_job_not_found', __( 'That job does not exist.', 'dl-relocate-db' ), 404 );
+		return $this->error( 'crq_relocate_job_not_found', __( 'That job does not exist.', 'cr-relocate-db' ), 404 );
 	}
 }

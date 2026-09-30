@@ -1,10 +1,10 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Jobs;
+namespace CraftRoq\Relocate\Jobs;
 
-use DesignsLabz\Relocate\Logger;
-use DesignsLabz\Relocate\Settings;
+use CraftRoq\Relocate\Logger;
+use CraftRoq\Relocate\Settings;
 use RuntimeException;
 
 /**
@@ -14,7 +14,7 @@ use RuntimeException;
  */
 final class Cleanup {
 
-	public const HOOK = 'dlz_relocate_cleanup';
+	public const HOOK = 'crq_relocate_cleanup';
 
 	public function __construct(
 		private JobRepository $jobs,

@@ -1,14 +1,14 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Tests\Integration;
+namespace CraftRoq\Relocate\Tests\Integration;
 
-use DesignsLabz\Relocate\Installer;
-use DesignsLabz\Relocate\Jobs\BeforeImage;
-use DesignsLabz\Relocate\Jobs\JobRepository;
-use DesignsLabz\Relocate\Replace\Replacement;
-use DesignsLabz\Relocate\Replace\Replacer;
-use DesignsLabz\Relocate\Settings;
+use CraftRoq\Relocate\Installer;
+use CraftRoq\Relocate\Jobs\BeforeImage;
+use CraftRoq\Relocate\Jobs\JobRepository;
+use CraftRoq\Relocate\Replace\Replacement;
+use CraftRoq\Relocate\Replace\Replacer;
+use CraftRoq\Relocate\Settings;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_UnitTestCase;
@@ -80,7 +80,7 @@ final class LiveJobTest extends WP_UnitTestCase {
 		wp_set_current_user( self::$admin_id );
 
 		// One window per request, so tests can stop and inspect between windows.
-		add_filter( 'dlz_relocate_step_seconds', '__return_zero' );
+		add_filter( 'crq_relocate_step_seconds', '__return_zero' );
 	}
 
 	public function tear_down(): void {
@@ -230,7 +230,7 @@ final class LiveJobTest extends WP_UnitTestCase {
 		$response = $this->request( 'POST', "/jobs/{$dry_run['id']}/execute", array( 'confirmed' => false ) );
 
 		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'dlz_relocate_not_confirmed', $response->get_data()['code'] );
+		$this->assertSame( 'crq_relocate_not_confirmed', $response->get_data()['code'] );
 	}
 
 	public function test_execute_needs_a_completed_dry_run_with_changes(): void {
@@ -244,12 +244,12 @@ final class LiveJobTest extends WP_UnitTestCase {
 			)
 		)->get_data();
 
-		$this->assertSame( 'dlz_relocate_not_executable', $this->request( 'POST', "/jobs/{$pending['id']}/execute", array( 'confirmed' => true ) )->get_data()['code'] );
+		$this->assertSame( 'crq_relocate_not_executable', $this->request( 'POST', "/jobs/{$pending['id']}/execute", array( 'confirmed' => true ) )->get_data()['code'] );
 
 		$nothing = $this->dry_run( array( self::table() ), 'no such text anywhere' );
 
 		$this->assertFalse( $nothing['executable'] );
-		$this->assertSame( 'dlz_relocate_nothing_to_replace', $this->request( 'POST', "/jobs/{$nothing['id']}/execute", array( 'confirmed' => true ) )->get_data()['code'] );
+		$this->assertSame( 'crq_relocate_nothing_to_replace', $this->request( 'POST', "/jobs/{$nothing['id']}/execute", array( 'confirmed' => true ) )->get_data()['code'] );
 	}
 
 	public function test_a_dry_run_can_only_be_executed_once(): void {
@@ -259,7 +259,7 @@ final class LiveJobTest extends WP_UnitTestCase {
 		$again = $this->request( 'POST', "/jobs/{$dry_run['id']}/execute", array( 'confirmed' => true ) );
 
 		$this->assertSame( 409, $again->get_status() );
-		$this->assertSame( 'dlz_relocate_already_executed', $again->get_data()['code'] );
+		$this->assertSame( 'crq_relocate_already_executed', $again->get_data()['code'] );
 		$this->assertFalse( $this->request( 'GET', "/jobs/{$dry_run['id']}" )->get_data()['executable'] );
 	}
 
@@ -269,7 +269,7 @@ final class LiveJobTest extends WP_UnitTestCase {
 		$second = $this->request( 'POST', '/jobs/' . $this->dry_run( array( self::table() ) )['id'] . '/execute', array( 'confirmed' => true ) );
 
 		$this->assertSame( 409, $second->get_status() );
-		$this->assertSame( 'dlz_relocate_job_running', $second->get_data()['code'] );
+		$this->assertSame( 'crq_relocate_job_running', $second->get_data()['code'] );
 	}
 
 	/**
@@ -329,7 +329,7 @@ final class LiveJobTest extends WP_UnitTestCase {
 	 * @param array<string, mixed> $body
 	 */
 	private function request( string $method, string $route, array $body = array() ): WP_REST_Response {
-		$request = new WP_REST_Request( $method, '/dlz-relocate/v1' . $route );
+		$request = new WP_REST_Request( $method, '/crq-relocate/v1' . $route );
 		foreach ( $body as $key => $value ) {
 			$request->set_param( $key, $value );
 		}
@@ -379,6 +379,6 @@ final class LiveJobTest extends WP_UnitTestCase {
 	private static function table(): string {
 		global $wpdb;
 
-		return $wpdb->prefix . 'dlz_fixture_live';
+		return $wpdb->prefix . 'crq_fixture_live';
 	}
 }

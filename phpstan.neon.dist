@@ -12,6 +12,6 @@ parameters:
 			- error
 			- halt
 	paths:
-		- dl-relocate-db.php
+		- cr-relocate-db.php
 		- uninstall.php
 		- src

@@ -1,18 +1,18 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate;
+namespace CraftRoq\Relocate;
 
-use DesignsLabz\Relocate\Admin\Admin;
-use DesignsLabz\Relocate\Cli\Command;
-use DesignsLabz\Relocate\Database\Schema;
-use DesignsLabz\Relocate\Jobs\BeforeImage;
-use DesignsLabz\Relocate\Jobs\Cleanup;
-use DesignsLabz\Relocate\Jobs\JobRepository;
-use DesignsLabz\Relocate\Jobs\JobRunner;
-use DesignsLabz\Relocate\Jobs\JobStarter;
-use DesignsLabz\Relocate\Rest\JobFormatter;
-use DesignsLabz\Relocate\Rest\JobsController;
+use CraftRoq\Relocate\Admin\Admin;
+use CraftRoq\Relocate\Cli\Command;
+use CraftRoq\Relocate\Database\Schema;
+use CraftRoq\Relocate\Jobs\BeforeImage;
+use CraftRoq\Relocate\Jobs\Cleanup;
+use CraftRoq\Relocate\Jobs\JobRepository;
+use CraftRoq\Relocate\Jobs\JobRunner;
+use CraftRoq\Relocate\Jobs\JobStarter;
+use CraftRoq\Relocate\Rest\JobFormatter;
+use CraftRoq\Relocate\Rest\JobsController;
 use WP_CLI;
 
 /**
@@ -29,7 +29,7 @@ final class Plugin {
 	 * arbitrary markup into the database, so it must not bypass a site's
 	 * DISALLOW_UNFILTERED_HTML hardening.
 	 */
-	public const CAPABILITY = 'dlz_relocate_manage';
+	public const CAPABILITY = 'crq_relocate_manage';
 
 	public function __construct(
 		private string $file,
@@ -55,7 +55,7 @@ final class Plugin {
 		( new JobsController( $jobs, $runner, $starter, $formatter, $logger ) )->register();
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			WP_CLI::add_command( 'dlz', new Command( new Installer( $this->wpdb ), $schema, $jobs, $runner, $starter, $formatter ) );
+			WP_CLI::add_command( 'crq', new Command( new Installer( $this->wpdb ), $schema, $jobs, $runner, $starter, $formatter ) );
 		}
 
 		if ( is_admin() ) {
@@ -82,6 +82,6 @@ final class Plugin {
 	}
 
 	public function load_textdomain(): void {
-		load_plugin_textdomain( 'dl-relocate-db', false, dirname( plugin_basename( $this->file ) ) . '/languages' );
+		load_plugin_textdomain( 'cr-relocate-db', false, dirname( plugin_basename( $this->file ) ) . '/languages' );
 	}
 }

@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Jobs;
+namespace CraftRoq\Relocate\Jobs;
 
 enum JobStatus: string {
 
@@ -17,11 +17,11 @@ enum JobStatus: string {
 
 	public function label(): string {
 		return match ( $this ) {
-			self::Pending   => __( 'Pending', 'dl-relocate-db' ),
-			self::Running   => __( 'Running', 'dl-relocate-db' ),
-			self::Completed => __( 'Completed', 'dl-relocate-db' ),
-			self::Failed    => __( 'Failed', 'dl-relocate-db' ),
-			self::Cancelled => __( 'Cancelled', 'dl-relocate-db' ),
+			self::Pending   => __( 'Pending', 'cr-relocate-db' ),
+			self::Running   => __( 'Running', 'cr-relocate-db' ),
+			self::Completed => __( 'Completed', 'cr-relocate-db' ),
+			self::Failed    => __( 'Failed', 'cr-relocate-db' ),
+			self::Cancelled => __( 'Cancelled', 'cr-relocate-db' ),
 		};
 	}
 }

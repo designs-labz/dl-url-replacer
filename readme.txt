@@ -1,5 +1,5 @@
-=== DL Relocate DB – Search Replace & Migration ===
-Contributors: designs_labz
+=== CR Relocate DB – Search Replace & Migration ===
+Contributors: craftroq
 Tags: search replace, migration, database, urls, serialized
 Requires at least: 6.5
 Tested up to: 7.1
@@ -12,7 +12,7 @@ Safely search and replace URLs and text across your WordPress database, with dry
 
 == Description ==
 
-DL Relocate DB, by DesignsLabz, changes text across your database: moving a site from staging to production, switching to HTTPS, changing a domain, or renaming something everywhere it appears.
+CR Relocate DB, by CraftRoq, changes text across your database: moving a site from staging to production, switching to HTTPS, changing a domain, or renaming something everywhere it appears.
 
 It is built for doing that on real sites without breaking them.
 
@@ -46,11 +46,11 @@ Tables are processed in small batches by primary key, a few seconds per request,
 * Case-insensitive and whole-word matching, and matching the http:// and protocol-relative versions of a URL.
 * A live progress view with the current table, rows scanned, changes found and time remaining.
 * A searchable, sortable history of every job, a log, and automatic clean-up. Old jobs can also be deleted by hand.
-* WP-CLI commands: `wp dlz search-replace` and `wp dlz resume`.
+* WP-CLI commands: `wp crq search-replace` and `wp crq resume`.
 
 == Installation ==
 
-1. Upload the plugin to `/wp-content/plugins/dl-relocate-db`, or install it from the Plugins screen.
+1. Upload the plugin to `/wp-content/plugins/cr-relocate-db`, or install it from the Plugins screen.
 2. Activate it.
 3. Open **Relocate** in the admin menu.
 
@@ -82,11 +82,11 @@ The tables you tick. By default those are the tables with your WordPress prefix.
 
 = How do I use it from WP-CLI? =
 
-`wp dlz search-replace https://staging.example.com https://example.com --dry-run` shows what would change. Without `--dry-run` the command asks for confirmation and applies the dry run it just made. See `wp help dlz search-replace` for all options.
+`wp crq search-replace https://staging.example.com https://example.com --dry-run` shows what would change. Without `--dry-run` the command asks for confirmation and applies the dry run it just made. See `wp help crq search-replace` for all options.
 
 = Does it send any data anywhere? =
 
-No. Everything happens in your own database. Nothing is sent to DesignsLabz or anyone else.
+No. Everything happens in your own database. Nothing is sent to CraftRoq or anyone else.
 
 == Changelog ==
 

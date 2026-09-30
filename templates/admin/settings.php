@@ -2,19 +2,19 @@
 /**
  * Settings.
  *
- * @package DesignsLabz\Relocate
+ * @package CraftRoq\Relocate
  */
 
-use DesignsLabz\Relocate\Settings;
+use CraftRoq\Relocate\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
 // Only options-general.php pages print these automatically.
 settings_errors();
 ?>
-<h2 class="dlz-title"><?php esc_html_e( 'Settings', 'dl-relocate-db' ); ?></h2>
+<h2 class="crq-title"><?php esc_html_e( 'Settings', 'cr-relocate-db' ); ?></h2>
 
-<form action="options.php" method="post" class="dlz-card dlz-settings">
+<form action="options.php" method="post" class="crq-card crq-settings">
 	<?php
 	settings_fields( Settings::OPTION );
 	do_settings_sections( Settings::OPTION );

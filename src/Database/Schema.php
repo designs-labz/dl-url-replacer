@@ -1,9 +1,9 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Database;
+namespace CraftRoq\Relocate\Database;
 
-use DesignsLabz\Relocate\Installer;
+use CraftRoq\Relocate\Installer;
 use RuntimeException;
 
 /**
@@ -35,7 +35,7 @@ final class Schema {
 		);
 
 		/* translators: %s: database error message. */
-		$this->check_error( __( 'Could not read the table list from the database: %s', 'dl-relocate-db' ) );
+		$this->check_error( __( 'Could not read the table list from the database: %s', 'cr-relocate-db' ) );
 
 		return array_map(
 			fn( object $row ): Table => new Table(
@@ -86,7 +86,7 @@ final class Schema {
 		);
 
 		/* translators: %s: database error message. */
-		$this->check_error( __( 'Could not read the columns of a table: %s', 'dl-relocate-db' ) );
+		$this->check_error( __( 'Could not read the columns of a table: %s', 'cr-relocate-db' ) );
 
 		$keys = $this->wpdb->get_results(
 			"SELECT TABLE_NAME AS table_name, COLUMN_NAME AS name FROM information_schema.STATISTICS
@@ -124,7 +124,7 @@ final class Schema {
 		);
 
 		/* translators: %s: database error message. */
-		$this->check_error( __( 'Could not read the columns of a table: %s', 'dl-relocate-db' ) );
+		$this->check_error( __( 'Could not read the columns of a table: %s', 'cr-relocate-db' ) );
 
 		if ( ! $columns ) {
 			return null;
@@ -188,7 +188,7 @@ final class Schema {
 		);
 
 		/* translators: %s: database error message. */
-		$this->check_error( __( 'Could not read the indexes of a table: %s', 'dl-relocate-db' ) );
+		$this->check_error( __( 'Could not read the indexes of a table: %s', 'cr-relocate-db' ) );
 
 		$indexes  = array();
 		$nullable = array();

@@ -1,5 +1,5 @@
 {
-	"name": "designslabz/dl-relocate-db",
+	"name": "craftroq/cr-relocate-db",
 	"description": "Safely search and replace URLs and text across a WordPress database.",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
@@ -19,8 +19,8 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"DesignsLabz\\Relocate\\": "src/",
-			"DesignsLabz\\Relocate\\Tests\\": "tests/"
+			"CraftRoq\\Relocate\\": "src/",
+			"CraftRoq\\Relocate\\Tests\\": "tests/"
 		}
 	},
 	"config": {

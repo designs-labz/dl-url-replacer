@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Tests\Integration;
+namespace CraftRoq\Relocate\Tests\Integration;
 
 use WP_REST_Request;
 use WP_REST_Response;
@@ -34,7 +34,7 @@ final class JobsControllerTest extends WP_UnitTestCase {
 	 * @param array<string, mixed> $body
 	 */
 	private function request( string $method, string $route, array $body = array() ): WP_REST_Response {
-		$request = new WP_REST_Request( $method, '/dlz-relocate/v1' . $route );
+		$request = new WP_REST_Request( $method, '/crq-relocate/v1' . $route );
 		foreach ( $body as $key => $value ) {
 			$request->set_param( $key, $value );
 		}
@@ -98,18 +98,18 @@ final class JobsControllerTest extends WP_UnitTestCase {
 	 */
 	public static function invalid_bodies(): array {
 		return array(
-			'empty search'    => array( array( 'search' => '' ), 'dlz_relocate_empty_search' ),
-			'same values'     => array( array( 'replace' => 'Hello world' ), 'dlz_relocate_same_values' ),
-			'no tables'       => array( array( 'tables' => array() ), 'dlz_relocate_no_tables' ),
-			'unknown table'   => array( array( 'tables' => array( 'wptests_does_not_exist' ) ), 'dlz_relocate_invalid_tables' ),
-			'own jobs table'  => array( array( 'tables' => array( 'wptests_dlz_relocate_jobs' ) ), 'dlz_relocate_invalid_tables' ),
-			'injection'       => array( array( 'tables' => array( 'wptests_posts`; DROP TABLE wptests_users; --' ) ), 'dlz_relocate_invalid_tables' ),
+			'empty search'    => array( array( 'search' => '' ), 'crq_relocate_empty_search' ),
+			'same values'     => array( array( 'replace' => 'Hello world' ), 'crq_relocate_same_values' ),
+			'no tables'       => array( array( 'tables' => array() ), 'crq_relocate_no_tables' ),
+			'unknown table'   => array( array( 'tables' => array( 'wptests_does_not_exist' ) ), 'crq_relocate_invalid_tables' ),
+			'own jobs table'  => array( array( 'tables' => array( 'wptests_crq_relocate_jobs' ) ), 'crq_relocate_invalid_tables' ),
+			'injection'       => array( array( 'tables' => array( 'wptests_posts`; DROP TABLE wptests_users; --' ) ), 'crq_relocate_invalid_tables' ),
 			// WordPress turns a comma-separated string into a list; it still goes through the allowlist.
-			'comma string'    => array( array( 'tables' => 'wptests_posts,wptests_nope' ), 'dlz_relocate_invalid_tables' ),
+			'comma string'    => array( array( 'tables' => 'wptests_posts,wptests_nope' ), 'crq_relocate_invalid_tables' ),
 			'tables not list' => array( array( 'tables' => array( array( 'nested' ) ) ), 'rest_invalid_param' ),
-			'unknown column'  => array( array( 'exclude_columns' => array( 'wptests_posts' => array( 'no_such_column' ) ) ), 'dlz_relocate_invalid_columns' ),
-			'key column'      => array( array( 'exclude_columns' => array( 'wptests_posts' => array( 'ID' ) ) ), 'dlz_relocate_invalid_columns' ),
-			'other table'     => array( array( 'exclude_columns' => array( 'wptests_users' => array( 'user_url' ) ) ), 'dlz_relocate_invalid_columns' ),
+			'unknown column'  => array( array( 'exclude_columns' => array( 'wptests_posts' => array( 'no_such_column' ) ) ), 'crq_relocate_invalid_columns' ),
+			'key column'      => array( array( 'exclude_columns' => array( 'wptests_posts' => array( 'ID' ) ) ), 'crq_relocate_invalid_columns' ),
+			'other table'     => array( array( 'exclude_columns' => array( 'wptests_users' => array( 'user_url' ) ) ), 'crq_relocate_invalid_columns' ),
 		);
 	}
 
@@ -174,7 +174,7 @@ final class JobsControllerTest extends WP_UnitTestCase {
 	 */
 	public function test_number_of_pairs_is_limited( int $pairs, int $limit, bool $allowed ): void {
 		wp_set_current_user( self::$admin_id );
-		add_filter( 'dlz_relocate_max_pairs', fn() => $limit );
+		add_filter( 'crq_relocate_max_pairs', fn() => $limit );
 
 		$response = $this->request(
 			'POST',
@@ -193,7 +193,7 @@ final class JobsControllerTest extends WP_UnitTestCase {
 
 		$this->assertSame( $allowed ? 201 : 400, $response->get_status() );
 		if ( ! $allowed ) {
-			$this->assertSame( 'dlz_relocate_too_many_pairs', $response->get_data()['code'] );
+			$this->assertSame( 'crq_relocate_too_many_pairs', $response->get_data()['code'] );
 		}
 	}
 
@@ -218,7 +218,7 @@ final class JobsControllerTest extends WP_UnitTestCase {
 			)
 		);
 
-		$this->assertSame( 'dlz_relocate_duplicate_search', $response->get_data()['code'] );
+		$this->assertSame( 'crq_relocate_duplicate_search', $response->get_data()['code'] );
 	}
 
 	public function test_unknown_job_is_not_found(): void {

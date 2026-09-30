@@ -1,9 +1,9 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Admin;
+namespace CraftRoq\Relocate\Admin;
 
-use DesignsLabz\Relocate\Logger;
+use CraftRoq\Relocate\Logger;
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
@@ -32,10 +32,10 @@ final class LogTable extends \WP_List_Table {
 	 */
 	public function get_columns(): array {
 		return array(
-			'created_at' => __( 'Time', 'dl-relocate-db' ),
-			'level'      => __( 'Level', 'dl-relocate-db' ),
-			'job_id'     => __( 'Job', 'dl-relocate-db' ),
-			'message'    => __( 'Message', 'dl-relocate-db' ),
+			'created_at' => __( 'Time', 'cr-relocate-db' ),
+			'level'      => __( 'Level', 'cr-relocate-db' ),
+			'job_id'     => __( 'Job', 'cr-relocate-db' ),
+			'message'    => __( 'Message', 'cr-relocate-db' ),
 		);
 	}
 
@@ -67,11 +67,11 @@ final class LogTable extends \WP_List_Table {
 
 	public function no_items(): void {
 		if ( '' !== $this->search_term() || $this->job_filter() || $this->level_filter() ) {
-			esc_html_e( 'No log entries match.', 'dl-relocate-db' );
+			esc_html_e( 'No log entries match.', 'cr-relocate-db' );
 			return;
 		}
 
-		esc_html_e( 'The log is empty.', 'dl-relocate-db' );
+		esc_html_e( 'The log is empty.', 'cr-relocate-db' );
 	}
 
 	/**
@@ -101,7 +101,7 @@ final class LogTable extends \WP_List_Table {
 		$current = $this->level_filter();
 		$links   = array();
 
-		foreach ( array( '' => __( 'All', 'dl-relocate-db' ) ) + self::levels() as $level => $label ) {
+		foreach ( array( '' => __( 'All', 'cr-relocate-db' ) ) + self::levels() as $level => $label ) {
 			$args = array_filter(
 				array(
 					'view'    => 'log',
@@ -163,8 +163,8 @@ final class LogTable extends \WP_List_Table {
 
 		if ( is_array( $context ) && $context ) {
 			$html .= sprintf(
-				'<details class="dlz-log-context"><summary>%1$s</summary><pre>%2$s</pre></details>',
-				esc_html__( 'Details', 'dl-relocate-db' ),
+				'<details class="crq-log-context"><summary>%1$s</summary><pre>%2$s</pre></details>',
+				esc_html__( 'Details', 'cr-relocate-db' ),
 				esc_html( (string) wp_json_encode( $context, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) )
 			);
 		}
@@ -177,13 +177,13 @@ final class LogTable extends \WP_List_Table {
 	 */
 	public static function level_badge( string $level ): string {
 		[ $icon, $label ] = match ( $level ) {
-			Logger::ERROR   => array( 'warning', __( 'Error', 'dl-relocate-db' ) ),
-			Logger::WARNING => array( 'flag', __( 'Warning', 'dl-relocate-db' ) ),
-			default         => array( 'info-outline', __( 'Info', 'dl-relocate-db' ) ),
+			Logger::ERROR   => array( 'warning', __( 'Error', 'cr-relocate-db' ) ),
+			Logger::WARNING => array( 'flag', __( 'Warning', 'cr-relocate-db' ) ),
+			default         => array( 'info-outline', __( 'Info', 'cr-relocate-db' ) ),
 		};
 
 		return sprintf(
-			'<span class="dlz-badge dlz-badge-%1$s"><span class="dashicons dashicons-%2$s" aria-hidden="true"></span> %3$s</span>',
+			'<span class="crq-badge crq-badge-%1$s"><span class="dashicons dashicons-%2$s" aria-hidden="true"></span> %3$s</span>',
 			esc_attr( $level ),
 			esc_attr( $icon ),
 			esc_html( $label )
@@ -195,9 +195,9 @@ final class LogTable extends \WP_List_Table {
 	 */
 	private static function levels(): array {
 		return array(
-			Logger::ERROR   => __( 'Errors', 'dl-relocate-db' ),
-			Logger::WARNING => __( 'Warnings', 'dl-relocate-db' ),
-			Logger::INFO    => __( 'Information', 'dl-relocate-db' ),
+			Logger::ERROR   => __( 'Errors', 'cr-relocate-db' ),
+			Logger::WARNING => __( 'Warnings', 'cr-relocate-db' ),
+			Logger::INFO    => __( 'Information', 'cr-relocate-db' ),
 		);
 	}
 

@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Tests\Unit\Fixtures;
+namespace CraftRoq\Relocate\Tests\Unit\Fixtures;
 
 /**
  * An object with every property visibility, as plugins store in options.

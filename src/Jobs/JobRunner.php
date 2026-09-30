@@ -1,14 +1,14 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Jobs;
+namespace CraftRoq\Relocate\Jobs;
 
-use DesignsLabz\Relocate\Database\Schema;
-use DesignsLabz\Relocate\Database\TableLayout;
-use DesignsLabz\Relocate\Installer;
-use DesignsLabz\Relocate\Logger;
-use DesignsLabz\Relocate\Replace\Replacer;
-use DesignsLabz\Relocate\Settings;
+use CraftRoq\Relocate\Database\Schema;
+use CraftRoq\Relocate\Database\TableLayout;
+use CraftRoq\Relocate\Installer;
+use CraftRoq\Relocate\Logger;
+use CraftRoq\Relocate\Replace\Replacer;
+use CraftRoq\Relocate\Settings;
 use RuntimeException;
 
 /**
@@ -193,7 +193,7 @@ final class JobRunner {
 			$job->finish(
 				JobStatus::Failed,
 				/* translators: 1: table name, 2: database error message. */
-				sprintf( __( 'The job stopped while processing %1$s: %2$s', 'dl-relocate-db' ), (string) $job->current_table(), $e->getMessage() )
+				sprintf( __( 'The job stopped while processing %1$s: %2$s', 'cr-relocate-db' ), (string) $job->current_table(), $e->getMessage() )
 			);
 			$this->jobs->save( $job );
 			$this->logger->error(
@@ -390,7 +390,7 @@ final class JobRunner {
 		 *
 		 * @param float $seconds Default 4.
 		 */
-		$seconds = (float) apply_filters( 'dlz_relocate_step_seconds', self::STEP_SECONDS );
+		$seconds = (float) apply_filters( 'crq_relocate_step_seconds', self::STEP_SECONDS );
 		$limit   = (int) ini_get( 'max_execution_time' );
 
 		return $limit > 0 ? min( $seconds, $limit / 2 ) : $seconds;

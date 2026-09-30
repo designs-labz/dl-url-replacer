@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Jobs;
+namespace CraftRoq\Relocate\Jobs;
 
 /**
  * Per-table results of a job, plus a few before/after examples for the preview.

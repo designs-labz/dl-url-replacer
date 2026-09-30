@@ -1,24 +1,24 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Cli;
+namespace CraftRoq\Relocate\Cli;
 
-use DesignsLabz\Relocate\Admin\Admin;
-use DesignsLabz\Relocate\Database\Schema;
-use DesignsLabz\Relocate\Installer;
-use DesignsLabz\Relocate\Jobs\Job;
-use DesignsLabz\Relocate\Jobs\JobException;
-use DesignsLabz\Relocate\Jobs\JobRepository;
-use DesignsLabz\Relocate\Jobs\JobRunner;
-use DesignsLabz\Relocate\Jobs\JobStarter;
-use DesignsLabz\Relocate\Jobs\JobStatus;
-use DesignsLabz\Relocate\Rest\JobFormatter;
+use CraftRoq\Relocate\Admin\Admin;
+use CraftRoq\Relocate\Database\Schema;
+use CraftRoq\Relocate\Installer;
+use CraftRoq\Relocate\Jobs\Job;
+use CraftRoq\Relocate\Jobs\JobException;
+use CraftRoq\Relocate\Jobs\JobRepository;
+use CraftRoq\Relocate\Jobs\JobRunner;
+use CraftRoq\Relocate\Jobs\JobStarter;
+use CraftRoq\Relocate\Jobs\JobStatus;
+use CraftRoq\Relocate\Rest\JobFormatter;
 use RuntimeException;
 use WP_CLI;
 use WP_CLI\Utils;
 
 /**
- * Search and replace with DL Relocate DB.
+ * Search and replace with CR Relocate DB.
  *
  * Jobs started here are the same jobs the admin screen runs: they appear in
  * its History, can be resumed from either place, and save the same file of
@@ -102,16 +102,16 @@ final class Command {
 	 * ## EXAMPLES
 	 *
 	 *     # See what would change.
-	 *     $ wp dlz search-replace https://staging.example.com https://example.com --dry-run
+	 *     $ wp crq search-replace https://staging.example.com https://example.com --dry-run
 	 *
 	 *     # Replace across all WordPress tables, after confirming.
-	 *     $ wp dlz search-replace https://staging.example.com https://example.com
+	 *     $ wp crq search-replace https://staging.example.com https://example.com
 	 *
 	 *     # Two pairs at once.
-	 *     $ wp dlz search-replace https://staging.example.com https://example.com /home/staging /home/live
+	 *     $ wp crq search-replace https://staging.example.com https://example.com /home/staging /home/live
 	 *
 	 *     # Replace in two tables without asking.
-	 *     $ wp dlz search-replace "Old Name" "New Name" --tables=wp_posts,wp_postmeta --yes
+	 *     $ wp crq search-replace "Old Name" "New Name" --tables=wp_posts,wp_postmeta --yes
 	 *
 	 * @subcommand search-replace
 	 *
@@ -149,7 +149,7 @@ final class Command {
 		$this->report( $dry_run, $format );
 
 		if ( JobStatus::Completed !== $dry_run->status ) {
-			WP_CLI::error( sprintf( 'The dry run stopped: %s Continue it with: wp dlz resume %d', (string) $dry_run->error_message, $dry_run->id ) );
+			WP_CLI::error( sprintf( 'The dry run stopped: %s Continue it with: wp crq resume %d', (string) $dry_run->error_message, $dry_run->id ) );
 		}
 
 		$totals = $dry_run->report->totals();
@@ -202,7 +202,7 @@ final class Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     $ wp dlz resume 42
+	 *     $ wp crq resume 42
 	 *
 	 * @param array{0: string}           $args
 	 * @param array<string, string|bool> $assoc_args
@@ -332,7 +332,7 @@ final class Command {
 			JobStatus::Cancelled => WP_CLI::warning( sprintf( 'Replacement #%d was cancelled. Batches finished before that were written.', $job->id ) ),
 			default              => WP_CLI::error(
 				sprintf(
-					'Replacement #%1$d stopped: %2$s Batches finished before the error were written; the failed batch was rolled back. Continue with: wp dlz resume %1$d',
+					'Replacement #%1$d stopped: %2$s Batches finished before the error were written; the failed batch was rolled back. Continue with: wp crq resume %1$d',
 					$job->id,
 					(string) $job->error_message
 				)

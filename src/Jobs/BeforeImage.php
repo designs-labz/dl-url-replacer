@@ -1,9 +1,9 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Jobs;
+namespace CraftRoq\Relocate\Jobs;
 
-use DesignsLabz\Relocate\Database\TableLayout;
+use CraftRoq\Relocate\Database\TableLayout;
 use RuntimeException;
 
 /**
@@ -13,7 +13,7 @@ use RuntimeException;
  * It is a recovery aid, not an undo button: running it puts those cells back
  * exactly as they were, including over any edits made after the job.
  *
- * Files live in uploads/dlz-relocate/ under unguessable names. The folder is
+ * Files live in uploads/crq-relocate/ under unguessable names. The folder is
  * closed off for Apache, but that does not help on nginx, so files are only
  * ever handed out through the authenticated download handler.
  *
@@ -23,7 +23,7 @@ use RuntimeException;
  */
 final class BeforeImage {
 
-	private const DIRECTORY = 'dlz-relocate';
+	private const DIRECTORY = 'crq-relocate';
 
 	public function __construct( private \wpdb $wpdb ) {}
 
@@ -47,7 +47,7 @@ final class BeforeImage {
 			implode(
 				"\n",
 				array(
-					sprintf( '-- DL Relocate DB: original values changed by job %d, started %s UTC.', $job->id, gmdate( 'Y-m-d H:i:s' ) ),
+					sprintf( '-- CR Relocate DB: original values changed by job %d, started %s UTC.', $job->id, gmdate( 'Y-m-d H:i:s' ) ),
 					'-- Running this file puts every changed value back, overwriting any edits made to those values since.',
 					'-- Statements from a batch that was rolled back restore values that never changed, so they are harmless.',
 					'SET NAMES ' . ( $this->wpdb->charset ? $this->wpdb->charset : 'utf8mb4' ) . ';',

@@ -2,7 +2,7 @@
   <img src="assets/images/logo.svg" alt="" width="88">
 </p>
 
-<h1 align="center">DL Relocate DB</h1>
+<h1 align="center">CR Relocate DB</h1>
 
 <p align="center">
   <strong>Safely search and replace URLs and text across your whole WordPress database.</strong><br>
@@ -32,7 +32,7 @@ Moving a WordPress site almost always means changing text inside the database. F
 https://staging.example.com   →   https://example.com
 ```
 
-That address can appear thousands of times: in posts, menus, widgets, page builder layouts and plugin settings. **DL Relocate DB finds every one of them and changes them safely**, including the ones hidden inside data that a normal find-and-replace would break.
+That address can appear thousands of times: in posts, menus, widgets, page builder layouts and plugin settings. **CR Relocate DB finds every one of them and changes them safely**, including the ones hidden inside data that a normal find-and-replace would break.
 
 **Good for:**
 
@@ -47,7 +47,7 @@ That address can appear thousands of times: in posts, menus, widgets, page build
 ## ✨ Features
 
 - 👀 **Dry run first, always.** See exactly what would change, table by table, with before and after examples. Nothing is written until you confirm.
-- 🧩 **Safe with serialized data and JSON.** Plugin settings and page builders store data in formats that break if their length changes. DL Relocate DB rewrites them correctly every time.
+- 🧩 **Safe with serialized data and JSON.** Plugin settings and page builders store data in formats that break if their length changes. CR Relocate DB rewrites them correctly every time.
 - ➕ **Up to 5 search and replace pairs at once.** Change your domain and your server path in a single run.
 - 🎯 **Choose tables and columns.** Search all WordPress tables, only some, or leave individual columns out.
 - 📊 **Live progress.** A progress bar with the current table, rows scanned, changes found and time remaining.
@@ -89,7 +89,7 @@ That address can appear thousands of times: in posts, menus, widgets, page build
 3. Click **Activate**.
 4. You will find **Relocate DB** in the admin menu on the left.
 
-> 💡 **Tip:** GitHub names the folder inside the ZIP `dl-relocate-db-main`. The plugin works either way, but for tidy future updates you can unzip it, rename the folder to `dl-relocate-db`, and zip it again before uploading.
+> 💡 **Tip:** GitHub names the folder inside the ZIP `cr-relocate-db-main`. The plugin works either way, but for tidy future updates you can unzip it, rename the folder to `cr-relocate-db`, and zip it again before uploading.
 
 ---
 
@@ -169,7 +169,7 @@ Nothing breaks. The batch in progress either finishes or is rolled back. Open th
 <details>
 <summary><strong>Why were some values "left unchanged"?</strong></summary>
 
-Sometimes changing a value would damage it: for example, plugin data that was already broken, or a custom format only that plugin understands. DL Relocate DB leaves those alone and tells you which table they are in, so you can check them yourself.
+Sometimes changing a value would damage it: for example, plugin data that was already broken, or a custom format only that plugin understands. CR Relocate DB leaves those alone and tells you which table they are in, so you can check them yourself.
 </details>
 
 <details>
@@ -187,7 +187,7 @@ Not yet. On a Multisite network it shows a notice and does not run. Multisite su
 <details>
 <summary><strong>Does it send my data anywhere?</strong></summary>
 
-No. Everything happens inside your own database. Nothing is sent to DesignsLabz or anyone else.
+No. Everything happens inside your own database. Nothing is sent to CraftRoq or anyone else.
 </details>
 
 ---
@@ -198,27 +198,27 @@ Prefer the command line? The same features are available through WP-CLI:
 
 ```bash
 # Preview only: nothing is changed
-wp dlz search-replace https://staging.example.com https://example.com --dry-run
+wp crq search-replace https://staging.example.com https://example.com --dry-run
 
 # Preview, then apply after you confirm
-wp dlz search-replace https://staging.example.com https://example.com
+wp crq search-replace https://staging.example.com https://example.com
 
 # Two pairs at once, only in two tables, without the confirmation question
-wp dlz search-replace https://staging.example.com https://example.com /home/staging /home/live \
+wp crq search-replace https://staging.example.com https://example.com /home/staging /home/live \
   --tables=wp_posts,wp_postmeta --yes
 
 # Continue a job that was interrupted
-wp dlz resume 42
+wp crq resume 42
 ```
 
-Run `wp help dlz search-replace` to see every option.
+Run `wp help crq search-replace` to see every option.
 
 ---
 
 ## 🗺️ What's next
 
 - 🌐 **Multisite support**: choose which sites of a network to update.
-- ⭐ **DL Relocate DB Pro** (planned): automatic backups, one-click rollback, saved profiles, scheduled jobs and moving databases between sites.
+- ⭐ **CR Relocate DB Pro** (planned): automatic backups, one-click rollback, saved profiles, scheduled jobs and moving databases between sites.
 
 Ideas or problems? [Open an issue](https://github.com/designs-labz/dl-relocate-db/issues).
 
@@ -234,7 +234,7 @@ Ideas or problems? [Open an issue](https://github.com/designs-labz/dl-relocate-d
 | Replacing within one value: plain text, serialized PHP, JSON | `src/Replace/` (no WordPress dependency) |
 | Table discovery and allowlisting | `src/Database/Schema.php` |
 | Jobs: batching, transactions, resume, original values file, clean-up | `src/Jobs/` |
-| REST API used by the admin screens | `src/Rest/` (`dlz-relocate/v1`) |
+| REST API used by the admin screens | `src/Rest/` (`crq-relocate/v1`) |
 | Admin screens | `src/Admin/`, `templates/admin/`, `assets/` |
 | WP-CLI | `src/Cli/Command.php` |
 
@@ -246,15 +246,15 @@ The admin screens and WP-CLI create jobs through `JobStarter` and run them with 
 
 | Hook | Type | What it does |
 |---|---|---|
-| `dlz_relocate_step_seconds` | filter | How long one step may work before saving and returning. Default `4`. |
-| `dlz_relocate_max_pairs` | filter | How many search and replace pairs one job may have. Default `5`. |
-| `dlz_relocate_manage` | capability | Required for everything. Maps to `manage_options` plus `unfiltered_html`; change it with a `map_meta_cap` filter. |
+| `crq_relocate_step_seconds` | filter | How long one step may work before saving and returning. Default `4`. |
+| `crq_relocate_max_pairs` | filter | How many search and replace pairs one job may have. Default `5`. |
+| `crq_relocate_manage` | capability | Required for everything. Maps to `manage_options` plus `unfiltered_html`; change it with a `map_meta_cap` filter. |
 </details>
 
 <details>
 <summary><strong>Development setup and tests</strong></summary>
 
-Classes load through the PSR-4 autoloader in `dl-relocate-db.php`, so the plugin runs straight from a Git checkout. Composer is only needed for development tools.
+Classes load through the PSR-4 autoloader in `cr-relocate-db.php`, so the plugin runs straight from a Git checkout. Composer is only needed for development tools.
 
 ```bash
 composer install
@@ -274,7 +274,7 @@ WP_TESTS_DB_HOST=127.0.0.1:3306 WP_TESTS_DB_NAME=relocate_tests composer test:in
 Regenerate the translation template after changing strings:
 
 ```bash
-wp i18n make-pot . languages/dl-relocate-db.pot --exclude=vendor,tests
+wp i18n make-pot . languages/cr-relocate-db.pot --exclude=vendor,tests
 ```
 
 CI runs the linters, the unit tests on PHP 8.1–8.4, and the integration tests on WordPress 6.5 and the latest release against MySQL 8.0, MySQL 8.4 and MariaDB 10.11.
@@ -287,5 +287,5 @@ CI runs the linters, the unit tests on PHP 8.1–8.4, and the integration tests 
 GPL-3.0-or-later. Free to use, change and share.
 
 <p align="center">
-  Made with 💜 by <a href="https://designslabz.com/"><strong>DesignsLabz</strong></a>
+  Made with 💜 by <a href="https://craftroq.com/"><strong>CraftRoq</strong></a>
 </p>

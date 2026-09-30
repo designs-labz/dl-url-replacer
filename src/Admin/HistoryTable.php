@@ -1,10 +1,10 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Admin;
+namespace CraftRoq\Relocate\Admin;
 
-use DesignsLabz\Relocate\Jobs\Job;
-use DesignsLabz\Relocate\Jobs\JobRepository;
+use CraftRoq\Relocate\Jobs\Job;
+use CraftRoq\Relocate\Jobs\JobRepository;
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
@@ -34,12 +34,12 @@ final class HistoryTable extends \WP_List_Table {
 	public function get_columns(): array {
 		return array(
 			'cb'           => '<input type="checkbox">',
-			'job'          => __( 'Job', 'dl-relocate-db' ),
-			'values'       => __( 'Search → Replace', 'dl-relocate-db' ),
-			'tables'       => __( 'Tables', 'dl-relocate-db' ),
-			'rows_changed' => __( 'Rows changed', 'dl-relocate-db' ),
-			'replacements' => __( 'Replacements', 'dl-relocate-db' ),
-			'status'       => __( 'Status', 'dl-relocate-db' ),
+			'job'          => __( 'Job', 'cr-relocate-db' ),
+			'values'       => __( 'Search → Replace', 'cr-relocate-db' ),
+			'tables'       => __( 'Tables', 'cr-relocate-db' ),
+			'rows_changed' => __( 'Rows changed', 'cr-relocate-db' ),
+			'replacements' => __( 'Replacements', 'cr-relocate-db' ),
+			'status'       => __( 'Status', 'cr-relocate-db' ),
 		);
 	}
 
@@ -60,11 +60,11 @@ final class HistoryTable extends \WP_List_Table {
 
 	public function no_items(): void {
 		if ( '' !== $this->search_term() ) {
-			esc_html_e( 'No jobs match your search.', 'dl-relocate-db' );
+			esc_html_e( 'No jobs match your search.', 'cr-relocate-db' );
 			return;
 		}
 
-		esc_html_e( 'No jobs yet. Run a dry run from Search & Replace to get started.', 'dl-relocate-db' );
+		esc_html_e( 'No jobs yet. Run a dry run from Search & Replace to get started.', 'cr-relocate-db' );
 	}
 
 	/**
@@ -83,7 +83,7 @@ final class HistoryTable extends \WP_List_Table {
 	 * @return array<string, string>
 	 */
 	protected function get_bulk_actions(): array {
-		return array( 'delete' => __( 'Delete', 'dl-relocate-db' ) );
+		return array( 'delete' => __( 'Delete', 'cr-relocate-db' ) );
 	}
 
 	/**
@@ -92,9 +92,9 @@ final class HistoryTable extends \WP_List_Table {
 	protected function get_views(): array {
 		$current = $this->type_filter();
 		$views   = array(
-			'all'  => array( null, __( 'All', 'dl-relocate-db' ) ),
-			'dry'  => array( true, __( 'Dry runs', 'dl-relocate-db' ) ),
-			'live' => array( false, __( 'Replacements', 'dl-relocate-db' ) ),
+			'all'  => array( null, __( 'All', 'cr-relocate-db' ) ),
+			'dry'  => array( true, __( 'Dry runs', 'cr-relocate-db' ) ),
+			'live' => array( false, __( 'Replacements', 'cr-relocate-db' ) ),
 		);
 
 		$links = array();
@@ -119,24 +119,24 @@ final class HistoryTable extends \WP_List_Table {
 		}
 
 		return sprintf(
-			'<label class="screen-reader-text" for="dlz-job-%1$d">%2$s</label><input type="checkbox" id="dlz-job-%1$d" name="job_ids[]" value="%1$d">',
+			'<label class="screen-reader-text" for="crq-job-%1$d">%2$s</label><input type="checkbox" id="crq-job-%1$d" name="job_ids[]" value="%1$d">',
 			(int) $job->id,
 			/* translators: %s: job title, e.g. Dry run #12. */
-			esc_html( sprintf( __( 'Select %s', 'dl-relocate-db' ), Admin::job_title( $job ) ) )
+			esc_html( sprintf( __( 'Select %s', 'cr-relocate-db' ), Admin::job_title( $job ) ) )
 		);
 	}
 
 	protected function column_job( Job $job ): string {
 		$actions = array(
-			'view' => sprintf( '<a href="%1$s">%2$s</a>', esc_url( Admin::job_url( $job->id ) ), esc_html__( 'View', 'dl-relocate-db' ) ),
+			'view' => sprintf( '<a href="%1$s">%2$s</a>', esc_url( Admin::job_url( $job->id ) ), esc_html__( 'View', 'cr-relocate-db' ) ),
 		);
 
 		if ( Admin::can_delete( $job ) ) {
 			$actions['delete'] = sprintf(
-				'<a href="%1$s" class="dlz-delete-job" data-job="%2$s">%3$s</a>',
+				'<a href="%1$s" class="crq-delete-job" data-job="%2$s">%3$s</a>',
 				esc_url( Admin::delete_url( $job->id ) ),
 				esc_attr( Admin::job_title( $job ) ),
-				esc_html__( 'Delete', 'dl-relocate-db' )
+				esc_html__( 'Delete', 'cr-relocate-db' )
 			);
 		}
 
@@ -153,13 +153,13 @@ final class HistoryTable extends \WP_List_Table {
 		$more = count( $job->pairs() ) - 1;
 
 		return sprintf(
-			'<span class="dlz-from"><code>%1$s</code></span><span class="dlz-to"><span aria-hidden="true">→</span><span class="screen-reader-text">%2$s</span> <code>%3$s</code></span>%4$s',
+			'<span class="crq-from"><code>%1$s</code></span><span class="crq-to"><span aria-hidden="true">→</span><span class="screen-reader-text">%2$s</span> <code>%3$s</code></span>%4$s',
 			esc_html( self::excerpt( $job->search ) ),
-			esc_html__( 'replaced with', 'dl-relocate-db' ),
-			esc_html( '' === $job->replace ? __( '(nothing)', 'dl-relocate-db' ) : self::excerpt( $job->replace ) ),
+			esc_html__( 'replaced with', 'cr-relocate-db' ),
+			esc_html( '' === $job->replace ? __( '(nothing)', 'cr-relocate-db' ) : self::excerpt( $job->replace ) ),
 			$more > 0
 				/* translators: %s: number of further search and replacement pairs. */
-				? '<span class="dlz-more">' . esc_html( sprintf( _n( '+ %s more', '+ %s more', $more, 'dl-relocate-db' ), number_format_i18n( $more ) ) ) . '</span>'
+				? '<span class="crq-more">' . esc_html( sprintf( _n( '+ %s more', '+ %s more', $more, 'cr-relocate-db' ), number_format_i18n( $more ) ) ) . '</span>'
 				: ''
 		);
 	}

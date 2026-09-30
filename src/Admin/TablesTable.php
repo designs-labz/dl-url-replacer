@@ -1,9 +1,9 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Admin;
+namespace CraftRoq\Relocate\Admin;
 
-use DesignsLabz\Relocate\Database\Table;
+use CraftRoq\Relocate\Database\Table;
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
@@ -35,11 +35,11 @@ final class TablesTable extends \WP_List_Table {
 	 */
 	public function get_columns(): array {
 		return array(
-			'name'      => __( 'Table', 'dl-relocate-db' ),
-			'engine'    => __( 'Engine', 'dl-relocate-db' ),
-			'rows'      => __( 'Rows (approx.)', 'dl-relocate-db' ),
-			'size'      => __( 'Size', 'dl-relocate-db' ),
-			'collation' => __( 'Collation', 'dl-relocate-db' ),
+			'name'      => __( 'Table', 'cr-relocate-db' ),
+			'engine'    => __( 'Engine', 'cr-relocate-db' ),
+			'rows'      => __( 'Rows (approx.)', 'cr-relocate-db' ),
+			'size'      => __( 'Size', 'cr-relocate-db' ),
+			'collation' => __( 'Collation', 'cr-relocate-db' ),
 		);
 	}
 
@@ -83,7 +83,7 @@ final class TablesTable extends \WP_List_Table {
 	}
 
 	public function no_items(): void {
-		esc_html_e( 'No tables match your search.', 'dl-relocate-db' );
+		esc_html_e( 'No tables match your search.', 'cr-relocate-db' );
 	}
 
 	/**
@@ -110,9 +110,9 @@ final class TablesTable extends \WP_List_Table {
 			'other' => count( array_filter( $this->tables, fn( Table $table ): bool => ! $table->prefixed ) ),
 		);
 		$views   = array(
-			'all'   => array( null, __( 'All', 'dl-relocate-db' ) ),
-			'core'  => array( true, __( 'WordPress prefix', 'dl-relocate-db' ) ),
-			'other' => array( false, __( 'Other', 'dl-relocate-db' ) ),
+			'all'   => array( null, __( 'All', 'cr-relocate-db' ) ),
+			'core'  => array( true, __( 'WordPress prefix', 'cr-relocate-db' ) ),
+			'other' => array( false, __( 'Other', 'cr-relocate-db' ) ),
 		);
 
 		$links = array();

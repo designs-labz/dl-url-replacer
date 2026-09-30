@@ -1,18 +1,18 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Tests\Integration;
+namespace CraftRoq\Relocate\Tests\Integration;
 
-use DesignsLabz\Relocate\Database\Schema;
-use DesignsLabz\Relocate\Jobs\BeforeImage;
-use DesignsLabz\Relocate\Jobs\Job;
-use DesignsLabz\Relocate\Jobs\JobRepository;
-use DesignsLabz\Relocate\Jobs\JobRunner;
-use DesignsLabz\Relocate\Jobs\JobStatus;
-use DesignsLabz\Relocate\Jobs\Report;
-use DesignsLabz\Relocate\Logger;
-use DesignsLabz\Relocate\Replace\Replacer;
-use DesignsLabz\Relocate\Settings;
+use CraftRoq\Relocate\Database\Schema;
+use CraftRoq\Relocate\Jobs\BeforeImage;
+use CraftRoq\Relocate\Jobs\Job;
+use CraftRoq\Relocate\Jobs\JobRepository;
+use CraftRoq\Relocate\Jobs\JobRunner;
+use CraftRoq\Relocate\Jobs\JobStatus;
+use CraftRoq\Relocate\Jobs\Report;
+use CraftRoq\Relocate\Logger;
+use CraftRoq\Relocate\Replace\Replacer;
+use CraftRoq\Relocate\Settings;
 use WP_UnitTestCase;
 
 /**
@@ -112,7 +112,7 @@ final class JobRunnerTest extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		update_option( Settings::OPTION, array( 'batch_size' => 100 ) );
-		add_filter( 'dlz_relocate_step_seconds', '__return_zero' );
+		add_filter( 'crq_relocate_step_seconds', '__return_zero' );
 	}
 
 	public function test_dry_run_matches_a_full_scan_and_changes_nothing(): void {
@@ -212,7 +212,7 @@ final class JobRunnerTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( $table, (string) $job->error_message );
 		$this->assertSame(
 			'Job failed.',
-			$wpdb->get_var( $wpdb->prepare( "SELECT message FROM {$wpdb->prefix}dlz_relocate_log WHERE job_id = %d AND level = 'error'", $job->id ) )
+			$wpdb->get_var( $wpdb->prepare( "SELECT message FROM {$wpdb->prefix}crq_relocate_log WHERE job_id = %d AND level = 'error'", $job->id ) )
 		);
 	}
 
@@ -221,7 +221,7 @@ final class JobRunnerTest extends WP_UnitTestCase {
 
 		$job   = $this->create_job( array( self::table( 'unique' ) ) );
 		$other = new \wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
-		$name  = $wpdb->prefix . 'dlz_relocate_jobs:' . $job->id;
+		$name  = $wpdb->prefix . 'crq_relocate_jobs:' . $job->id;
 
 		$this->assertSame( '1', $other->get_var( $other->prepare( 'SELECT GET_LOCK(SHA1(CONCAT(DATABASE(), %s)), 0)', $name ) ) );
 		$this->assertNull( $this->runner()->step( $job ) );
@@ -362,6 +362,6 @@ final class JobRunnerTest extends WP_UnitTestCase {
 	private static function table( string $name ): string {
 		global $wpdb;
 
-		return $wpdb->prefix . 'dlz_fixture_' . $name;
+		return $wpdb->prefix . 'crq_fixture_' . $name;
 	}
 }

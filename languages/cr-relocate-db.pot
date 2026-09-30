@@ -1,53 +1,53 @@
-# Copyright (C) 2026 DesignsLabz
+# Copyright (C) 2026 CraftRoq
 # This file is distributed under the GPL-3.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: DL Relocate DB 0.1.0\n"
+"Project-Id-Version: CR Relocate DB 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/designs-labz/dl-relocate-db/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-30T09:10:39+00:00\n"
+"POT-Creation-Date: 2026-09-30T09:28:57+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
-"X-Domain: dl-relocate-db\n"
+"X-Domain: cr-relocate-db\n"
 
 #. Plugin Name of the plugin
-#: dl-relocate-db.php
+#: cr-relocate-db.php
 #: src/Admin/Admin.php:167
 #: src/Admin/Admin.php:180
 #: templates/admin/page.php:28
-msgid "DL Relocate DB"
+msgid "CR Relocate DB"
 msgstr ""
 
 #. Plugin URI of the plugin
-#: dl-relocate-db.php
+#: cr-relocate-db.php
 msgid "https://github.com/designs-labz/dl-relocate-db"
 msgstr ""
 
 #. Description of the plugin
-#: dl-relocate-db.php
+#: cr-relocate-db.php
 msgid "Safely search and replace URLs and text across your WordPress database, with serialized data support, dry runs and an operation history."
 msgstr ""
 
 #. Author of the plugin
-#: dl-relocate-db.php
-msgid "DesignsLabz"
+#: cr-relocate-db.php
+msgid "CraftRoq"
 msgstr ""
 
 #. Author URI of the plugin
-#: dl-relocate-db.php
-msgid "https://designslabz.com/"
+#: cr-relocate-db.php
+msgid "https://craftroq.com/"
 msgstr ""
 
-#: dl-relocate-db.php:28
-msgid "DL Relocate DB requires PHP 8.1 or newer and is not running."
+#: cr-relocate-db.php:28
+msgid "CR Relocate DB requires PHP 8.1 or newer and is not running."
 msgstr ""
 
-#: dl-relocate-db.php:41
-msgid "DL Relocate DB does not support WordPress Multisite yet, so it is not running on this network."
+#: cr-relocate-db.php:41
+msgid "CR Relocate DB does not support WordPress Multisite yet, so it is not running on this network."
 msgstr ""
 
 #. translators: %d: job number.
@@ -912,7 +912,7 @@ msgid "No log entries for this job."
 msgstr ""
 
 #: templates/admin/page.php:32
-msgid "DL Relocate DB sections"
+msgid "CR Relocate DB sections"
 msgstr ""
 
 #: templates/admin/partials/runner.php:21

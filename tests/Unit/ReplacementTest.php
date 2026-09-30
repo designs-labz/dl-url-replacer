@@ -1,9 +1,9 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Tests\Unit;
+namespace CraftRoq\Relocate\Tests\Unit;
 
-use DesignsLabz\Relocate\Replace\Replacement;
+use CraftRoq\Relocate\Replace\Replacement;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
@@ -20,8 +20,8 @@ final class ReplacementTest extends TestCase {
 	}
 
 	public function test_allows_case_only_change(): void {
-		$replacement = new Replacement( array( array( 'Designslabz', 'DesignsLabz' ) ) );
-		$this->assertSame( 'Designslabz', $replacement->pairs[0]['search'] );
+		$replacement = new Replacement( array( array( 'Craftroq', 'CraftRoq' ) ) );
+		$this->assertSame( 'Craftroq', $replacement->pairs[0]['search'] );
 	}
 
 	public function test_allows_empty_replacement(): void {

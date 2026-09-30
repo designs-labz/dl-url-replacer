@@ -1,17 +1,17 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Tests\Integration;
+namespace CraftRoq\Relocate\Tests\Integration;
 
-use DesignsLabz\Relocate\Installer;
-use DesignsLabz\Relocate\Jobs\BeforeImage;
-use DesignsLabz\Relocate\Jobs\Cleanup;
-use DesignsLabz\Relocate\Jobs\Job;
-use DesignsLabz\Relocate\Jobs\JobRepository;
-use DesignsLabz\Relocate\Jobs\JobStatus;
-use DesignsLabz\Relocate\Jobs\Report;
-use DesignsLabz\Relocate\Logger;
-use DesignsLabz\Relocate\Settings;
+use CraftRoq\Relocate\Installer;
+use CraftRoq\Relocate\Jobs\BeforeImage;
+use CraftRoq\Relocate\Jobs\Cleanup;
+use CraftRoq\Relocate\Jobs\Job;
+use CraftRoq\Relocate\Jobs\JobRepository;
+use CraftRoq\Relocate\Jobs\JobStatus;
+use CraftRoq\Relocate\Jobs\Report;
+use CraftRoq\Relocate\Logger;
+use CraftRoq\Relocate\Settings;
 use WP_UnitTestCase;
 
 final class HistoryTest extends WP_UnitTestCase {

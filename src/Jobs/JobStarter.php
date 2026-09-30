@@ -1,11 +1,11 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Jobs;
+namespace CraftRoq\Relocate\Jobs;
 
-use DesignsLabz\Relocate\Database\Schema;
-use DesignsLabz\Relocate\Logger;
-use DesignsLabz\Relocate\Replace\Replacement;
+use CraftRoq\Relocate\Database\Schema;
+use CraftRoq\Relocate\Logger;
+use CraftRoq\Relocate\Replace\Replacement;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -38,7 +38,7 @@ final class JobStarter {
 		 *
 		 * @param int $max Default 5.
 		 */
-		return max( 1, (int) apply_filters( 'dlz_relocate_max_pairs', self::MAX_PAIRS ) );
+		return max( 1, (int) apply_filters( 'crq_relocate_max_pairs', self::MAX_PAIRS ) );
 	}
 
 	/**
@@ -54,26 +54,26 @@ final class JobStarter {
 		try {
 			new Replacement( $pairs, $options['case_sensitive'], $options['whole_words'], $options['url_variants'] );
 		} catch ( InvalidArgumentException ) {
-			throw new JobException( 'dlz_relocate_invalid_values', __( 'The search and replacement values must be valid UTF-8 text.', 'dl-relocate-db' ) );
+			throw new JobException( 'crq_relocate_invalid_values', __( 'The search and replacement values must be valid UTF-8 text.', 'cr-relocate-db' ) );
 		}
 
 		if ( ! $tables ) {
-			throw new JobException( 'dlz_relocate_no_tables', __( 'Select at least one table to search.', 'dl-relocate-db' ) );
+			throw new JobException( 'crq_relocate_no_tables', __( 'Select at least one table to search.', 'cr-relocate-db' ) );
 		}
 
 		try {
 			$available = $this->schema->searchable_tables();
 		} catch ( RuntimeException $e ) {
-			throw new JobException( 'dlz_relocate_database_error', $e->getMessage(), 500 );
+			throw new JobException( 'crq_relocate_database_error', $e->getMessage(), 500 );
 		}
 
 		$unknown = array_diff( $tables, array_keys( $available ) );
 
 		if ( $unknown ) {
 			throw new JobException(
-				'dlz_relocate_invalid_tables',
+				'crq_relocate_invalid_tables',
 				/* translators: %s: comma-separated table names. */
-				sprintf( __( 'These tables do not exist or cannot be searched: %s', 'dl-relocate-db' ), implode( ', ', $unknown ) )
+				sprintf( __( 'These tables do not exist or cannot be searched: %s', 'cr-relocate-db' ), implode( ', ', $unknown ) )
 			);
 		}
 
@@ -116,11 +116,11 @@ final class JobStarter {
 	 */
 	public function replacement( Job $dry_run, bool $before_image ): Job {
 		if ( ! $dry_run->dry_run || JobStatus::Completed !== $dry_run->status ) {
-			throw new JobException( 'dlz_relocate_not_executable', __( 'Only a completed dry run can be applied to the database.', 'dl-relocate-db' ) );
+			throw new JobException( 'crq_relocate_not_executable', __( 'Only a completed dry run can be applied to the database.', 'cr-relocate-db' ) );
 		}
 
 		if ( 0 === $dry_run->report->totals()['rows_changed'] ) {
-			throw new JobException( 'dlz_relocate_nothing_to_replace', __( 'The dry run found nothing to replace.', 'dl-relocate-db' ) );
+			throw new JobException( 'crq_relocate_nothing_to_replace', __( 'The dry run found nothing to replace.', 'cr-relocate-db' ) );
 		}
 
 		// Held while checking and creating, so two requests cannot both get past the checks.
@@ -128,11 +128,11 @@ final class JobStarter {
 			'execute',
 			function () use ( $dry_run, $before_image ): Job {
 				if ( null !== $this->jobs->child_id( $dry_run->id ) ) {
-					throw new JobException( 'dlz_relocate_already_executed', __( 'This dry run has already been applied. Run a new dry run to replace again.', 'dl-relocate-db' ), 409 );
+					throw new JobException( 'crq_relocate_already_executed', __( 'This dry run has already been applied. Run a new dry run to replace again.', 'cr-relocate-db' ), 409 );
 				}
 
 				if ( $this->jobs->active_live_job() ) {
-					throw new JobException( 'dlz_relocate_job_running', __( 'Another replacement is still running. Wait for it to finish or cancel it first.', 'dl-relocate-db' ), 409 );
+					throw new JobException( 'crq_relocate_job_running', __( 'Another replacement is still running. Wait for it to finish or cancel it first.', 'cr-relocate-db' ), 409 );
 				}
 
 				return $this->create(
@@ -158,7 +158,7 @@ final class JobStarter {
 		);
 
 		if ( null === $job ) {
-			throw new JobException( 'dlz_relocate_job_busy', __( 'Another replacement is being started. Try again in a few seconds.', 'dl-relocate-db' ), 409 );
+			throw new JobException( 'crq_relocate_job_busy', __( 'Another replacement is being started. Try again in a few seconds.', 'cr-relocate-db' ), 409 );
 		}
 
 		if ( $before_image ) {
@@ -185,14 +185,14 @@ final class JobStarter {
 	 */
 	private function validate_pairs( array $pairs, bool $case_sensitive ): void {
 		if ( ! $pairs ) {
-			throw new JobException( 'dlz_relocate_empty_search', __( 'Enter the text or URL to search for.', 'dl-relocate-db' ) );
+			throw new JobException( 'crq_relocate_empty_search', __( 'Enter the text or URL to search for.', 'cr-relocate-db' ) );
 		}
 
 		if ( count( $pairs ) > self::max_pairs() ) {
 			throw new JobException(
-				'dlz_relocate_too_many_pairs',
+				'crq_relocate_too_many_pairs',
 				/* translators: %d: maximum number of pairs. */
-				sprintf( _n( 'You can search for up to %d value at a time.', 'You can search for up to %d values at a time.', self::max_pairs(), 'dl-relocate-db' ), self::max_pairs() )
+				sprintf( _n( 'You can search for up to %d value at a time.', 'You can search for up to %d values at a time.', self::max_pairs(), 'cr-relocate-db' ), self::max_pairs() )
 			);
 		}
 
@@ -200,20 +200,20 @@ final class JobStarter {
 
 		foreach ( $pairs as $index => [ $search, $replace ] ) {
 			/* translators: %d: pair number. */
-			$which = count( $pairs ) > 1 ? ' ' . sprintf( __( '(pair %d)', 'dl-relocate-db' ), $index + 1 ) : '';
+			$which = count( $pairs ) > 1 ? ' ' . sprintf( __( '(pair %d)', 'cr-relocate-db' ), $index + 1 ) : '';
 
 			if ( '' === $search ) {
-				throw new JobException( 'dlz_relocate_empty_search', __( 'Enter the text or URL to search for.', 'dl-relocate-db' ) . $which );
+				throw new JobException( 'crq_relocate_empty_search', __( 'Enter the text or URL to search for.', 'cr-relocate-db' ) . $which );
 			}
 
 			if ( $search === $replace ) {
-				throw new JobException( 'dlz_relocate_same_values', __( 'The search and replacement values are the same, so there is nothing to change.', 'dl-relocate-db' ) . $which );
+				throw new JobException( 'crq_relocate_same_values', __( 'The search and replacement values are the same, so there is nothing to change.', 'cr-relocate-db' ) . $which );
 			}
 
 			$key = $case_sensitive ? $search : strtolower( $search );
 
 			if ( isset( $seen[ $key ] ) ) {
-				throw new JobException( 'dlz_relocate_duplicate_search', __( 'The same search value is entered twice.', 'dl-relocate-db' ) . $which );
+				throw new JobException( 'crq_relocate_duplicate_search', __( 'The same search value is entered twice.', 'cr-relocate-db' ) . $which );
 			}
 
 			$seen[ $key ] = true;
@@ -239,7 +239,7 @@ final class JobStarter {
 		try {
 			$searchable = $this->schema->searchable_columns();
 		} catch ( RuntimeException $e ) {
-			throw new JobException( 'dlz_relocate_database_error', $e->getMessage(), 500 );
+			throw new JobException( 'crq_relocate_database_error', $e->getMessage(), 500 );
 		}
 
 		$valid   = array();
@@ -257,9 +257,9 @@ final class JobStarter {
 
 		if ( $unknown ) {
 			throw new JobException(
-				'dlz_relocate_invalid_columns',
+				'crq_relocate_invalid_columns',
 				/* translators: %s: comma-separated table.column names. */
-				sprintf( __( 'These columns do not exist or are not searched: %s', 'dl-relocate-db' ), implode( ', ', $unknown ) )
+				sprintf( __( 'These columns do not exist or are not searched: %s', 'cr-relocate-db' ), implode( ', ', $unknown ) )
 			);
 		}
 
@@ -274,7 +274,7 @@ final class JobStarter {
 			return $this->jobs->create( $job );
 		} catch ( RuntimeException $e ) {
 			$this->logger->error( 'Could not create a job.', array( 'error' => $e->getMessage() ) );
-			throw new JobException( 'dlz_relocate_database_error', __( 'The job could not be saved to the database.', 'dl-relocate-db' ), 500 );
+			throw new JobException( 'crq_relocate_database_error', __( 'The job could not be saved to the database.', 'cr-relocate-db' ), 500 );
 		}
 	}
 
@@ -294,9 +294,9 @@ final class JobStarter {
 			$this->logger->error( 'Could not create the before-image file.', array( 'error' => $e->getMessage() ), $job->id );
 
 			throw new JobException(
-				'dlz_relocate_before_image_failed',
+				'crq_relocate_before_image_failed',
 				/* translators: %s: error message. */
-				sprintf( __( 'The file for the original values could not be created, so nothing was changed. %s', 'dl-relocate-db' ), $e->getMessage() ),
+				sprintf( __( 'The file for the original values could not be created, so nothing was changed. %s', 'cr-relocate-db' ), $e->getMessage() ),
 				500
 			);
 		}

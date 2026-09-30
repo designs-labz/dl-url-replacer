@@ -1,9 +1,9 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Jobs;
+namespace CraftRoq\Relocate\Jobs;
 
-use DesignsLabz\Relocate\Replace\Replacement;
+use CraftRoq\Relocate\Replace\Replacement;
 
 /**
  * One search and replace run: its settings, where it has got to, and what it found.

@@ -1,18 +1,18 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Tests\Integration;
+namespace CraftRoq\Relocate\Tests\Integration;
 
-use DesignsLabz\Relocate\Admin\Admin;
-use DesignsLabz\Relocate\Database\Schema;
-use DesignsLabz\Relocate\Jobs\BeforeImage;
-use DesignsLabz\Relocate\Jobs\Job;
-use DesignsLabz\Relocate\Jobs\JobRepository;
-use DesignsLabz\Relocate\Jobs\JobStatus;
-use DesignsLabz\Relocate\Jobs\Report;
-use DesignsLabz\Relocate\Logger;
-use DesignsLabz\Relocate\Rest\JobFormatter;
-use DesignsLabz\Relocate\Settings;
+use CraftRoq\Relocate\Admin\Admin;
+use CraftRoq\Relocate\Database\Schema;
+use CraftRoq\Relocate\Jobs\BeforeImage;
+use CraftRoq\Relocate\Jobs\Job;
+use CraftRoq\Relocate\Jobs\JobRepository;
+use CraftRoq\Relocate\Jobs\JobStatus;
+use CraftRoq\Relocate\Jobs\Report;
+use CraftRoq\Relocate\Logger;
+use CraftRoq\Relocate\Rest\JobFormatter;
+use CraftRoq\Relocate\Settings;
 use WP_UnitTestCase;
 
 /**
@@ -67,7 +67,7 @@ final class AdminPagesTest extends WP_UnitTestCase {
 
 	public function test_quick_form_prefills_search_and_replace(): void {
 		$_POST = array(
-			'_wpnonce' => wp_create_nonce( 'dlz_relocate_quick' ),
+			'_wpnonce' => wp_create_nonce( 'crq_relocate_quick' ),
 			'search'   => 'https://old.test/"quoted"',
 			'replace'  => 'https://new.test',
 		);
@@ -91,10 +91,10 @@ final class AdminPagesTest extends WP_UnitTestCase {
 		$html = $this->render( array( 'tab' => 'search-replace' ) );
 
 		$this->assertStringContainsString( 'value="wptests_posts"', $html );
-		$this->assertStringNotContainsString( 'value="wptests_dlz_relocate_jobs"', $html );
-		$this->assertStringContainsString( 'id="dlz-confirm"', $html );
-		$this->assertStringContainsString( 'id="dlz-form-summary"', $html );
-		$this->assertStringContainsString( 'id="dlz-steps"', $html );
+		$this->assertStringNotContainsString( 'value="wptests_crq_relocate_jobs"', $html );
+		$this->assertStringContainsString( 'id="crq-confirm"', $html );
+		$this->assertStringContainsString( 'id="crq-form-summary"', $html );
+		$this->assertStringContainsString( 'id="crq-steps"', $html );
 	}
 
 	public function test_history_list_and_type_filter(): void {
@@ -231,7 +231,7 @@ final class AdminPagesTest extends WP_UnitTestCase {
 	private function render( array $query ): string {
 		global $wpdb;
 
-		// Each section is its own submenu page: dl-relocate-db-<section>.
+		// Each section is its own submenu page: cr-relocate-db-<section>.
 		$section = $query['tab'] ?? 'dashboard';
 		unset( $query['tab'] );
 		$_GET = array( 'page' => 'dashboard' === $section ? Admin::PAGE : Admin::PAGE . '-' . $section ) + array_map( 'strval', $query );
@@ -240,7 +240,7 @@ final class AdminPagesTest extends WP_UnitTestCase {
 		$schema = new Schema( $wpdb );
 		$images = new BeforeImage( $wpdb );
 		$admin  = new Admin(
-			dirname( __DIR__, 2 ) . '/dl-relocate-db.php',
+			dirname( __DIR__, 2 ) . '/cr-relocate-db.php',
 			$schema,
 			$jobs,
 			$images,

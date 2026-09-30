@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Database;
+namespace CraftRoq\Relocate\Database;
 
 /**
  * What a job needs to know to page through a table and search it.

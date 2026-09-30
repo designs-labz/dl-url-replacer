@@ -1,11 +1,11 @@
 <?php
 declare( strict_types=1 );
 
-namespace DesignsLabz\Relocate\Tests\Unit;
+namespace CraftRoq\Relocate\Tests\Unit;
 
-use DesignsLabz\Relocate\Replace\Replacement;
-use DesignsLabz\Relocate\Replace\Replacer;
-use DesignsLabz\Relocate\Replace\ReplaceResult;
+use CraftRoq\Relocate\Replace\Replacement;
+use CraftRoq\Relocate\Replace\Replacer;
+use CraftRoq\Relocate\Replace\ReplaceResult;
 use PHPUnit\Framework\TestCase;
 
 /**
