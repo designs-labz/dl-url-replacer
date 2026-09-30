@@ -1,4 +1,4 @@
-=== DesignsLabz Relocate – Search Replace & Migration ===
+=== DL Relocate DB – Search Replace & Migration ===
 Contributors: designs_labz
 Tags: search replace, migration, database, urls, serialized
 Requires at least: 6.5
@@ -12,7 +12,7 @@ Safely search and replace URLs and text across your WordPress database, with dry
 
 == Description ==
 
-DesignsLabz Relocate changes text across your database: moving a site from staging to production, switching to HTTPS, changing a domain, or renaming something everywhere it appears.
+DL Relocate DB, by DesignsLabz, changes text across your database: moving a site from staging to production, switching to HTTPS, changing a domain, or renaming something everywhere it appears.
 
 It is built for doing that on real sites without breaking them.
 
@@ -49,7 +49,7 @@ Tables are processed in small batches by primary key, a few seconds per request,
 
 == Installation ==
 
-1. Upload the plugin to `/wp-content/plugins/designslabz-relocate`, or install it from the Plugins screen.
+1. Upload the plugin to `/wp-content/plugins/dl-relocate-db`, or install it from the Plugins screen.
 2. Activate it.
 3. Open **Relocate** in the admin menu.
 

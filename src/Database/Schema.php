@@ -35,7 +35,7 @@ final class Schema {
 		);
 
 		/* translators: %s: database error message. */
-		$this->check_error( __( 'Could not read the table list from the database: %s', 'designslabz-relocate' ) );
+		$this->check_error( __( 'Could not read the table list from the database: %s', 'dl-relocate-db' ) );
 
 		return array_map(
 			fn( object $row ): Table => new Table(
@@ -86,7 +86,7 @@ final class Schema {
 		);
 
 		/* translators: %s: database error message. */
-		$this->check_error( __( 'Could not read the columns of a table: %s', 'designslabz-relocate' ) );
+		$this->check_error( __( 'Could not read the columns of a table: %s', 'dl-relocate-db' ) );
 
 		$keys = $this->wpdb->get_results(
 			"SELECT TABLE_NAME AS table_name, COLUMN_NAME AS name FROM information_schema.STATISTICS
@@ -124,7 +124,7 @@ final class Schema {
 		);
 
 		/* translators: %s: database error message. */
-		$this->check_error( __( 'Could not read the columns of a table: %s', 'designslabz-relocate' ) );
+		$this->check_error( __( 'Could not read the columns of a table: %s', 'dl-relocate-db' ) );
 
 		if ( ! $columns ) {
 			return null;
@@ -188,7 +188,7 @@ final class Schema {
 		);
 
 		/* translators: %s: database error message. */
-		$this->check_error( __( 'Could not read the indexes of a table: %s', 'designslabz-relocate' ) );
+		$this->check_error( __( 'Could not read the indexes of a table: %s', 'dl-relocate-db' ) );
 
 		$indexes  = array();
 		$nullable = array();

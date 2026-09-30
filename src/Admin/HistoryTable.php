@@ -34,12 +34,12 @@ final class HistoryTable extends \WP_List_Table {
 	public function get_columns(): array {
 		return array(
 			'cb'           => '<input type="checkbox">',
-			'job'          => __( 'Job', 'designslabz-relocate' ),
-			'values'       => __( 'Search → Replace', 'designslabz-relocate' ),
-			'tables'       => __( 'Tables', 'designslabz-relocate' ),
-			'rows_changed' => __( 'Rows changed', 'designslabz-relocate' ),
-			'replacements' => __( 'Replacements', 'designslabz-relocate' ),
-			'status'       => __( 'Status', 'designslabz-relocate' ),
+			'job'          => __( 'Job', 'dl-relocate-db' ),
+			'values'       => __( 'Search → Replace', 'dl-relocate-db' ),
+			'tables'       => __( 'Tables', 'dl-relocate-db' ),
+			'rows_changed' => __( 'Rows changed', 'dl-relocate-db' ),
+			'replacements' => __( 'Replacements', 'dl-relocate-db' ),
+			'status'       => __( 'Status', 'dl-relocate-db' ),
 		);
 	}
 
@@ -60,11 +60,11 @@ final class HistoryTable extends \WP_List_Table {
 
 	public function no_items(): void {
 		if ( '' !== $this->search_term() ) {
-			esc_html_e( 'No jobs match your search.', 'designslabz-relocate' );
+			esc_html_e( 'No jobs match your search.', 'dl-relocate-db' );
 			return;
 		}
 
-		esc_html_e( 'No jobs yet. Run a dry run from Search & Replace to get started.', 'designslabz-relocate' );
+		esc_html_e( 'No jobs yet. Run a dry run from Search & Replace to get started.', 'dl-relocate-db' );
 	}
 
 	/**
@@ -83,7 +83,7 @@ final class HistoryTable extends \WP_List_Table {
 	 * @return array<string, string>
 	 */
 	protected function get_bulk_actions(): array {
-		return array( 'delete' => __( 'Delete', 'designslabz-relocate' ) );
+		return array( 'delete' => __( 'Delete', 'dl-relocate-db' ) );
 	}
 
 	/**
@@ -92,9 +92,9 @@ final class HistoryTable extends \WP_List_Table {
 	protected function get_views(): array {
 		$current = $this->type_filter();
 		$views   = array(
-			'all'  => array( null, __( 'All', 'designslabz-relocate' ) ),
-			'dry'  => array( true, __( 'Dry runs', 'designslabz-relocate' ) ),
-			'live' => array( false, __( 'Replacements', 'designslabz-relocate' ) ),
+			'all'  => array( null, __( 'All', 'dl-relocate-db' ) ),
+			'dry'  => array( true, __( 'Dry runs', 'dl-relocate-db' ) ),
+			'live' => array( false, __( 'Replacements', 'dl-relocate-db' ) ),
 		);
 
 		$links = array();
@@ -122,13 +122,13 @@ final class HistoryTable extends \WP_List_Table {
 			'<label class="screen-reader-text" for="dlz-job-%1$d">%2$s</label><input type="checkbox" id="dlz-job-%1$d" name="job_ids[]" value="%1$d">',
 			(int) $job->id,
 			/* translators: %s: job title, e.g. Dry run #12. */
-			esc_html( sprintf( __( 'Select %s', 'designslabz-relocate' ), Admin::job_title( $job ) ) )
+			esc_html( sprintf( __( 'Select %s', 'dl-relocate-db' ), Admin::job_title( $job ) ) )
 		);
 	}
 
 	protected function column_job( Job $job ): string {
 		$actions = array(
-			'view' => sprintf( '<a href="%1$s">%2$s</a>', esc_url( Admin::job_url( $job->id ) ), esc_html__( 'View', 'designslabz-relocate' ) ),
+			'view' => sprintf( '<a href="%1$s">%2$s</a>', esc_url( Admin::job_url( $job->id ) ), esc_html__( 'View', 'dl-relocate-db' ) ),
 		);
 
 		if ( Admin::can_delete( $job ) ) {
@@ -136,7 +136,7 @@ final class HistoryTable extends \WP_List_Table {
 				'<a href="%1$s" class="dlz-delete-job" data-job="%2$s">%3$s</a>',
 				esc_url( Admin::delete_url( $job->id ) ),
 				esc_attr( Admin::job_title( $job ) ),
-				esc_html__( 'Delete', 'designslabz-relocate' )
+				esc_html__( 'Delete', 'dl-relocate-db' )
 			);
 		}
 
@@ -153,8 +153,8 @@ final class HistoryTable extends \WP_List_Table {
 		return sprintf(
 			'<span class="dlz-from"><code>%1$s</code></span><span class="dlz-to"><span aria-hidden="true">→</span><span class="screen-reader-text">%2$s</span> <code>%3$s</code></span>',
 			esc_html( self::excerpt( $job->search ) ),
-			esc_html__( 'replaced with', 'designslabz-relocate' ),
-			esc_html( '' === $job->replace ? __( '(nothing)', 'designslabz-relocate' ) : self::excerpt( $job->replace ) )
+			esc_html__( 'replaced with', 'dl-relocate-db' ),
+			esc_html( '' === $job->replace ? __( '(nothing)', 'dl-relocate-db' ) : self::excerpt( $job->replace ) )
 		);
 	}
 

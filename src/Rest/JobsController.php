@@ -190,11 +190,11 @@ final class JobsController {
 			$job = $this->runner->step( $job );
 		} catch ( RuntimeException $e ) {
 			$this->logger->error( 'Could not save job progress.', array( 'error' => $e->getMessage() ), (int) $request['id'] );
-			return $this->error( 'dlz_relocate_database_error', __( 'The job’s progress could not be saved to the database.', 'designslabz-relocate' ), 500 );
+			return $this->error( 'dlz_relocate_database_error', __( 'The job’s progress could not be saved to the database.', 'dl-relocate-db' ), 500 );
 		}
 
 		if ( ! $job ) {
-			return $this->error( 'dlz_relocate_job_busy', __( 'This job is already being processed in another browser tab.', 'designslabz-relocate' ), 409 );
+			return $this->error( 'dlz_relocate_job_busy', __( 'This job is already being processed in another browser tab.', 'dl-relocate-db' ), 409 );
 		}
 
 		return rest_ensure_response( $this->formatter->format( $job ) );
@@ -211,7 +211,7 @@ final class JobsController {
 		}
 
 		if ( true !== $request['confirmed'] ) {
-			return $this->error( 'dlz_relocate_not_confirmed', __( 'Confirm the replacement before starting it.', 'designslabz-relocate' ) );
+			return $this->error( 'dlz_relocate_not_confirmed', __( 'Confirm the replacement before starting it.', 'dl-relocate-db' ) );
 		}
 
 		return $this->started( fn(): Job => $this->starter->replacement( $dry_run, (bool) $request['before_image'] ) );
@@ -228,11 +228,11 @@ final class JobsController {
 			$job = $this->runner->resume( $job );
 		} catch ( RuntimeException $e ) {
 			$this->logger->error( 'Could not resume job.', array( 'error' => $e->getMessage() ), (int) $request['id'] );
-			return $this->error( 'dlz_relocate_database_error', __( 'The job could not be resumed.', 'designslabz-relocate' ), 500 );
+			return $this->error( 'dlz_relocate_database_error', __( 'The job could not be resumed.', 'dl-relocate-db' ), 500 );
 		}
 
 		if ( ! $job ) {
-			return $this->error( 'dlz_relocate_job_busy', __( 'This job is already being processed in another browser tab.', 'designslabz-relocate' ), 409 );
+			return $this->error( 'dlz_relocate_job_busy', __( 'This job is already being processed in another browser tab.', 'dl-relocate-db' ), 409 );
 		}
 
 		return rest_ensure_response( $this->formatter->format( $job ) );
@@ -249,11 +249,11 @@ final class JobsController {
 			$job = $this->runner->cancel( $job );
 		} catch ( RuntimeException $e ) {
 			$this->logger->error( 'Could not cancel job.', array( 'error' => $e->getMessage() ), (int) $request['id'] );
-			return $this->error( 'dlz_relocate_database_error', __( 'The job could not be cancelled.', 'designslabz-relocate' ), 500 );
+			return $this->error( 'dlz_relocate_database_error', __( 'The job could not be cancelled.', 'dl-relocate-db' ), 500 );
 		}
 
 		if ( ! $job ) {
-			return $this->error( 'dlz_relocate_job_busy', __( 'The job is busy. Try cancelling again in a few seconds.', 'designslabz-relocate' ), 409 );
+			return $this->error( 'dlz_relocate_job_busy', __( 'The job is busy. Try cancelling again in a few seconds.', 'dl-relocate-db' ), 409 );
 		}
 
 		return rest_ensure_response( $this->formatter->format( $job ) );
@@ -275,6 +275,6 @@ final class JobsController {
 	}
 
 	private function not_found(): WP_Error {
-		return $this->error( 'dlz_relocate_job_not_found', __( 'That job does not exist.', 'designslabz-relocate' ), 404 );
+		return $this->error( 'dlz_relocate_job_not_found', __( 'That job does not exist.', 'dl-relocate-db' ), 404 );
 	}
 }

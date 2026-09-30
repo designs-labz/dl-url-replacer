@@ -77,19 +77,19 @@ final class JobFormatter {
 
 	public static function note_label( string $note ): string {
 		return match ( $note ) {
-			Report::NOTE_MISSING_TABLE => __( 'Skipped: the table no longer exists.', 'designslabz-relocate' ),
-			Report::NOTE_NO_KEY        => __( 'Skipped: the table has no primary key or suitable unique key, so its rows cannot be updated one at a time safely.', 'designslabz-relocate' ),
-			Report::NOTE_NO_COLUMNS    => __( 'Skipped: the table has no text columns to search.', 'designslabz-relocate' ),
+			Report::NOTE_MISSING_TABLE => __( 'Skipped: the table no longer exists.', 'dl-relocate-db' ),
+			Report::NOTE_NO_KEY        => __( 'Skipped: the table has no primary key or suitable unique key, so its rows cannot be updated one at a time safely.', 'dl-relocate-db' ),
+			Report::NOTE_NO_COLUMNS    => __( 'Skipped: the table has no text columns to search.', 'dl-relocate-db' ),
 			default                    => $note,
 		};
 	}
 
 	public static function skip_label( string $reason ): string {
 		return match ( $reason ) {
-			ReplaceResult::INVALID_SERIALIZED     => __( 'Serialized data that is already corrupt, or would not read back correctly after the change', 'designslabz-relocate' ),
-			ReplaceResult::UNSUPPORTED_SERIALIZED => __( 'Match inside a custom serialized object format that cannot be edited safely', 'designslabz-relocate' ),
-			ReplaceResult::BROKEN_JSON            => __( 'The change would turn valid JSON into invalid JSON', 'designslabz-relocate' ),
-			default                               => __( 'The value could not be searched', 'designslabz-relocate' ),
+			ReplaceResult::INVALID_SERIALIZED     => __( 'Serialized data that is already corrupt, or would not read back correctly after the change', 'dl-relocate-db' ),
+			ReplaceResult::UNSUPPORTED_SERIALIZED => __( 'Match inside a custom serialized object format that cannot be edited safely', 'dl-relocate-db' ),
+			ReplaceResult::BROKEN_JSON            => __( 'The change would turn valid JSON into invalid JSON', 'dl-relocate-db' ),
+			default                               => __( 'The value could not be searched', 'dl-relocate-db' ),
 		};
 	}
 

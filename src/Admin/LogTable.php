@@ -32,10 +32,10 @@ final class LogTable extends \WP_List_Table {
 	 */
 	public function get_columns(): array {
 		return array(
-			'created_at' => __( 'Time', 'designslabz-relocate' ),
-			'level'      => __( 'Level', 'designslabz-relocate' ),
-			'job_id'     => __( 'Job', 'designslabz-relocate' ),
-			'message'    => __( 'Message', 'designslabz-relocate' ),
+			'created_at' => __( 'Time', 'dl-relocate-db' ),
+			'level'      => __( 'Level', 'dl-relocate-db' ),
+			'job_id'     => __( 'Job', 'dl-relocate-db' ),
+			'message'    => __( 'Message', 'dl-relocate-db' ),
 		);
 	}
 
@@ -67,11 +67,11 @@ final class LogTable extends \WP_List_Table {
 
 	public function no_items(): void {
 		if ( '' !== $this->search_term() || $this->job_filter() || $this->level_filter() ) {
-			esc_html_e( 'No log entries match.', 'designslabz-relocate' );
+			esc_html_e( 'No log entries match.', 'dl-relocate-db' );
 			return;
 		}
 
-		esc_html_e( 'The log is empty.', 'designslabz-relocate' );
+		esc_html_e( 'The log is empty.', 'dl-relocate-db' );
 	}
 
 	/**
@@ -101,7 +101,7 @@ final class LogTable extends \WP_List_Table {
 		$current = $this->level_filter();
 		$links   = array();
 
-		foreach ( array( '' => __( 'All', 'designslabz-relocate' ) ) + self::levels() as $level => $label ) {
+		foreach ( array( '' => __( 'All', 'dl-relocate-db' ) ) + self::levels() as $level => $label ) {
 			$args = array_filter(
 				array(
 					'view'    => 'log',
@@ -164,7 +164,7 @@ final class LogTable extends \WP_List_Table {
 		if ( is_array( $context ) && $context ) {
 			$html .= sprintf(
 				'<details class="dlz-log-context"><summary>%1$s</summary><pre>%2$s</pre></details>',
-				esc_html__( 'Details', 'designslabz-relocate' ),
+				esc_html__( 'Details', 'dl-relocate-db' ),
 				esc_html( (string) wp_json_encode( $context, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) )
 			);
 		}
@@ -177,9 +177,9 @@ final class LogTable extends \WP_List_Table {
 	 */
 	public static function level_badge( string $level ): string {
 		[ $icon, $label ] = match ( $level ) {
-			Logger::ERROR   => array( 'warning', __( 'Error', 'designslabz-relocate' ) ),
-			Logger::WARNING => array( 'flag', __( 'Warning', 'designslabz-relocate' ) ),
-			default         => array( 'info-outline', __( 'Info', 'designslabz-relocate' ) ),
+			Logger::ERROR   => array( 'warning', __( 'Error', 'dl-relocate-db' ) ),
+			Logger::WARNING => array( 'flag', __( 'Warning', 'dl-relocate-db' ) ),
+			default         => array( 'info-outline', __( 'Info', 'dl-relocate-db' ) ),
 		};
 
 		return sprintf(
@@ -195,9 +195,9 @@ final class LogTable extends \WP_List_Table {
 	 */
 	private static function levels(): array {
 		return array(
-			Logger::ERROR   => __( 'Errors', 'designslabz-relocate' ),
-			Logger::WARNING => __( 'Warnings', 'designslabz-relocate' ),
-			Logger::INFO    => __( 'Information', 'designslabz-relocate' ),
+			Logger::ERROR   => __( 'Errors', 'dl-relocate-db' ),
+			Logger::WARNING => __( 'Warnings', 'dl-relocate-db' ),
+			Logger::INFO    => __( 'Information', 'dl-relocate-db' ),
 		);
 	}
 

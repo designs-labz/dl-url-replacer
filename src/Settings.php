@@ -37,22 +37,22 @@ final class Settings {
 			)
 		);
 
-		add_settings_section( 'processing', __( 'Processing', 'designslabz-relocate' ), '__return_false', self::OPTION );
+		add_settings_section( 'processing', __( 'Processing', 'dl-relocate-db' ), '__return_false', self::OPTION );
 
 		add_settings_field(
 			'batch_size',
-			__( 'Rows per batch', 'designslabz-relocate' ),
+			__( 'Rows per batch', 'dl-relocate-db' ),
 			array( $this, 'render_batch_size_field' ),
 			self::OPTION,
 			'processing',
 			array( 'label_for' => 'dlz-relocate-batch-size' )
 		);
 
-		add_settings_section( 'data', __( 'Data', 'designslabz-relocate' ), '__return_false', self::OPTION );
+		add_settings_section( 'data', __( 'Data', 'dl-relocate-db' ), '__return_false', self::OPTION );
 
 		add_settings_field(
 			'retention_days',
-			__( 'Keep history for', 'designslabz-relocate' ),
+			__( 'Keep history for', 'dl-relocate-db' ),
 			array( $this, 'render_retention_days_field' ),
 			self::OPTION,
 			'data',
@@ -61,7 +61,7 @@ final class Settings {
 
 		add_settings_field(
 			'delete_data',
-			__( 'Uninstall', 'designslabz-relocate' ),
+			__( 'Uninstall', 'dl-relocate-db' ),
 			array( $this, 'render_delete_data_field' ),
 			self::OPTION,
 			'data'
@@ -88,8 +88,8 @@ final class Settings {
 			esc_attr( self::OPTION ),
 			(int) $this->retention_days(),
 			(int) self::MAX_RETENTION_DAYS,
-			esc_html__( 'days', 'designslabz-relocate' ),
-			esc_html__( 'Finished jobs, their files of original values, and log entries older than this are deleted once a day. Enter 0 to keep everything.', 'designslabz-relocate' )
+			esc_html__( 'days', 'dl-relocate-db' ),
+			esc_html__( 'Finished jobs, their files of original values, and log entries older than this are deleted once a day. Enter 0 to keep everything.', 'dl-relocate-db' )
 		);
 	}
 
@@ -100,18 +100,18 @@ final class Settings {
 			(int) $this->batch_size(),
 			(int) self::MIN_BATCH_SIZE,
 			(int) self::MAX_BATCH_SIZE,
-			esc_html__( 'How many rows are read from a table at a time. Lower it if processing runs out of memory on tables with very large rows, such as page builder content.', 'designslabz-relocate' )
+			esc_html__( 'How many rows are read from a table at a time. Lower it if processing runs out of memory on tables with very large rows, such as page builder content.', 'dl-relocate-db' )
 		);
 	}
 
 	public function render_delete_data_field(): void {
 		printf(
 			'<fieldset><legend class="screen-reader-text">%1$s</legend><label for="dlz-relocate-delete-data"><input type="checkbox" id="dlz-relocate-delete-data" name="%2$s[delete_data]" value="1" %3$s> %4$s</label><p class="description">%5$s</p></fieldset>',
-			esc_html__( 'Uninstall', 'designslabz-relocate' ),
+			esc_html__( 'Uninstall', 'dl-relocate-db' ),
 			esc_attr( self::OPTION ),
 			checked( $this->delete_data_on_uninstall(), true, false ),
-			esc_html__( 'Delete all plugin data when the plugin is deleted', 'designslabz-relocate' ),
-			esc_html__( 'Removes the operation history, logs and settings. Your site content is not affected.', 'designslabz-relocate' )
+			esc_html__( 'Delete all plugin data when the plugin is deleted', 'dl-relocate-db' ),
+			esc_html__( 'Removes the operation history, logs and settings. Your site content is not affected.', 'dl-relocate-db' )
 		);
 	}
 

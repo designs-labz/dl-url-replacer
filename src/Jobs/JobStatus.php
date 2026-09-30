@@ -17,11 +17,11 @@ enum JobStatus: string {
 
 	public function label(): string {
 		return match ( $this ) {
-			self::Pending   => __( 'Pending', 'designslabz-relocate' ),
-			self::Running   => __( 'Running', 'designslabz-relocate' ),
-			self::Completed => __( 'Completed', 'designslabz-relocate' ),
-			self::Failed    => __( 'Failed', 'designslabz-relocate' ),
-			self::Cancelled => __( 'Cancelled', 'designslabz-relocate' ),
+			self::Pending   => __( 'Pending', 'dl-relocate-db' ),
+			self::Running   => __( 'Running', 'dl-relocate-db' ),
+			self::Completed => __( 'Completed', 'dl-relocate-db' ),
+			self::Failed    => __( 'Failed', 'dl-relocate-db' ),
+			self::Cancelled => __( 'Cancelled', 'dl-relocate-db' ),
 		};
 	}
 }

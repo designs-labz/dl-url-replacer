@@ -220,7 +220,7 @@ final class AdminPagesTest extends WP_UnitTestCase {
 	private function render( array $query ): string {
 		global $wpdb;
 
-		// Each section is its own submenu page: designslabz-relocate-<section>.
+		// Each section is its own submenu page: dl-relocate-db-<section>.
 		$section = $query['tab'] ?? 'dashboard';
 		unset( $query['tab'] );
 		$_GET = array( 'page' => 'dashboard' === $section ? Admin::PAGE : Admin::PAGE . '-' . $section ) + array_map( 'strval', $query );
@@ -229,7 +229,7 @@ final class AdminPagesTest extends WP_UnitTestCase {
 		$schema = new Schema( $wpdb );
 		$images = new BeforeImage( $wpdb );
 		$admin  = new Admin(
-			dirname( __DIR__, 2 ) . '/designslabz-relocate.php',
+			dirname( __DIR__, 2 ) . '/dl-relocate-db.php',
 			$schema,
 			$jobs,
 			$images,

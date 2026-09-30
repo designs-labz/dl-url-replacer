@@ -20,7 +20,7 @@ use RuntimeException;
  */
 final class Admin {
 
-	public const PAGE = 'designslabz-relocate';
+	public const PAGE = 'dl-relocate-db';
 
 	private const DOWNLOAD_ACTION = 'dlz_relocate_before_image';
 
@@ -86,9 +86,9 @@ final class Admin {
 	public static function job_title( Job $job ): string {
 		return $job->dry_run
 			/* translators: %d: job number. */
-			? sprintf( __( 'Dry run #%d', 'designslabz-relocate' ), $job->id )
+			? sprintf( __( 'Dry run #%d', 'dl-relocate-db' ), $job->id )
 			/* translators: %d: job number. */
-			: sprintf( __( 'Replacement #%d', 'designslabz-relocate' ), $job->id );
+			: sprintf( __( 'Replacement #%d', 'dl-relocate-db' ), $job->id );
 	}
 
 	/**
@@ -109,7 +109,7 @@ final class Admin {
 	 */
 	public static function status_badge( Job $job ): string {
 		[ $key, $icon, $label ] = $job->is_interrupted()
-			? array( 'interrupted', 'warning', __( 'Interrupted', 'designslabz-relocate' ) )
+			? array( 'interrupted', 'warning', __( 'Interrupted', 'dl-relocate-db' ) )
 			: match ( $job->status ) {
 				JobStatus::Completed => array( 'completed', 'yes-alt', $job->status->label() ),
 				JobStatus::Failed    => array( 'failed', 'warning', $job->status->label() ),
@@ -141,14 +141,14 @@ final class Admin {
 		check_admin_referer( self::DOWNLOAD_ACTION . '_' . $job_id );
 
 		if ( ! current_user_can( Plugin::CAPABILITY ) ) {
-			wp_die( esc_html__( 'Sorry, you are not allowed to download this file.', 'designslabz-relocate' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'Sorry, you are not allowed to download this file.', 'dl-relocate-db' ), '', array( 'response' => 403 ) );
 		}
 
 		$job  = $this->jobs->find( $job_id );
 		$path = $job ? $this->before_images->path( $job->before_image ) : null;
 
 		if ( ! $path ) {
-			wp_die( esc_html__( 'That file no longer exists.', 'designslabz-relocate' ), '', array( 'response' => 404 ) );
+			wp_die( esc_html__( 'That file no longer exists.', 'dl-relocate-db' ), '', array( 'response' => 404 ) );
 		}
 
 		nocache_headers();
@@ -164,8 +164,8 @@ final class Admin {
 		$sections = $this->sections();
 
 		$hook                 = add_menu_page(
-			__( 'DesignsLabz Relocate', 'designslabz-relocate' ),
-			__( 'Relocate', 'designslabz-relocate' ),
+			__( 'DL Relocate DB', 'dl-relocate-db' ),
+			__( 'Relocate DB', 'dl-relocate-db' ),
 			Plugin::CAPABILITY,
 			self::PAGE,
 			array( $this, 'render_page' ),
@@ -177,7 +177,7 @@ final class Admin {
 		foreach ( $sections as $section => $label ) {
 			$hook = (string) add_submenu_page(
 				self::PAGE,
-				$label . ' ‹ ' . __( 'DesignsLabz Relocate', 'designslabz-relocate' ),
+				$label . ' ‹ ' . __( 'DL Relocate DB', 'dl-relocate-db' ),
 				$label,
 				Plugin::CAPABILITY,
 				self::page_slug( $section ),
@@ -210,7 +210,7 @@ final class Admin {
 		check_admin_referer( $row ? self::DELETE_ACTION : 'bulk-jobs' );
 
 		if ( ! current_user_can( Plugin::CAPABILITY ) ) {
-			wp_die( esc_html__( 'Sorry, you are not allowed to delete jobs.', 'designslabz-relocate' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'Sorry, you are not allowed to delete jobs.', 'dl-relocate-db' ), '', array( 'response' => 403 ) );
 		}
 
 		$ids     = isset( $_GET['job_ids'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['job_ids'] ) ) : array();
@@ -264,12 +264,12 @@ final class Admin {
 				Plugin::VERSION,
 				array( 'in_footer' => true )
 			);
-			wp_set_script_translations( 'dlz-relocate-search-replace', 'designslabz-relocate', dirname( $this->file ) . '/languages' );
+			wp_set_script_translations( 'dlz-relocate-search-replace', 'dl-relocate-db', dirname( $this->file ) . '/languages' );
 		}
 
 		if ( 'history' === $section ) {
 			wp_enqueue_script( 'dlz-relocate-history', plugins_url( 'assets/js/history.js', $this->file ), array( 'wp-i18n' ), Plugin::VERSION, array( 'in_footer' => true ) );
-			wp_set_script_translations( 'dlz-relocate-history', 'designslabz-relocate', dirname( $this->file ) . '/languages' );
+			wp_set_script_translations( 'dlz-relocate-history', 'dl-relocate-db', dirname( $this->file ) . '/languages' );
 		}
 	}
 
@@ -307,11 +307,11 @@ final class Admin {
 	 */
 	private function sections(): array {
 		return array(
-			'dashboard'      => __( 'Dashboard', 'designslabz-relocate' ),
-			'search-replace' => __( 'Search & Replace', 'designslabz-relocate' ),
-			'history'        => __( 'History', 'designslabz-relocate' ),
-			'database'       => __( 'Database', 'designslabz-relocate' ),
-			'settings'       => __( 'Settings', 'designslabz-relocate' ),
+			'dashboard'      => __( 'Dashboard', 'dl-relocate-db' ),
+			'search-replace' => __( 'Search & Replace', 'dl-relocate-db' ),
+			'history'        => __( 'History', 'dl-relocate-db' ),
+			'database'       => __( 'Database', 'dl-relocate-db' ),
+			'settings'       => __( 'Settings', 'dl-relocate-db' ),
 		);
 	}
 
@@ -354,25 +354,25 @@ final class Admin {
 			),
 			'quick_action' => self::QUICK_ACTION,
 			'status'       => array(
-				__( 'Plugin version', 'designslabz-relocate' ) => Plugin::VERSION,
-				__( 'WordPress', 'designslabz-relocate' ) => get_bloginfo( 'version' ),
-				__( 'PHP', 'designslabz-relocate' )       => PHP_VERSION,
-				__( 'Database server', 'designslabz-relocate' ) => $this->schema->server_info()['version'],
-				__( 'PHP time limit', 'designslabz-relocate' ) => $this->time_limit(),
-				__( 'PHP memory limit', 'designslabz-relocate' ) => (string) ini_get( 'memory_limit' ),
-				__( 'Persistent object cache', 'designslabz-relocate' ) => wp_using_ext_object_cache()
-					? __( 'Yes. It is flushed after every replacement.', 'designslabz-relocate' )
-					: __( 'No', 'designslabz-relocate' ),
-				__( 'Folder for original values', 'designslabz-relocate' ) => wp_is_writable( $uploads['basedir'] )
-					? __( 'Writable', 'designslabz-relocate' )
-					: __( 'Not writable: replacements can only run without saving original values.', 'designslabz-relocate' ),
-				__( 'History clean-up', 'designslabz-relocate' ) => 0 === $retention
-					? __( 'Off: all history is kept.', 'designslabz-relocate' )
+				__( 'Plugin version', 'dl-relocate-db' )   => Plugin::VERSION,
+				__( 'WordPress', 'dl-relocate-db' )        => get_bloginfo( 'version' ),
+				__( 'PHP', 'dl-relocate-db' )              => PHP_VERSION,
+				__( 'Database server', 'dl-relocate-db' )  => $this->schema->server_info()['version'],
+				__( 'PHP time limit', 'dl-relocate-db' )   => $this->time_limit(),
+				__( 'PHP memory limit', 'dl-relocate-db' ) => (string) ini_get( 'memory_limit' ),
+				__( 'Persistent object cache', 'dl-relocate-db' ) => wp_using_ext_object_cache()
+					? __( 'Yes. It is flushed after every replacement.', 'dl-relocate-db' )
+					: __( 'No', 'dl-relocate-db' ),
+				__( 'Folder for original values', 'dl-relocate-db' ) => wp_is_writable( $uploads['basedir'] )
+					? __( 'Writable', 'dl-relocate-db' )
+					: __( 'Not writable: replacements can only run without saving original values.', 'dl-relocate-db' ),
+				__( 'History clean-up', 'dl-relocate-db' ) => 0 === $retention
+					? __( 'Off: all history is kept.', 'dl-relocate-db' )
 					: sprintf(
 						/* translators: 1: number of days, 2: date of the next clean-up. */
-						_n( 'After %1$s day. Next run: %2$s', 'After %1$s days. Next run: %2$s', $retention, 'designslabz-relocate' ),
+						_n( 'After %1$s day. Next run: %2$s', 'After %1$s days. Next run: %2$s', $retention, 'dl-relocate-db' ),
 						number_format_i18n( $retention ),
-						$cleanup ? self::format_date( gmdate( 'Y-m-d H:i:s', $cleanup ) ) : __( 'not scheduled yet', 'designslabz-relocate' )
+						$cleanup ? self::format_date( gmdate( 'Y-m-d H:i:s', $cleanup ) ) : __( 'not scheduled yet', 'dl-relocate-db' )
 					),
 			),
 		);
@@ -414,7 +414,7 @@ final class Admin {
 			$job = $this->jobs->find( $job_id );
 
 			if ( ! $job ) {
-				return array( 'error' => __( 'That job does not exist. It may have been deleted or removed by the history clean-up.', 'designslabz-relocate' ) );
+				return array( 'error' => __( 'That job does not exist. It may have been deleted or removed by the history clean-up.', 'dl-relocate-db' ) );
 			}
 
 			[ $logs, $log_total ] = $this->logger->entries( 1, 20, $job->id );
@@ -465,9 +465,9 @@ final class Admin {
 		$limit = (int) ini_get( 'max_execution_time' );
 
 		return 0 === $limit
-			? __( 'None', 'designslabz-relocate' )
+			? __( 'None', 'dl-relocate-db' )
 			/* translators: %s: number of seconds. */
-			: sprintf( _n( '%s second', '%s seconds', $limit, 'designslabz-relocate' ), number_format_i18n( $limit ) );
+			: sprintf( _n( '%s second', '%s seconds', $limit, 'dl-relocate-db' ), number_format_i18n( $limit ) );
 	}
 
 	/**

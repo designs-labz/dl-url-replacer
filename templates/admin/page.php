@@ -25,11 +25,11 @@ $icons = array(
 		<div class="dlz-brand">
 			<span class="dlz-brand-mark dashicons dashicons-migrate" aria-hidden="true"></span>
 			<h1 class="dlz-brand-name">
-				<?php esc_html_e( 'DesignsLabz Relocate', 'designslabz-relocate' ); ?>
+				<?php esc_html_e( 'DL Relocate DB', 'dl-relocate-db' ); ?>
 				<span class="dlz-version"><?php echo esc_html( Plugin::VERSION ); ?></span>
 			</h1>
 		</div>
-		<nav class="dlz-nav" aria-label="<?php esc_attr_e( 'DesignsLabz Relocate sections', 'designslabz-relocate' ); ?>">
+		<nav class="dlz-nav" aria-label="<?php esc_attr_e( 'DL Relocate DB sections', 'dl-relocate-db' ); ?>">
 			<?php foreach ( $args['sections'] as $section => $label ) : ?>
 				<?php $active = $section === $args['current']; ?>
 				<a href="<?php echo esc_url( Admin::url( $section ) ); ?>" class="dlz-nav-link<?php echo $active ? ' is-active' : ''; ?>"<?php echo $active ? ' aria-current="page"' : ''; ?>>

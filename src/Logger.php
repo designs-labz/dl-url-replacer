@@ -114,7 +114,7 @@ final class Logger {
 		// If the log table itself is unavailable, the PHP error log is the only place left.
 		if ( false === $inserted || ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( sprintf( 'DesignsLabz Relocate [%s]%s %s %s', $level, $job_id ? " job {$job_id}:" : '', $message, (string) $context ) );
+			error_log( sprintf( 'DL Relocate DB [%s]%s %s %s', $level, $job_id ? " job {$job_id}:" : '', $message, (string) $context ) );
 		}
 	}
 }

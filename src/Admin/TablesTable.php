@@ -35,11 +35,11 @@ final class TablesTable extends \WP_List_Table {
 	 */
 	public function get_columns(): array {
 		return array(
-			'name'      => __( 'Table', 'designslabz-relocate' ),
-			'engine'    => __( 'Engine', 'designslabz-relocate' ),
-			'rows'      => __( 'Rows (approx.)', 'designslabz-relocate' ),
-			'size'      => __( 'Size', 'designslabz-relocate' ),
-			'collation' => __( 'Collation', 'designslabz-relocate' ),
+			'name'      => __( 'Table', 'dl-relocate-db' ),
+			'engine'    => __( 'Engine', 'dl-relocate-db' ),
+			'rows'      => __( 'Rows (approx.)', 'dl-relocate-db' ),
+			'size'      => __( 'Size', 'dl-relocate-db' ),
+			'collation' => __( 'Collation', 'dl-relocate-db' ),
 		);
 	}
 
@@ -83,7 +83,7 @@ final class TablesTable extends \WP_List_Table {
 	}
 
 	public function no_items(): void {
-		esc_html_e( 'No tables match your search.', 'designslabz-relocate' );
+		esc_html_e( 'No tables match your search.', 'dl-relocate-db' );
 	}
 
 	/**
@@ -110,9 +110,9 @@ final class TablesTable extends \WP_List_Table {
 			'other' => count( array_filter( $this->tables, fn( Table $table ): bool => ! $table->prefixed ) ),
 		);
 		$views   = array(
-			'all'   => array( null, __( 'All', 'designslabz-relocate' ) ),
-			'core'  => array( true, __( 'WordPress prefix', 'designslabz-relocate' ) ),
-			'other' => array( false, __( 'Other', 'designslabz-relocate' ) ),
+			'all'   => array( null, __( 'All', 'dl-relocate-db' ) ),
+			'core'  => array( true, __( 'WordPress prefix', 'dl-relocate-db' ) ),
+			'other' => array( false, __( 'Other', 'dl-relocate-db' ) ),
 		);
 
 		$links = array();

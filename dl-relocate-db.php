@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       DesignsLabz Relocate
+ * Plugin Name:       DL Relocate DB
  * Plugin URI:        https://github.com/designs-labz/dl-url-replacer
  * Description:       Safely search and replace URLs and text across your WordPress database, with serialized data support, dry runs and an operation history.
  * Version:           0.1.0
@@ -10,7 +10,7 @@
  * Author URI:        https://designslabz.com/
  * License:           GPL-3.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
- * Text Domain:       designslabz-relocate
+ * Text Domain:       dl-relocate-db
  * Domain Path:       /languages
  *
  * @package DesignsLabz\Relocate
@@ -25,7 +25,7 @@ if ( version_compare( PHP_VERSION, '8.1', '<' ) ) {
 		'admin_notices',
 		function () {
 			wp_admin_notice(
-				esc_html__( 'DesignsLabz Relocate requires PHP 8.1 or newer and is not running.', 'designslabz-relocate' ),
+				esc_html__( 'DL Relocate DB requires PHP 8.1 or newer and is not running.', 'dl-relocate-db' ),
 				array( 'type' => 'error' )
 			);
 		}
@@ -38,7 +38,7 @@ if ( is_multisite() ) {
 		'admin_notices',
 		function () {
 			wp_admin_notice(
-				esc_html__( 'DesignsLabz Relocate does not support WordPress Multisite yet, so it is not running on this network.', 'designslabz-relocate' ),
+				esc_html__( 'DL Relocate DB does not support WordPress Multisite yet, so it is not running on this network.', 'dl-relocate-db' ),
 				array( 'type' => 'warning' )
 			);
 		}

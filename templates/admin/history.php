@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 if ( isset( $args['error'] ) ) {
 	wp_admin_notice( esc_html( $args['error'] ), array( 'type' => 'error' ) );
-	printf( '<p><a href="%1$s">%2$s</a></p>', esc_url( Admin::url( 'history' ) ), esc_html__( 'Back to all jobs', 'designslabz-relocate' ) );
+	printf( '<p><a href="%1$s">%2$s</a></p>', esc_url( Admin::url( 'history' ) ), esc_html__( 'Back to all jobs', 'dl-relocate-db' ) );
 	return;
 }
 
@@ -26,7 +26,7 @@ if ( null !== $args['deleted'] ) {
 	wp_admin_notice(
 		esc_html(
 			/* translators: %s: number of jobs. */
-			sprintf( _n( '%s job deleted.', '%s jobs deleted.', $args['deleted'], 'designslabz-relocate' ), number_format_i18n( $args['deleted'] ) )
+			sprintf( _n( '%s job deleted.', '%s jobs deleted.', $args['deleted'], 'dl-relocate-db' ), number_format_i18n( $args['deleted'] ) )
 		),
 		array(
 			'type'        => 'success',
@@ -39,7 +39,7 @@ if ( $args['kept'] ) {
 	wp_admin_notice(
 		esc_html(
 			/* translators: %s: number of jobs. */
-			sprintf( _n( '%s job was not deleted because it is still running.', '%s jobs were not deleted because they are still running.', $args['kept'], 'designslabz-relocate' ), number_format_i18n( $args['kept'] ) )
+			sprintf( _n( '%s job was not deleted because it is still running.', '%s jobs were not deleted because they are still running.', $args['kept'], 'dl-relocate-db' ), number_format_i18n( $args['kept'] ) )
 		),
 		array( 'type' => 'warning' )
 	);
@@ -47,20 +47,20 @@ if ( $args['kept'] ) {
 
 $is_log = 'log' === $args['view'];
 ?>
-<h2 class="dlz-title"><?php esc_html_e( 'History', 'designslabz-relocate' ); ?></h2>
+<h2 class="dlz-title"><?php esc_html_e( 'History', 'dl-relocate-db' ); ?></h2>
 
-<nav class="dlz-subnav" aria-label="<?php esc_attr_e( 'History views', 'designslabz-relocate' ); ?>">
-	<a href="<?php echo esc_url( Admin::url( 'history' ) ); ?>" class="<?php echo $is_log ? '' : 'is-active'; ?>"<?php echo $is_log ? '' : ' aria-current="page"'; ?>><?php esc_html_e( 'Jobs', 'designslabz-relocate' ); ?></a>
-	<a href="<?php echo esc_url( Admin::url( 'history', array( 'view' => 'log' ) ) ); ?>" class="<?php echo $is_log ? 'is-active' : ''; ?>"<?php echo $is_log ? ' aria-current="page"' : ''; ?>><?php esc_html_e( 'Log', 'designslabz-relocate' ); ?></a>
+<nav class="dlz-subnav" aria-label="<?php esc_attr_e( 'History views', 'dl-relocate-db' ); ?>">
+	<a href="<?php echo esc_url( Admin::url( 'history' ) ); ?>" class="<?php echo $is_log ? '' : 'is-active'; ?>"<?php echo $is_log ? '' : ' aria-current="page"'; ?>><?php esc_html_e( 'Jobs', 'dl-relocate-db' ); ?></a>
+	<a href="<?php echo esc_url( Admin::url( 'history', array( 'view' => 'log' ) ) ); ?>" class="<?php echo $is_log ? 'is-active' : ''; ?>"<?php echo $is_log ? ' aria-current="page"' : ''; ?>><?php esc_html_e( 'Log', 'dl-relocate-db' ); ?></a>
 </nav>
 
 <?php if ( $is_log && $args['table']->job_filter() ) : ?>
 	<p class="dlz-filter-note">
 		<?php
 		/* translators: %d: job number. */
-		echo esc_html( sprintf( __( 'Showing entries for job #%d.', 'designslabz-relocate' ), $args['table']->job_filter() ) );
+		echo esc_html( sprintf( __( 'Showing entries for job #%d.', 'dl-relocate-db' ), $args['table']->job_filter() ) );
 		?>
-		<a href="<?php echo esc_url( Admin::url( 'history', array( 'view' => 'log' ) ) ); ?>"><?php esc_html_e( 'Show all entries', 'designslabz-relocate' ); ?></a>
+		<a href="<?php echo esc_url( Admin::url( 'history', array( 'view' => 'log' ) ) ); ?>"><?php esc_html_e( 'Show all entries', 'dl-relocate-db' ); ?></a>
 	</p>
 <?php endif; ?>
 
@@ -77,7 +77,7 @@ $is_log = 'log' === $args['view'];
 		}
 		// phpcs:enable
 
-		$args['table']->search_box( $is_log ? __( 'Search log', 'designslabz-relocate' ) : __( 'Search jobs', 'designslabz-relocate' ), 'dlz-history' );
+		$args['table']->search_box( $is_log ? __( 'Search log', 'dl-relocate-db' ) : __( 'Search jobs', 'dl-relocate-db' ), 'dlz-history' );
 		$args['table']->display();
 		?>
 	</form>

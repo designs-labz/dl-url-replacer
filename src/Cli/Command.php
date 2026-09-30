@@ -18,7 +18,7 @@ use WP_CLI;
 use WP_CLI\Utils;
 
 /**
- * Search and replace with DesignsLabz Relocate.
+ * Search and replace with DL Relocate DB.
  *
  * Jobs started here are the same jobs the admin screen runs: they appear in
  * its History, can be resumed from either place, and save the same file of

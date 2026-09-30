@@ -18,13 +18,13 @@ if ( isset( $args['error'] ) ) {
 
 $server = $args['server'];
 $tiles  = array(
-	array( 'database', __( 'Tables', 'designslabz-relocate' ), number_format_i18n( $args['count'] ) ),
-	array( 'chart-pie', __( 'Total size', 'designslabz-relocate' ), (string) size_format( $args['size'], 1 ) ),
-	array( 'editor-table', __( 'Rows (approx.)', 'designslabz-relocate' ), number_format_i18n( $args['rows'] ) ),
-	array( 'admin-site-alt3', __( 'Server', 'designslabz-relocate' ), $server['version'] ),
+	array( 'database', __( 'Tables', 'dl-relocate-db' ), number_format_i18n( $args['count'] ) ),
+	array( 'chart-pie', __( 'Total size', 'dl-relocate-db' ), (string) size_format( $args['size'], 1 ) ),
+	array( 'editor-table', __( 'Rows (approx.)', 'dl-relocate-db' ), number_format_i18n( $args['rows'] ) ),
+	array( 'admin-site-alt3', __( 'Server', 'dl-relocate-db' ), $server['version'] ),
 );
 ?>
-<h2 class="dlz-title"><?php esc_html_e( 'Database', 'designslabz-relocate' ); ?></h2>
+<h2 class="dlz-title"><?php esc_html_e( 'Database', 'dl-relocate-db' ); ?></h2>
 
 <ul class="dlz-tiles">
 	<?php foreach ( $tiles as [ $icon, $label, $value ] ) : ?>
@@ -37,16 +37,16 @@ $tiles  = array(
 </ul>
 
 <section class="dlz-card" aria-labelledby="dlz-db-info">
-	<h3 id="dlz-db-info" class="dlz-card-title"><?php esc_html_e( 'Database information', 'designslabz-relocate' ); ?></h3>
+	<h3 id="dlz-db-info" class="dlz-card-title"><?php esc_html_e( 'Database information', 'dl-relocate-db' ); ?></h3>
 	<dl class="dlz-summary">
-		<dt><?php esc_html_e( 'Database name', 'designslabz-relocate' ); ?></dt>
+		<dt><?php esc_html_e( 'Database name', 'dl-relocate-db' ); ?></dt>
 		<dd><code><?php echo esc_html( $server['name'] ); ?></code></dd>
-		<dt><?php esc_html_e( 'Connection charset', 'designslabz-relocate' ); ?></dt>
+		<dt><?php esc_html_e( 'Connection charset', 'dl-relocate-db' ); ?></dt>
 		<dd><?php echo esc_html( trim( $server['charset'] . ' / ' . $server['collate'], ' /' ) ); ?></dd>
-		<dt><?php esc_html_e( 'Table prefix', 'designslabz-relocate' ); ?></dt>
+		<dt><?php esc_html_e( 'Table prefix', 'dl-relocate-db' ); ?></dt>
 		<dd><code><?php echo esc_html( $server['prefix'] ); ?></code></dd>
 	</dl>
-	<p class="description"><?php esc_html_e( 'Row counts and sizes come from the database server’s statistics. For InnoDB tables they are estimates and can be out of date.', 'designslabz-relocate' ); ?></p>
+	<p class="description"><?php esc_html_e( 'Row counts and sizes come from the database server’s statistics. For InnoDB tables they are estimates and can be out of date.', 'dl-relocate-db' ); ?></p>
 </section>
 
 <div class="dlz-card dlz-card-flush">
@@ -60,7 +60,7 @@ $tiles  = array(
 			printf( '<input type="hidden" name="group" value="%s">', esc_attr( sanitize_key( wp_unslash( $_GET['group'] ) ) ) );
 		}
 
-		$args['list']->search_box( __( 'Search tables', 'designslabz-relocate' ), 'dlz-tables' );
+		$args['list']->search_box( __( 'Search tables', 'dl-relocate-db' ), 'dlz-tables' );
 		$args['list']->display();
 		?>
 	</form>

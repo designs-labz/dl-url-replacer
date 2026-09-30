@@ -80,7 +80,7 @@
 	cancelButton.addEventListener( 'click', () => {
 		cancelRequested = true;
 		cancelButton.disabled = true;
-		progress.text.textContent = __( 'Stopping after the current batch…', 'designslabz-relocate' );
+		progress.text.textContent = __( 'Stopping after the current batch…', 'dl-relocate-db' );
 	} );
 
 	if ( runner.dataset.job ) {
@@ -100,7 +100,7 @@
 			const boxes = tableBoxes();
 			count.textContent = sprintf(
 				/* translators: 1: selected tables, 2: all tables. */
-				__( '%1$s of %2$s tables selected', 'designslabz-relocate' ),
+				__( '%1$s of %2$s tables selected', 'dl-relocate-db' ),
 				numbers.format( boxes.filter( ( box ) => box.checked ).length ),
 				numbers.format( boxes.length )
 			);
@@ -171,7 +171,7 @@
 		clearNotices();
 
 		if ( ! tables.length ) {
-			showNotice( 'error', __( 'Select at least one table to search.', 'designslabz-relocate' ) );
+			showNotice( 'error', __( 'Select at least one table to search.', 'dl-relocate-db' ) );
 			return;
 		}
 
@@ -201,7 +201,7 @@
 			return;
 		}
 
-		speak( __( 'Dry run started.', 'designslabz-relocate' ) );
+		speak( __( 'Dry run started.', 'dl-relocate-db' ) );
 		run( job );
 	}
 
@@ -246,10 +246,10 @@
 		}
 
 		const message = job.interrupted
-			? __( 'This job stopped before it finished, probably because the page running it was closed. Continuing carries on from the last completed batch.', 'designslabz-relocate' )
-			: __( 'This job is still running, possibly in another tab. If that tab was closed, continue it here.', 'designslabz-relocate' );
+			? __( 'This job stopped before it finished, probably because the page running it was closed. Continuing carries on from the last completed batch.', 'dl-relocate-db' )
+			: __( 'This job is still running, possibly in another tab. If that tab was closed, continue it here.', 'dl-relocate-db' );
 
-		showNotice( 'warning', message, () => run( job ), __( 'Continue', 'designslabz-relocate' ), false );
+		showNotice( 'warning', message, () => run( job ), __( 'Continue', 'dl-relocate-db' ), false );
 	}
 
 	/**
@@ -309,7 +309,7 @@
 		}
 
 		results.hidden = true;
-		speak( __( 'Replacement started.', 'designslabz-relocate' ) );
+		speak( __( 'Replacement started.', 'dl-relocate-db' ) );
 		run( live );
 	}
 
@@ -332,17 +332,17 @@
 	function startProgress( job ) {
 		progress.panel.hidden = false;
 		progress.heading.textContent = job.dry_run
-			? __( 'Dry run in progress', 'designslabz-relocate' )
-			: __( 'Replacing in the database', 'designslabz-relocate' );
+			? __( 'Dry run in progress', 'dl-relocate-db' )
+			: __( 'Replacing in the database', 'dl-relocate-db' );
 		progress.changedLabel.textContent = job.dry_run
-			? __( 'Rows to change', 'designslabz-relocate' )
-			: __( 'Rows changed', 'designslabz-relocate' );
+			? __( 'Rows to change', 'dl-relocate-db' )
+			: __( 'Rows changed', 'dl-relocate-db' );
 		progress.text.textContent = job.dry_run
-			? __( 'Starting…', 'designslabz-relocate' )
-			: __( 'Starting… Keep this page open until the replacement finishes.', 'designslabz-relocate' );
+			? __( 'Starting…', 'dl-relocate-db' )
+			: __( 'Starting… Keep this page open until the replacement finishes.', 'dl-relocate-db' );
 
 		cancelButton.disabled = false;
-		cancelButton.textContent = job.dry_run ? __( 'Cancel', 'designslabz-relocate' ) : __( 'Stop after this batch', 'designslabz-relocate' );
+		cancelButton.textContent = job.dry_run ? __( 'Cancel', 'dl-relocate-db' ) : __( 'Stop after this batch', 'dl-relocate-db' );
 
 		progress.bar.classList.remove( 'is-done', 'is-stopped' );
 		progress.bar.classList.add( 'is-indeterminate' );
@@ -378,12 +378,12 @@
 			progress.text.textContent = job.current_table
 				? sprintf(
 					/* translators: 1: table name, 2: table number, 3: number of tables. */
-					__( 'Working on %1$s (table %2$s of %3$s)', 'designslabz-relocate' ),
+					__( 'Working on %1$s (table %2$s of %3$s)', 'dl-relocate-db' ),
 					job.current_table,
 					numbers.format( job.tables_done + 1 ),
 					numbers.format( job.tables_total )
 				)
-				: __( 'Finishing…', 'designslabz-relocate' );
+				: __( 'Finishing…', 'dl-relocate-db' );
 		}
 
 		progress.bar.setAttribute( 'aria-valuetext', `${ percent }% – ${ progress.text.textContent }` );
@@ -397,7 +397,7 @@
 		if ( quarter > progress.spoken && percent < 100 ) {
 			progress.spoken = quarter;
 			/* translators: %s: percentage. */
-			speak( sprintf( __( '%s percent done.', 'designslabz-relocate' ), quarter ) );
+			speak( sprintf( __( '%s percent done.', 'dl-relocate-db' ), quarter ) );
 		}
 	}
 
@@ -410,7 +410,7 @@
 		if ( 'done' === state ) {
 			progress.fill.style.width = '100%';
 			progress.percent.textContent = '100%';
-			progress.text.textContent = __( 'Done.', 'designslabz-relocate' );
+			progress.text.textContent = __( 'Done.', 'dl-relocate-db' );
 		}
 	}
 
@@ -451,7 +451,7 @@
 
 		progress.remaining.textContent = sprintf(
 			/* translators: %s: time, e.g. 2:15. */
-			__( 'about %s', 'designslabz-relocate' ),
+			__( 'about %s', 'dl-relocate-db' ),
 			clock( ( elapsed / done ) * ( 100 - percent ) )
 		);
 	}
@@ -463,34 +463,34 @@
 	/* Results ------------------------------------------------------------- */
 
 	function renderDryRun( job, announce = true ) {
-		const heading = startResults( __( 'Dry run results', 'designslabz-relocate' ) );
+		const heading = startResults( __( 'Dry run results', 'dl-relocate-db' ) );
 
 		if ( 'completed' === job.status ) {
-			results.append( status( 'success', 'yes-alt', __( 'Dry run complete. Nothing in the database was changed.', 'designslabz-relocate' ) ) );
+			results.append( status( 'success', 'yes-alt', __( 'Dry run complete. Nothing in the database was changed.', 'dl-relocate-db' ) ) );
 		} else if ( 'cancelled' === job.status ) {
-			results.append( status( 'warning', 'dismiss', __( 'Dry run cancelled. The figures below cover only the part that was searched.', 'designslabz-relocate' ) ) );
+			results.append( status( 'warning', 'dismiss', __( 'Dry run cancelled. The figures below cover only the part that was searched.', 'dl-relocate-db' ) ) );
 		} else {
-			results.append( status( 'error', 'warning', job.error || __( 'The dry run stopped because of an error.', 'designslabz-relocate' ) ) );
+			results.append( status( 'error', 'warning', job.error || __( 'The dry run stopped because of an error.', 'dl-relocate-db' ) ) );
 			results.append( resumeButton( job ) );
 		}
 
 		results.append(
 			tiles( [
-				[ 'database', __( 'Tables searched', 'designslabz-relocate' ), job.tables_done ],
-				[ 'editor-table', __( 'Rows scanned', 'designslabz-relocate' ), job.totals.rows_scanned ],
-				[ 'edit', __( 'Rows that would change', 'designslabz-relocate' ), job.totals.rows_changed ],
-				[ 'update', __( 'Replacements', 'designslabz-relocate' ), job.totals.replacements ],
-				[ 'shield', __( 'Left unchanged', 'designslabz-relocate' ), job.totals.skipped ],
+				[ 'database', __( 'Tables searched', 'dl-relocate-db' ), job.tables_done ],
+				[ 'editor-table', __( 'Rows scanned', 'dl-relocate-db' ), job.totals.rows_scanned ],
+				[ 'edit', __( 'Rows that would change', 'dl-relocate-db' ), job.totals.rows_changed ],
+				[ 'update', __( 'Replacements', 'dl-relocate-db' ), job.totals.replacements ],
+				[ 'shield', __( 'Left unchanged', 'dl-relocate-db' ), job.totals.skipped ],
 			] )
 		);
 
 		if ( job.executable ) {
 			results.append( applySection( job ) );
 		} else if ( 'completed' === job.status && ! job.totals.rows_changed ) {
-			results.append( el( 'p', { className: 'dlz-empty' }, __( 'No matches were found, so there is nothing to replace.', 'designslabz-relocate' ) ) );
+			results.append( el( 'p', { className: 'dlz-empty' }, __( 'No matches were found, so there is nothing to replace.', 'dl-relocate-db' ) ) );
 		}
 
-		appendReport( job, __( 'Rows to change', 'designslabz-relocate' ) );
+		appendReport( job, __( 'Rows to change', 'dl-relocate-db' ) );
 
 		finishResults( heading, announce, sprintf(
 			/* translators: 1: number of replacements, 2: number of rows. */
@@ -498,7 +498,7 @@
 				'Dry run finished: %1$s replacement in %2$s rows.',
 				'Dry run finished: %1$s replacements in %2$s rows.',
 				job.totals.replacements,
-				'designslabz-relocate'
+				'dl-relocate-db'
 			),
 			numbers.format( job.totals.replacements ),
 			numbers.format( job.totals.rows_changed )
@@ -506,20 +506,20 @@
 	}
 
 	function renderLiveRun( job, announce = true ) {
-		const heading = startResults( __( 'Replacement results', 'designslabz-relocate' ) );
+		const heading = startResults( __( 'Replacement results', 'dl-relocate-db' ) );
 		let message;
 
 		if ( 'completed' === job.status ) {
-			message = __( 'Replacement complete. The changes below have been written to the database.', 'designslabz-relocate' );
+			message = __( 'Replacement complete. The changes below have been written to the database.', 'dl-relocate-db' );
 			results.append( status( 'success', 'yes-alt', message ) );
 		} else if ( 'cancelled' === job.status ) {
-			message = __( 'Replacement stopped. Batches finished before stopping were written to the database; the rest was not touched.', 'designslabz-relocate' );
+			message = __( 'Replacement stopped. Batches finished before stopping were written to the database; the rest was not touched.', 'dl-relocate-db' );
 			results.append( status( 'warning', 'dismiss', message ) );
 		} else {
-			message = job.error || __( 'The replacement stopped because of an error.', 'designslabz-relocate' );
+			message = job.error || __( 'The replacement stopped because of an error.', 'dl-relocate-db' );
 			results.append( status( 'error', 'warning', message ) );
 			results.append(
-				el( 'p', {}, __( 'Batches finished before the error were written to the database. The batch that failed was rolled back completely. Resuming carries on from there.', 'designslabz-relocate' ) ),
+				el( 'p', {}, __( 'Batches finished before the error were written to the database. The batch that failed was rolled back completely. Resuming carries on from there.', 'dl-relocate-db' ) ),
 				resumeButton( job )
 			);
 		}
@@ -529,19 +529,19 @@
 				el(
 					'div',
 					{ className: 'notice notice-warning inline' },
-					el( 'p', {}, __( 'The site address (siteurl and home) was changed, so you will need to log in again at the new address.', 'designslabz-relocate' ) ),
-					el( 'p', {}, el( 'a', { href: job.login_url }, __( 'Log in at the new address', 'designslabz-relocate' ) ) )
+					el( 'p', {}, __( 'The site address (siteurl and home) was changed, so you will need to log in again at the new address.', 'dl-relocate-db' ) ),
+					el( 'p', {}, el( 'a', { href: job.login_url }, __( 'Log in at the new address', 'dl-relocate-db' ) ) )
 				)
 			);
 		}
 
 		results.append(
 			tiles( [
-				[ 'database', __( 'Tables processed', 'designslabz-relocate' ), job.tables_done ],
-				[ 'editor-table', __( 'Rows scanned', 'designslabz-relocate' ), job.totals.rows_scanned ],
-				[ 'edit', __( 'Rows changed', 'designslabz-relocate' ), job.totals.rows_changed ],
-				[ 'update', __( 'Replacements', 'designslabz-relocate' ), job.totals.replacements ],
-				[ 'shield', __( 'Left unchanged', 'designslabz-relocate' ), job.totals.skipped ],
+				[ 'database', __( 'Tables processed', 'dl-relocate-db' ), job.tables_done ],
+				[ 'editor-table', __( 'Rows scanned', 'dl-relocate-db' ), job.totals.rows_scanned ],
+				[ 'edit', __( 'Rows changed', 'dl-relocate-db' ), job.totals.rows_changed ],
+				[ 'update', __( 'Replacements', 'dl-relocate-db' ), job.totals.replacements ],
+				[ 'shield', __( 'Left unchanged', 'dl-relocate-db' ), job.totals.skipped ],
 			] )
 		);
 
@@ -550,8 +550,8 @@
 				el(
 					'section',
 					{ className: 'dlz-card' },
-					el( 'h3', { className: 'dlz-card-title' }, __( 'Original values', 'designslabz-relocate' ) ),
-					el( 'p', {}, __( 'Importing this file into the database puts every changed value back as it was, overwriting any edits made to those values since.', 'designslabz-relocate' ) ),
+					el( 'h3', { className: 'dlz-card-title' }, __( 'Original values', 'dl-relocate-db' ) ),
+					el( 'p', {}, __( 'Importing this file into the database puts every changed value back as it was, overwriting any edits made to those values since.', 'dl-relocate-db' ) ),
 					el(
 						'p',
 						{},
@@ -560,14 +560,14 @@
 							{ className: 'button button-primary', href: job.before_image_url },
 							el( 'span', { className: 'dashicons dashicons-download', ariaHidden: 'true' } ),
 							' ',
-							__( 'Download original values (.sql.gz)', 'designslabz-relocate' )
+							__( 'Download original values (.sql.gz)', 'dl-relocate-db' )
 						)
 					)
 				)
 			);
 		}
 
-		appendReport( job, __( 'Rows changed', 'designslabz-relocate' ) );
+		appendReport( job, __( 'Rows changed', 'dl-relocate-db' ) );
 		finishResults( heading, announce, message );
 	}
 
@@ -576,7 +576,7 @@
 			'button',
 			{ type: 'button', className: 'button button-primary dlz-button-lg' },
 			el( 'span', { className: 'dashicons dashicons-update', ariaHidden: 'true' } ),
-			__( 'Replace in database…', 'designslabz-relocate' )
+			__( 'Replace in database…', 'dl-relocate-db' )
 		);
 
 		button.addEventListener( 'click', () => openDialog( job, button ) );
@@ -584,11 +584,11 @@
 		return el(
 			'section',
 			{ className: 'dlz-card dlz-apply' },
-			el( 'h3', { className: 'dlz-card-title' }, __( 'Apply these changes', 'designslabz-relocate' ) ),
+			el( 'h3', { className: 'dlz-card-title' }, __( 'Apply these changes', 'dl-relocate-db' ) ),
 			el(
 				'p',
 				{},
-				__( 'This writes the replacements shown here to the database, using exactly the search, replacement, tables and columns of this dry run. Rows are processed in batches; each batch is saved completely or not at all.', 'designslabz-relocate' )
+				__( 'This writes the replacements shown here to the database, using exactly the search, replacement, tables and columns of this dry run. Rows are processed in batches; each batch is saved completely or not at all.', 'dl-relocate-db' )
 			),
 			el( 'p', {}, button )
 		);
@@ -600,7 +600,7 @@
 				el(
 					'div',
 					{ className: 'notice notice-info inline' },
-					el( 'p', {}, __( 'Some matching values are left unchanged because changing them could corrupt data. The reasons are listed per table below.', 'designslabz-relocate' ) )
+					el( 'p', {}, __( 'Some matching values are left unchanged because changing them could corrupt data. The reasons are listed per table below.', 'dl-relocate-db' ) )
 				)
 			);
 		}
@@ -613,7 +613,7 @@
 			el(
 				'section',
 				{ className: 'dlz-card' },
-				el( 'h3', { className: 'dlz-card-title' }, __( 'Results per table', 'designslabz-relocate' ) ),
+				el( 'h3', { className: 'dlz-card-title' }, __( 'Results per table', 'dl-relocate-db' ) ),
 				tablesReport( job.report.tables, changedLabel )
 			)
 		);
@@ -633,15 +633,15 @@
 	 */
 	function tablesReport( tables, changedLabel ) {
 		const columns = [
-			{ key: 'name', label: __( 'Table', 'designslabz-relocate' ), numeric: false },
-			{ key: 'rows_scanned', label: __( 'Rows scanned', 'designslabz-relocate' ), numeric: true },
+			{ key: 'name', label: __( 'Table', 'dl-relocate-db' ), numeric: false },
+			{ key: 'rows_scanned', label: __( 'Rows scanned', 'dl-relocate-db' ), numeric: true },
 			{ key: 'rows_changed', label: changedLabel, numeric: true },
-			{ key: 'replacements', label: __( 'Replacements', 'designslabz-relocate' ), numeric: true },
+			{ key: 'replacements', label: __( 'Replacements', 'dl-relocate-db' ), numeric: true },
 		];
 		const state = { sort: 'replacements', direction: 'desc', term: '', changedOnly: tables.some( ( table ) => table.rows_changed ), page: 1 };
 
-		const filter = el( 'input', { type: 'search', className: 'dlz-filter', placeholder: __( 'Filter tables…', 'designslabz-relocate' ) } );
-		filter.setAttribute( 'aria-label', __( 'Filter tables', 'designslabz-relocate' ) );
+		const filter = el( 'input', { type: 'search', className: 'dlz-filter', placeholder: __( 'Filter tables…', 'dl-relocate-db' ) } );
+		filter.setAttribute( 'aria-label', __( 'Filter tables', 'dl-relocate-db' ) );
 		const changedOnly = el( 'input', { type: 'checkbox', checked: state.changedOnly } );
 		const caption = el( 'caption', { className: 'screen-reader-text' } );
 		const headRow = el( 'tr' );
@@ -659,8 +659,8 @@
 			headRow.append( el( 'th', { scope: 'col', className: column.numeric ? 'num' : '' }, button ) );
 		} );
 		headRow.append(
-			el( 'th', { scope: 'col' }, __( 'Columns', 'designslabz-relocate' ) ),
-			el( 'th', { scope: 'col' }, __( 'Notes', 'designslabz-relocate' ) )
+			el( 'th', { scope: 'col' }, __( 'Columns', 'dl-relocate-db' ) ),
+			el( 'th', { scope: 'col' }, __( 'Notes', 'dl-relocate-db' ) )
 		);
 
 		filter.addEventListener( 'input', () => {
@@ -698,21 +698,21 @@
 			} );
 
 			body.replaceChildren(
-				...( shown.length ? shown.map( tableRow ) : [ el( 'tr', {}, el( 'td', { colSpan: columns.length + 2, className: 'dlz-empty' }, __( 'No tables match.', 'designslabz-relocate' ) ) ) ] )
+				...( shown.length ? shown.map( tableRow ) : [ el( 'tr', {}, el( 'td', { colSpan: columns.length + 2, className: 'dlz-empty' }, __( 'No tables match.', 'dl-relocate-db' ) ) ) ] )
 			);
 
-			caption.textContent = __( 'Results per table', 'designslabz-relocate' );
+			caption.textContent = __( 'Results per table', 'dl-relocate-db' );
 			announcer.textContent = sprintf(
 				/* translators: 1: tables shown, 2: tables matching. */
-				__( 'Showing %1$s of %2$s tables.', 'designslabz-relocate' ),
+				__( 'Showing %1$s of %2$s tables.', 'dl-relocate-db' ),
 				numbers.format( shown.length ),
 				numbers.format( rows.length )
 			);
 
 			pager.replaceChildren();
 			if ( pages > 1 ) {
-				const previous = el( 'button', { type: 'button', className: 'button', disabled: 1 === state.page }, '‹ ', __( 'Previous', 'designslabz-relocate' ) );
-				const next = el( 'button', { type: 'button', className: 'button', disabled: pages === state.page }, __( 'Next', 'designslabz-relocate' ), ' ›' );
+				const previous = el( 'button', { type: 'button', className: 'button', disabled: 1 === state.page }, '‹ ', __( 'Previous', 'dl-relocate-db' ) );
+				const next = el( 'button', { type: 'button', className: 'button', disabled: pages === state.page }, __( 'Next', 'dl-relocate-db' ), ' ›' );
 				previous.addEventListener( 'click', () => {
 					state.page--;
 					render();
@@ -723,7 +723,7 @@
 				} );
 				pager.append(
 					/* translators: 1: current page, 2: number of pages. */
-					el( 'span', {}, sprintf( __( 'Page %1$s of %2$s', 'designslabz-relocate' ), numbers.format( state.page ), numbers.format( pages ) ) ),
+					el( 'span', {}, sprintf( __( 'Page %1$s of %2$s', 'dl-relocate-db' ), numbers.format( state.page ), numbers.format( pages ) ) ),
 					previous,
 					next
 				);
@@ -739,7 +739,7 @@
 				'div',
 				{ className: 'dlz-table-tools' },
 				filter,
-				el( 'label', {}, changedOnly, __( 'Only tables with changes or notes', 'designslabz-relocate' ) ),
+				el( 'label', {}, changedOnly, __( 'Only tables with changes or notes', 'dl-relocate-db' ) ),
 				announcer
 			),
 			el(
@@ -760,7 +760,7 @@
 		table.skipped.forEach( ( skipped ) => {
 			notes.push( sprintf(
 				/* translators: 1: number of values, 2: reason. */
-				__( '%1$s left unchanged: %2$s', 'designslabz-relocate' ),
+				__( '%1$s left unchanged: %2$s', 'dl-relocate-db' ),
 				numbers.format( skipped.count ),
 				skipped.reason
 			) );
@@ -784,13 +784,13 @@
 		return el(
 			'section',
 			{ className: 'dlz-card dlz-samples' },
-			el( 'h3', { className: 'dlz-card-title' }, __( 'Examples', 'designslabz-relocate' ) ),
+			el( 'h3', { className: 'dlz-card-title' }, __( 'Examples', 'dl-relocate-db' ) ),
 			el(
 				'p',
 				{ className: 'description' },
 				sprintf(
 					/* translators: %s: number of examples. */
-					__( 'The first %s changes found, with a little surrounding text.', 'designslabz-relocate' ),
+					__( 'The first %s changes found, with a little surrounding text.', 'dl-relocate-db' ),
 					numbers.format( list.length )
 				)
 			),
@@ -804,9 +804,9 @@
 					el(
 						'dl',
 						{ className: 'dlz-sample' },
-						el( 'dt', {}, __( 'Before', 'designslabz-relocate' ) ),
+						el( 'dt', {}, __( 'Before', 'dl-relocate-db' ) ),
 						el( 'dd', {}, el( 'pre', {}, sample.before ) ),
-						el( 'dt', {}, __( 'After', 'designslabz-relocate' ) ),
+						el( 'dt', {}, __( 'After', 'dl-relocate-db' ) ),
 						el( 'dd', {}, el( 'pre', {}, sample.after ) )
 					)
 				) )
@@ -823,7 +823,7 @@
 				{},
 				sprintf(
 					/* translators: 1: number of replacements, 2: number of rows, 3: number of tables. */
-					__( '%1$s replacements in %2$s rows across %3$s tables will be written to the database.', 'designslabz-relocate' ),
+					__( '%1$s replacements in %2$s rows across %3$s tables will be written to the database.', 'dl-relocate-db' ),
 					numbers.format( job.totals.replacements ),
 					numbers.format( job.totals.rows_changed ),
 					numbers.format( job.tables_total )
@@ -832,10 +832,10 @@
 			el(
 				'dl',
 				{ className: 'dlz-summary' },
-				el( 'dt', {}, __( 'Search for', 'designslabz-relocate' ) ),
+				el( 'dt', {}, __( 'Search for', 'dl-relocate-db' ) ),
 				el( 'dd', {}, el( 'code', {}, job.search ) ),
-				el( 'dt', {}, __( 'Replace with', 'designslabz-relocate' ) ),
-				el( 'dd', {}, job.replace ? el( 'code', {}, job.replace ) : el( 'em', {}, __( '(nothing: matches are removed)', 'designslabz-relocate' ) ) )
+				el( 'dt', {}, __( 'Replace with', 'dl-relocate-db' ) ),
+				el( 'dd', {}, job.replace ? el( 'code', {}, job.replace ) : el( 'em', {}, __( '(nothing: matches are removed)', 'dl-relocate-db' ) ) )
 			)
 		);
 
@@ -856,17 +856,17 @@
 		if ( untransactional.length ) {
 			list.push( sprintf(
 				/* translators: %s: comma-separated table names. */
-				__( 'These tables do not support transactions, so if the replacement is interrupted a batch in them could be left partly written: %s', 'designslabz-relocate' ),
+				__( 'These tables do not support transactions, so if the replacement is interrupted a batch in them could be left partly written: %s', 'dl-relocate-db' ),
 				untransactional.join( ', ' )
 			) );
 		}
 
 		if ( job.replace.includes( job.search ) ) {
-			list.push( __( 'The replacement contains the search text. Running this same replacement a second time would apply it again.', 'designslabz-relocate' ) );
+			list.push( __( 'The replacement contains the search text. Running this same replacement a second time would apply it again.', 'dl-relocate-db' ) );
 		}
 
 		if ( job.touches_site_address ) {
-			list.push( __( 'If this changes the site address (siteurl or home), it is changed last and you will need to log in again at the new address.', 'designslabz-relocate' ) );
+			list.push( __( 'If this changes the site address (siteurl or home), it is changed last and you will need to log in again at the new address.', 'dl-relocate-db' ) );
 		}
 
 		return list;
@@ -909,7 +909,7 @@
 	}
 
 	function resumeButton( job ) {
-		const button = el( 'button', { type: 'button', className: 'button button-primary' }, __( 'Resume', 'designslabz-relocate' ) );
+		const button = el( 'button', { type: 'button', className: 'button button-primary' }, __( 'Resume', 'dl-relocate-db' ) );
 		button.addEventListener( 'click', () => resume( job ) );
 		return el( 'p', {}, button );
 	}
@@ -934,7 +934,7 @@
 		const notice = el( 'div', { className: `notice notice-${ type }` }, el( 'p', {}, message ) );
 
 		if ( retry ) {
-			const button = el( 'button', { type: 'button', className: 'button' }, label || __( 'Resume', 'designslabz-relocate' ) );
+			const button = el( 'button', { type: 'button', className: 'button' }, label || __( 'Resume', 'dl-relocate-db' ) );
 			button.addEventListener( 'click', () => {
 				notice.remove();
 				retry();
@@ -977,7 +977,7 @@
 	}
 
 	function errorMessage( error ) {
-		return ( error && error.message ) || __( 'The request failed. Check your connection and try again.', 'designslabz-relocate' );
+		return ( error && error.message ) || __( 'The request failed. Check your connection and try again.', 'dl-relocate-db' );
 	}
 
 	function clock( seconds ) {

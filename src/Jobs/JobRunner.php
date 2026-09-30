@@ -193,7 +193,7 @@ final class JobRunner {
 			$job->finish(
 				JobStatus::Failed,
 				/* translators: 1: table name, 2: database error message. */
-				sprintf( __( 'The job stopped while processing %1$s: %2$s', 'designslabz-relocate' ), (string) $job->current_table(), $e->getMessage() )
+				sprintf( __( 'The job stopped while processing %1$s: %2$s', 'dl-relocate-db' ), (string) $job->current_table(), $e->getMessage() )
 			);
 			$this->jobs->save( $job );
 			$this->logger->error(

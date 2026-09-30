@@ -82,6 +82,6 @@ final class Plugin {
 	}
 
 	public function load_textdomain(): void {
-		load_plugin_textdomain( 'designslabz-relocate', false, dirname( plugin_basename( $this->file ) ) . '/languages' );
+		load_plugin_textdomain( 'dl-relocate-db', false, dirname( plugin_basename( $this->file ) ) . '/languages' );
 	}
 }

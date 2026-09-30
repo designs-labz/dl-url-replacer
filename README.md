@@ -1,4 +1,4 @@
-# DesignsLabz Relocate
+# DL Relocate DB
 
 Search and replace URLs and text across a WordPress database without breaking serialized data or JSON. Every replacement is previewed by a dry run first, processed in resumable batches, and recorded in a history with a downloadable file of the original values.
 
@@ -39,7 +39,7 @@ wp dlz resume 42
 
 ## Development
 
-Classes are loaded by the PSR-4 autoloader in `designslabz-relocate.php`, so the plugin runs straight from a Git checkout. Composer is only needed for development tools.
+Classes are loaded by the PSR-4 autoloader in `dl-relocate-db.php`, so the plugin runs straight from a Git checkout. Composer is only needed for development tools.
 
 ```bash
 composer install
@@ -59,7 +59,7 @@ WP_TESTS_DB_HOST=127.0.0.1:3306 WP_TESTS_DB_NAME=relocate_tests composer test:in
 Regenerate the translation template after changing strings:
 
 ```bash
-wp i18n make-pot . languages/designslabz-relocate.pot --exclude=vendor,tests
+wp i18n make-pot . languages/dl-relocate-db.pot --exclude=vendor,tests
 ```
 
 CI (`.github/workflows/ci.yml`) runs the linters, the unit tests on PHP 8.1–8.4, and the integration tests on WordPress 6.5 and the latest release against MySQL 8.0, MySQL 8.4 and MariaDB 10.11.

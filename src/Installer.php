@@ -37,7 +37,7 @@ final class Installer {
 			if ( ! $this->table_exists( $this->wpdb->prefix . $table ) ) {
 				// Leave the stored version alone so the upgrade is retried on the next admin request.
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-				error_log( sprintf( 'DesignsLabz Relocate: could not create table %s: %s', $this->wpdb->prefix . $table, $this->wpdb->last_error ) );
+				error_log( sprintf( 'DL Relocate DB: could not create table %s: %s', $this->wpdb->prefix . $table, $this->wpdb->last_error ) );
 				return;
 			}
 		}

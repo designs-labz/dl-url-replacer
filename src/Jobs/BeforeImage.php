@@ -47,7 +47,7 @@ final class BeforeImage {
 			implode(
 				"\n",
 				array(
-					sprintf( '-- DesignsLabz Relocate: original values changed by job %d, started %s UTC.', $job->id, gmdate( 'Y-m-d H:i:s' ) ),
+					sprintf( '-- DL Relocate DB: original values changed by job %d, started %s UTC.', $job->id, gmdate( 'Y-m-d H:i:s' ) ),
 					'-- Running this file puts every changed value back, overwriting any edits made to those values since.',
 					'-- Statements from a batch that was rolled back restore values that never changed, so they are harmless.',
 					'SET NAMES ' . ( $this->wpdb->charset ? $this->wpdb->charset : 'utf8mb4' ) . ';',

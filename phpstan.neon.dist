@@ -12,6 +12,6 @@ parameters:
 			- error
 			- halt
 	paths:
-		- designslabz-relocate.php
+		- dl-relocate-db.php
 		- uninstall.php
 		- src

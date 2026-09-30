@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="DesignsLabz Relocate">
-	<description>Coding standards for DesignsLabz Relocate.</description>
+<ruleset name="DL Relocate DB">
+	<description>Coding standards for DL Relocate DB.</description>
 
 	<file>.</file>
 	<exclude-pattern>/vendor/*</exclude-pattern>
@@ -28,7 +28,7 @@
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">
-				<element value="designslabz-relocate"/>
+				<element value="dl-relocate-db"/>
 			</property>
 		</properties>
 	</rule>
