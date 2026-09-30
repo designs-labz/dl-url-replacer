@@ -36,13 +36,11 @@ That address can appear thousands of times: in posts, menus, widgets, page build
 
 **Good for:**
 
-| | |
-|---|---|
-| 🚚 | Moving a site from staging to live, or live to staging |
-| 🌐 | Changing a domain name |
-| 🔒 | Switching from `http://` to `https://` |
-| 📁 | Updating server paths, such as `/home/old/public_html` |
-| ✏️ | Renaming a product, company or phrase everywhere it appears |
+- 🚚 Moving a site from staging to live, or live to staging
+- 🌐 Changing a domain name
+- 🔒 Switching from `http://` to `https://`
+- 📁 Updating server paths, such as `/home/old/public_html`
+- ✏️ Renaming a product, company or phrase everywhere it appears
 
 ---
 
@@ -137,14 +135,12 @@ Happy with the preview? Click **Replace in database…**, tick the box to confir
 
 ## 🛡️ How it keeps your site safe
 
-| | |
-|---|---|
-| 👀 | **Preview before every change.** A replacement can only be started from a finished dry run, and does exactly what the preview showed. |
-| 🧩 | **No broken data.** Serialized settings and JSON are rewritten correctly. If a value could not be changed safely, it is left as it was and listed in the results. |
-| 🧱 | **All or nothing per batch.** Rows are changed in small batches, and each batch is either saved completely or not at all. |
-| 💾 | **Original values saved.** Before anything is written, the old values go into a downloadable file. |
-| 🏠 | **Stays logged in.** Your site address is changed last, so you are not logged out part way through. |
-| 🔐 | **Administrators only.** Only users who can manage the site and post unfiltered HTML can use it. |
+- 👀 **Preview before every change.** A replacement can only be started from a finished dry run, and does exactly what the preview showed.
+- 🧩 **No broken data.** Serialized settings and JSON are rewritten correctly. If a value could not be changed safely, it is left as it was and listed in the results.
+- 🧱 **All or nothing per batch.** Rows are changed in small batches, and each batch is either saved completely or not at all.
+- 💾 **Original values saved.** Before anything is written, the old values go into a downloadable file.
+- 🏠 **Stays logged in.** Your site address is changed last, so you are not logged out part way through.
+- 🔐 **Administrators only.** Only users who can manage the site and post unfiltered HTML can use it.
 
 > ⚠️ **Always take a full backup of your database first.** The file of original values helps, but it is not a replacement for a proper backup.
 
