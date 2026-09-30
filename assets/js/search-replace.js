@@ -91,6 +91,7 @@
 
 	function initForm() {
 		initPairs();
+		initColumnMenus();
 
 		const filter = document.getElementById( 'dlz-table-filter' );
 		const count = document.getElementById( 'dlz-table-count' );
@@ -147,6 +148,9 @@
 			updateCount();
 		} );
 
+		form.addEventListener( 'input', updateSummary );
+		form.addEventListener( 'change', updateSummary );
+
 		form.addEventListener( 'change', ( event ) => {
 			if ( 'tables[]' === event.target.name ) {
 				updateCount();
@@ -162,6 +166,100 @@
 
 		form.addEventListener( 'submit', onSubmit );
 		updateCount();
+		updateSummary();
+	}
+
+	/**
+	 * The sticky summary next to the form, so the choices are visible from anywhere on the page.
+	 */
+	function updateSummary() {
+		const summary = document.getElementById( 'dlz-form-summary' );
+
+		if ( ! summary ) {
+			return;
+		}
+
+		const data = new FormData( form );
+		const pairs = data.getAll( 'search[]' ).filter( Boolean ).length;
+		const boxes = [ ...form.querySelectorAll( 'input[name="tables[]"]' ) ];
+		const selected = boxes.filter( ( box ) => box.checked );
+		const excluded = selected.reduce(
+			( total, box ) => total + box.closest( '.dlz-picker-row' ).querySelectorAll( '.dlz-columns input:not(:checked)' ).length,
+			0
+		);
+		const options = [
+			data.has( 'case_insensitive' ) ? __( 'Any case', 'dl-relocate-db' ) : __( 'Exact case', 'dl-relocate-db' ),
+			data.has( 'whole_words' ) ? __( 'whole words', 'dl-relocate-db' ) : '',
+			data.has( 'url_variants' ) ? __( 'URL versions', 'dl-relocate-db' ) : '',
+		].filter( Boolean );
+
+		const set = ( key, value ) => {
+			summary.querySelector( `[data-summary="${ key }"]` ).textContent = value;
+		};
+
+		/* translators: %s: number of search and replacement pairs. */
+		set( 'pairs', pairs ? sprintf( _n( '%s pair', '%s pairs', pairs, 'dl-relocate-db' ), numbers.format( pairs ) ) : '—' );
+		/* translators: 1: selected tables, 2: all tables. */
+		set( 'tables', sprintf( __( '%1$s of %2$s', 'dl-relocate-db' ), numbers.format( selected.length ), numbers.format( boxes.length ) ) );
+		set( 'columns', excluded ? numbers.format( excluded ) : __( 'None', 'dl-relocate-db' ) );
+		set( 'options', options.join( ', ' ) );
+	}
+
+	/**
+	 * Column dropdowns in the table picker: one open at a time, closed by
+	 * Escape or a click elsewhere.
+	 */
+	function initColumnMenus() {
+		const menus = () => [ ...form.querySelectorAll( '.dlz-columns[open]' ) ];
+
+		form.addEventListener( 'toggle', ( event ) => {
+			if ( event.target.matches( '.dlz-columns' ) && event.target.open ) {
+				menus().filter( ( menu ) => menu !== event.target ).forEach( ( menu ) => {
+					menu.open = false;
+				} );
+			}
+		}, true );
+
+		document.addEventListener( 'click', ( event ) => {
+			menus().filter( ( menu ) => ! menu.contains( event.target ) ).forEach( ( menu ) => {
+				menu.open = false;
+			} );
+		} );
+
+		document.addEventListener( 'keydown', ( event ) => {
+			if ( 'Escape' !== event.key ) {
+				return;
+			}
+
+			menus().forEach( ( menu ) => {
+				menu.open = false;
+				if ( menu.contains( document.activeElement ) ) {
+					menu.querySelector( 'summary' ).focus();
+				}
+			} );
+		} );
+	}
+
+	/**
+	 * Marks the stepper at the top of Search & Replace.
+	 *
+	 * @param {number} current Step in progress (1 choose, 2 preview, 3 apply), or 4 when everything is done.
+	 */
+	function setStep( current ) {
+		const steps = document.querySelectorAll( '#dlz-steps li' );
+
+		steps.forEach( ( step, index ) => {
+			const number = index + 1;
+
+			step.classList.toggle( 'is-done', number < current );
+			step.classList.toggle( 'is-current', number === current );
+
+			if ( number === current ) {
+				step.setAttribute( 'aria-current', 'step' );
+			} else {
+				step.removeAttribute( 'aria-current' );
+			}
+		} );
 	}
 
 	/**
@@ -346,6 +444,7 @@
 	 */
 	async function run( job ) {
 		cancelRequested = false;
+		setStep( job.dry_run ? 2 : 3 );
 		startProgress( job );
 		setBusy( true, ! job.dry_run );
 
@@ -374,8 +473,10 @@
 		if ( job.dry_run ) {
 			dryRun = job;
 			renderDryRun( job );
+			setStep( job.executable ? 3 : 1 );
 		} else {
 			renderLiveRun( job );
+			setStep( 'completed' === job.status ? 4 : 3 );
 		}
 	}
 
@@ -749,6 +850,19 @@
 			el( 'th', { scope: 'col' }, __( 'Notes', 'dl-relocate-db' ) )
 		);
 
+		// Header buttons are hidden when the table is stacked on small screens; this takes their place.
+		const sortSelect = el( 'select', { className: 'dlz-sort-select' } );
+		sortSelect.setAttribute( 'aria-label', __( 'Sort tables by', 'dl-relocate-db' ) );
+		columns.forEach( ( column ) => {
+			/* translators: %s: column name. */
+			sortSelect.append( el( 'option', { value: column.key }, sprintf( __( 'Sort by %s', 'dl-relocate-db' ), column.label.toLowerCase() ) ) );
+		} );
+		sortSelect.addEventListener( 'change', () => {
+			state.sort = sortSelect.value;
+			state.direction = 'name' === state.sort ? 'asc' : 'desc';
+			render();
+		} );
+
 		filter.addEventListener( 'input', () => {
 			state.term = filter.value.trim().toLowerCase();
 			state.page = 1;
@@ -761,6 +875,8 @@
 		} );
 
 		function render() {
+			sortSelect.value = state.sort;
+
 			const rows = tables
 				.filter( ( table ) => ( ! state.term || table.name.toLowerCase().includes( state.term ) ) && ( ! state.changedOnly || table.rows_changed || table.skipped.length || table.note ) )
 				.sort( ( a, b ) => {
@@ -784,7 +900,7 @@
 			} );
 
 			body.replaceChildren(
-				...( shown.length ? shown.map( tableRow ) : [ el( 'tr', {}, el( 'td', { colSpan: columns.length + 2, className: 'dlz-empty' }, __( 'No tables match.', 'dl-relocate-db' ) ) ) ] )
+				...( shown.length ? shown.map( ( table ) => tableRow( table, columns ) ) : [ el( 'tr', {}, el( 'td', { colSpan: columns.length + 2, className: 'dlz-empty' }, __( 'No tables match.', 'dl-relocate-db' ) ) ) ] )
 			);
 
 			caption.textContent = __( 'Results per table', 'dl-relocate-db' );
@@ -825,19 +941,20 @@
 				'div',
 				{ className: 'dlz-table-tools' },
 				filter,
+				sortSelect,
 				el( 'label', {}, changedOnly, __( 'Only tables with changes or notes', 'dl-relocate-db' ) ),
 				announcer
 			),
 			el(
 				'div',
 				{ className: 'dlz-table-scroll' },
-				el( 'table', { className: 'wp-list-table widefat striped dlz-tables' }, caption, el( 'thead', {}, headRow ), body )
+				el( 'table', { className: 'widefat striped dlz-tables dlz-stack-table' }, caption, el( 'thead', {}, headRow ), body )
 			),
 			pager
 		);
 	}
 
-	function tableRow( table ) {
+	function tableRow( table, columns ) {
 		const notes = [];
 
 		if ( table.note ) {
@@ -852,17 +969,24 @@
 			) );
 		} );
 
-		const columns = Object.entries( table.columns ).map( ( [ name, count ] ) => `${ name } (${ numbers.format( count ) })` );
+		const changed = Object.entries( table.columns ).map( ( [ name, count ] ) => `${ name } (${ numbers.format( count ) })` );
+
+		// data-label is shown next to each value when the table is stacked on small screens.
+		const cell = ( label, value, className = '' ) => {
+			const td = el( 'td', { className }, value );
+			td.dataset.label = label;
+			return td;
+		};
 
 		return el(
 			'tr',
 			{},
 			el( 'th', { scope: 'row' }, el( 'code', {}, table.name ) ),
-			el( 'td', { className: 'num' }, numbers.format( table.rows_scanned ) ),
-			el( 'td', { className: 'num' }, numbers.format( table.rows_changed ) ),
-			el( 'td', { className: 'num' }, numbers.format( table.replacements ) ),
-			el( 'td', {}, columns.join( ', ' ) || '—' ),
-			el( 'td', {}, notes.join( ' ' ) || '—' )
+			cell( columns[ 1 ].label, numbers.format( table.rows_scanned ), 'num' ),
+			cell( columns[ 2 ].label, numbers.format( table.rows_changed ), 'num' ),
+			cell( columns[ 3 ].label, numbers.format( table.replacements ), 'num' ),
+			cell( __( 'Columns', 'dl-relocate-db' ), changed.join( ', ' ) || '—' ),
+			cell( __( 'Notes', 'dl-relocate-db' ), notes.join( ' ' ) || '—' )
 		);
 	}
 

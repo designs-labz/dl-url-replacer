@@ -32,10 +32,20 @@ $options = array(
 	'skip_guids'       => array( true, __( 'Leave post GUIDs unchanged', 'dl-relocate-db' ), __( 'Recommended. Feed readers use GUIDs to recognise posts they have already seen.', 'dl-relocate-db' ) ),
 );
 ?>
-<h2 class="dlz-title"><?php esc_html_e( 'Search & Replace', 'dl-relocate-db' ); ?></h2>
-<p class="dlz-intro"><?php esc_html_e( 'Start with a dry run: it changes nothing and shows exactly what would be replaced. You can apply it afterwards.', 'dl-relocate-db' ); ?></p>
+<div class="dlz-title-row">
+	<div>
+		<h2 class="dlz-title"><?php esc_html_e( 'Search & Replace', 'dl-relocate-db' ); ?></h2>
+		<p class="dlz-intro"><?php esc_html_e( 'Preview first, then apply. Nothing is changed until you review the dry run and confirm.', 'dl-relocate-db' ); ?></p>
+	</div>
+	<ol id="dlz-steps" class="dlz-steps" aria-label="<?php esc_attr_e( 'Progress', 'dl-relocate-db' ); ?>">
+		<li class="is-current" aria-current="step"><span class="dlz-steps-number">1</span> <?php esc_html_e( 'Choose', 'dl-relocate-db' ); ?></li>
+		<li><span class="dlz-steps-number">2</span> <?php esc_html_e( 'Preview', 'dl-relocate-db' ); ?></li>
+		<li><span class="dlz-steps-number">3</span> <?php esc_html_e( 'Apply', 'dl-relocate-db' ); ?></li>
+	</ol>
+</div>
 
-<form id="dlz-search-replace" class="dlz-form">
+<form id="dlz-search-replace" class="dlz-form dlz-layout">
+	<div class="dlz-layout-main">
 	<section class="dlz-card" aria-labelledby="dlz-step-find">
 		<h3 id="dlz-step-find" class="dlz-card-title"><span class="dlz-step" aria-hidden="true">1</span> <?php esc_html_e( 'What to find', 'dl-relocate-db' ); ?></h3>
 		<div class="dlz-pair-head" aria-hidden="true">
@@ -132,6 +142,12 @@ $options = array(
 				?>
 				<details class="dlz-picker-group" <?php echo 'core' === $group ? 'open' : ''; ?>>
 					<summary><?php echo esc_html( $heading ); ?> <span class="dlz-picker-count">(<?php echo esc_html( number_format_i18n( count( $group_tables ) ) ); ?>)</span></summary>
+					<div class="dlz-picker-head" aria-hidden="true">
+						<span><?php esc_html_e( 'Table', 'dl-relocate-db' ); ?></span>
+						<span><?php esc_html_e( 'Rows', 'dl-relocate-db' ); ?></span>
+						<span><?php esc_html_e( 'Size', 'dl-relocate-db' ); ?></span>
+						<span><?php esc_html_e( 'Columns', 'dl-relocate-db' ); ?></span>
+					</div>
 					<ul class="dlz-picker-list">
 						<?php foreach ( $group_tables as $table ) : ?>
 							<?php $table_columns = $columns[ $table->name ] ?? array(); ?>
@@ -140,29 +156,27 @@ $options = array(
 									<input type="checkbox" name="tables[]" value="<?php echo esc_attr( $table->name ); ?>" data-group="<?php echo esc_attr( $group ); ?>" <?php checked( 'core' === $group ); ?>>
 									<code><?php echo esc_html( $table->name ); ?></code>
 								</label>
-								<span class="dlz-picker-meta">
+								<span class="dlz-picker-num">
 									<?php
-									printf(
-										/* translators: 1: approximate row count, 2: table size. */
-										esc_html__( '%1$s rows · %2$s', 'dl-relocate-db' ),
-										esc_html( number_format_i18n( $table->approx_rows ) ),
-										esc_html( (string) size_format( $table->size(), 1 ) )
-									);
+									/* translators: %s: approximate number of rows. */
+									echo esc_html( sprintf( __( '%s rows', 'dl-relocate-db' ), number_format_i18n( $table->approx_rows ) ) );
 									?>
 								</span>
+								<span class="dlz-picker-num"><?php echo esc_html( (string) size_format( $table->size(), 1 ) ); ?></span>
 								<?php if ( $table_columns ) : ?>
 									<details class="dlz-columns">
-										<summary data-total="<?php echo esc_attr( (string) count( $table_columns ) ); ?>">
+										<summary>
 											<?php
 											printf(
 												/* translators: 1: columns selected, 2: text columns in the table. */
-												esc_html__( 'Columns: %1$s of %2$s', 'dl-relocate-db' ),
+												esc_html__( '%1$s of %2$s columns', 'dl-relocate-db' ),
 												'<span class="dlz-columns-selected">' . esc_html( number_format_i18n( count( $table_columns ) ) ) . '</span>',
 												esc_html( number_format_i18n( count( $table_columns ) ) )
 											);
 											?>
+											<span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
 										</summary>
-										<fieldset>
+										<fieldset class="dlz-columns-menu">
 											<?php /* translators: %s: table name. */ ?>
 											<legend class="screen-reader-text"><?php echo esc_html( sprintf( __( 'Columns of %s to search', 'dl-relocate-db' ), $table->name ) ); ?></legend>
 											<?php foreach ( $table_columns as $column ) : ?>
@@ -171,7 +185,7 @@ $options = array(
 										</fieldset>
 									</details>
 								<?php else : ?>
-									<span class="dlz-picker-meta"><?php esc_html_e( 'No text columns', 'dl-relocate-db' ); ?></span>
+									<span class="dlz-picker-none"><?php esc_html_e( 'No text columns', 'dl-relocate-db' ); ?></span>
 								<?php endif; ?>
 							</li>
 						<?php endforeach; ?>
@@ -182,13 +196,27 @@ $options = array(
 		</fieldset>
 	</section>
 
-	<div class="dlz-actions">
-		<button type="submit" class="button button-primary dlz-button-lg">
-			<span class="dashicons dashicons-visibility" aria-hidden="true"></span>
-			<?php esc_html_e( 'Run dry run', 'dl-relocate-db' ); ?>
-		</button>
-		<span class="description"><?php esc_html_e( 'Nothing is changed until you review the results and confirm.', 'dl-relocate-db' ); ?></span>
 	</div>
+
+	<aside class="dlz-layout-side" aria-labelledby="dlz-summary-title">
+		<div class="dlz-card dlz-summary-card">
+			<h3 id="dlz-summary-title" class="dlz-card-title"><?php esc_html_e( 'Summary', 'dl-relocate-db' ); ?></h3>
+			<dl id="dlz-form-summary" class="dlz-kv">
+				<div><dt><?php esc_html_e( 'Replacements', 'dl-relocate-db' ); ?></dt><dd data-summary="pairs">—</dd></div>
+				<div><dt><?php esc_html_e( 'Tables', 'dl-relocate-db' ); ?></dt><dd data-summary="tables">—</dd></div>
+				<div><dt><?php esc_html_e( 'Columns left out', 'dl-relocate-db' ); ?></dt><dd data-summary="columns">—</dd></div>
+				<div><dt><?php esc_html_e( 'Matching', 'dl-relocate-db' ); ?></dt><dd data-summary="options">—</dd></div>
+			</dl>
+			<button type="submit" class="button button-primary dlz-button-lg dlz-button-block">
+				<span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+				<?php esc_html_e( 'Run dry run', 'dl-relocate-db' ); ?>
+			</button>
+			<p class="dlz-summary-note">
+				<span class="dashicons dashicons-shield" aria-hidden="true"></span>
+				<?php esc_html_e( 'A dry run only reads the database. You confirm before anything is written.', 'dl-relocate-db' ); ?>
+			</p>
+		</div>
+	</aside>
 </form>
 
 <?php require __DIR__ . '/partials/runner.php'; ?>

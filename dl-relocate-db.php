@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       DL Relocate DB
- * Plugin URI:        https://github.com/designs-labz/dl-url-replacer
+ * Plugin URI:        https://github.com/designs-labz/dl-relocate-db
  * Description:       Safely search and replace URLs and text across your WordPress database, with serialized data support, dry runs and an operation history.
  * Version:           0.1.0
  * Requires at least: 6.5

@@ -53,7 +53,16 @@ final class AdminPagesTest extends WP_UnitTestCase {
 	}
 
 	public function test_dashboard_without_any_jobs(): void {
-		$this->assertStringContainsString( 'Nothing has been replaced yet.', $this->render( array() ) );
+		$html = $this->render( array() );
+
+		$this->assertStringContainsString( 'Nothing has been replaced yet.', $html );
+		$this->assertStringContainsString( 'Move a site safely in three steps', $html, 'New users get the three-step introduction.' );
+	}
+
+	public function test_introduction_is_hidden_once_there_are_jobs(): void {
+		$this->job( true );
+
+		$this->assertStringNotContainsString( 'Move a site safely in three steps', $this->render( array() ) );
 	}
 
 	public function test_quick_form_prefills_search_and_replace(): void {
@@ -84,6 +93,8 @@ final class AdminPagesTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'value="wptests_posts"', $html );
 		$this->assertStringNotContainsString( 'value="wptests_dlz_relocate_jobs"', $html );
 		$this->assertStringContainsString( 'id="dlz-confirm"', $html );
+		$this->assertStringContainsString( 'id="dlz-form-summary"', $html );
+		$this->assertStringContainsString( 'id="dlz-steps"', $html );
 	}
 
 	public function test_history_list_and_type_filter(): void {

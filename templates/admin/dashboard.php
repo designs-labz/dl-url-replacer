@@ -29,6 +29,32 @@ $tiles = array(
 ?>
 <h2 class="dlz-title"><?php esc_html_e( 'Dashboard', 'dl-relocate-db' ); ?></h2>
 
+<?php if ( 0 === $stats['jobs'] ) : ?>
+	<section class="dlz-card dlz-welcome" aria-labelledby="dlz-welcome-title">
+		<div>
+			<h3 id="dlz-welcome-title"><?php esc_html_e( 'Move a site safely in three steps', 'dl-relocate-db' ); ?></h3>
+			<p class="dlz-intro"><?php esc_html_e( 'Change a domain, switch to HTTPS or update text everywhere it appears, without breaking serialized data.', 'dl-relocate-db' ); ?></p>
+		</div>
+		<a class="button button-primary dlz-button-lg" href="<?php echo esc_url( Admin::url( 'search-replace' ) ); ?>">
+			<?php esc_html_e( 'Start a search & replace', 'dl-relocate-db' ); ?> <span aria-hidden="true">→</span>
+		</a>
+		<ol class="dlz-welcome-steps">
+			<li>
+				<span class="dashicons dashicons-edit" aria-hidden="true"></span>
+				<span><strong><?php esc_html_e( 'Choose', 'dl-relocate-db' ); ?></strong> <?php esc_html_e( 'What to find, what to replace it with, and which tables.', 'dl-relocate-db' ); ?></span>
+			</li>
+			<li>
+				<span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+				<span><strong><?php esc_html_e( 'Preview', 'dl-relocate-db' ); ?></strong> <?php esc_html_e( 'A dry run shows every change without writing anything.', 'dl-relocate-db' ); ?></span>
+			</li>
+			<li>
+				<span class="dashicons dashicons-shield" aria-hidden="true"></span>
+				<span><strong><?php esc_html_e( 'Apply', 'dl-relocate-db' ); ?></strong> <?php esc_html_e( 'Confirm, and the original values are saved to a file first.', 'dl-relocate-db' ); ?></span>
+			</li>
+		</ol>
+	</section>
+<?php endif; ?>
+
 <ul class="dlz-tiles">
 	<?php foreach ( $tiles as [ $icon, $label, $value ] ) : ?>
 		<li class="dlz-tile">
@@ -130,7 +156,7 @@ $tiles = array(
 		<h3 id="dlz-recent-title" class="dlz-card-title"><span class="dashicons dashicons-backup" aria-hidden="true"></span> <?php esc_html_e( 'Recent jobs', 'dl-relocate-db' ); ?></h3>
 		<?php if ( $args['recent'] ) : ?>
 			<div class="dlz-table-scroll">
-				<table class="widefat striped dlz-tables">
+				<table class="widefat striped dlz-tables dlz-stack-table">
 					<caption class="screen-reader-text"><?php esc_html_e( 'Recent jobs', 'dl-relocate-db' ); ?></caption>
 					<thead>
 						<tr>
@@ -144,9 +170,9 @@ $tiles = array(
 						<?php foreach ( $args['recent'] as $job ) : ?>
 							<tr>
 								<th scope="row"><a href="<?php echo esc_url( Admin::job_url( $job->id ) ); ?>"><?php echo esc_html( Admin::job_title( $job ) ); ?></a></th>
-								<td><?php echo esc_html( Admin::format_date( $job->created_at ) ); ?></td>
-								<td class="num"><?php echo esc_html( number_format_i18n( $job->report->totals()['replacements'] ) ); ?></td>
-								<td><?php echo Admin::status_badge( $job ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped HTML. ?></td>
+								<td data-label="<?php esc_attr_e( 'Created', 'dl-relocate-db' ); ?>"><?php echo esc_html( Admin::format_date( $job->created_at ) ); ?></td>
+								<td class="num" data-label="<?php esc_attr_e( 'Replacements', 'dl-relocate-db' ); ?>"><?php echo esc_html( number_format_i18n( $job->report->totals()['replacements'] ) ); ?></td>
+								<td data-label="<?php esc_attr_e( 'Status', 'dl-relocate-db' ); ?>"><?php echo Admin::status_badge( $job ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped HTML. ?></td>
 							</tr>
 						<?php endforeach; ?>
 					</tbody>
@@ -154,7 +180,10 @@ $tiles = array(
 			</div>
 			<p><a href="<?php echo esc_url( Admin::url( 'history' ) ); ?>"><?php esc_html_e( 'View all history', 'dl-relocate-db' ); ?> <span aria-hidden="true">→</span></a></p>
 		<?php else : ?>
-			<p class="dlz-empty"><?php esc_html_e( 'No jobs yet.', 'dl-relocate-db' ); ?></p>
+			<div class="dlz-empty-state">
+				<span class="dashicons dashicons-backup" aria-hidden="true"></span>
+				<?php esc_html_e( 'No jobs yet. Your dry runs and replacements will appear here.', 'dl-relocate-db' ); ?>
+			</div>
 		<?php endif; ?>
 	</section>
 </div>
