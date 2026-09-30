@@ -40,4 +40,12 @@
 		<!-- Templates are included from inside methods, so their variables are not globals. -->
 		<exclude-pattern>/templates/*</exclude-pattern>
 	</rule>
+
+	<!-- Tests build serialized, JSON and random fixtures on purpose. -->
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.AlternativeFunctions">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
 </ruleset>

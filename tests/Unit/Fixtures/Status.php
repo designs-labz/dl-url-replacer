@@ -1,0 +1,9 @@
+<?php
+declare( strict_types=1 );
+
+namespace DesignsLabz\Relocate\Tests\Unit\Fixtures;
+
+enum Status: string {
+	case Active   = 'active';
+	case Inactive = 'inactive';
+}
