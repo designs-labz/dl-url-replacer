@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: DesignsLabz Relocate 0.1.0\n"
-"Report-Msgid-Bugs-To: https://github.com/team-designslabz/dl-url-replacer/issues\n"
+"Report-Msgid-Bugs-To: https://github.com/designs-labz/dl-url-replacer/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -24,7 +24,7 @@ msgstr ""
 
 #. Plugin URI of the plugin
 #: designslabz-relocate.php
-msgid "https://github.com/team-designslabz/dl-url-replacer"
+msgid "https://github.com/designs-labz/dl-url-replacer"
 msgstr ""
 
 #. Description of the plugin

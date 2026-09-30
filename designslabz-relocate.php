@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       DesignsLabz Relocate
- * Plugin URI:        https://github.com/team-designslabz/dl-url-replacer
+ * Plugin URI:        https://github.com/designs-labz/dl-url-replacer
  * Description:       Safely search and replace URLs and text across your WordPress database, with serialized data support, dry runs and an operation history.
  * Version:           0.1.0
  * Requires at least: 6.5
