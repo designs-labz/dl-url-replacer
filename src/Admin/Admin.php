@@ -50,7 +50,18 @@ final class Admin {
 			return;
 		}
 
-		wp_enqueue_style( 'dlz-relocate-admin', plugins_url( 'assets/css/admin.css', $this->file ), array(), Plugin::VERSION );
+		wp_enqueue_style( 'dlz-relocate-admin', plugins_url( 'assets/css/admin.css', $this->file ), array( 'dashicons' ), Plugin::VERSION );
+
+		if ( 'search-replace' === $this->current_tab( $this->tabs() ) ) {
+			wp_enqueue_script(
+				'dlz-relocate-search-replace',
+				plugins_url( 'assets/js/search-replace.js', $this->file ),
+				array( 'wp-api-fetch', 'wp-i18n', 'wp-a11y' ),
+				Plugin::VERSION,
+				array( 'in_footer' => true )
+			);
+			wp_set_script_translations( 'dlz-relocate-search-replace', 'designslabz-relocate', dirname( $this->file ) . '/languages' );
+		}
 	}
 
 	public function render_page(): void {
@@ -71,8 +82,9 @@ final class Admin {
 	 */
 	private function tabs(): array {
 		return array(
-			'database' => __( 'Database', 'designslabz-relocate' ),
-			'settings' => __( 'Settings', 'designslabz-relocate' ),
+			'search-replace' => __( 'Search & Replace', 'designslabz-relocate' ),
+			'database'       => __( 'Database', 'designslabz-relocate' ),
+			'settings'       => __( 'Settings', 'designslabz-relocate' ),
 		);
 	}
 
@@ -90,15 +102,18 @@ final class Admin {
 	 * @return array<string, mixed>
 	 */
 	private function tab_args( string $tab ): array {
-		if ( 'database' !== $tab ) {
-			return array();
-		}
-
 		try {
-			return array(
-				'tables' => $this->schema->tables(),
-				'server' => $this->schema->server_info(),
-			);
+			return match ( $tab ) {
+				'search-replace' => array(
+					'tables' => $this->schema->searchable_tables(),
+					'prefix' => $this->schema->server_info()['prefix'],
+				),
+				'database'       => array(
+					'tables' => $this->schema->tables(),
+					'server' => $this->schema->server_info(),
+				),
+				default          => array(),
+			};
 		} catch ( RuntimeException $e ) {
 			return array( 'error' => $e->getMessage() );
 		}

@@ -11,7 +11,10 @@
 		"wp-coding-standards/wpcs": "^3.1",
 		"phpstan/phpstan": "^2.1",
 		"szepeviktor/phpstan-wordpress": "^2.0",
-		"phpunit/phpunit": "^9.6"
+		"phpunit/phpunit": "^9.6",
+		"wp-phpunit/wp-phpunit": "^7.1",
+		"yoast/phpunit-polyfills": "^4.0",
+		"roots/wordpress-no-content": "^7.1"
 	},
 	"autoload-dev": {
 		"psr-4": {
@@ -31,6 +34,7 @@
 		"lint": "phpcs",
 		"lint:fix": "phpcbf",
 		"analyse": "phpstan analyse --memory-limit=1G",
-		"test": "phpunit"
+		"test": "phpunit",
+		"test:integration": "phpunit -c phpunit-integration.xml.dist"
 	}
 }

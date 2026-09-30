@@ -8,10 +8,13 @@ namespace DesignsLabz\Relocate;
  */
 final class Installer {
 
-	public const JOBS_TABLE = 'dlz_relocate_jobs';
-	public const LOG_TABLE  = 'dlz_relocate_log';
+	/** Shared by every table this plugin creates, so they can be kept out of searches. */
+	public const TABLE_PREFIX = 'dlz_relocate_';
 
-	private const DB_VERSION        = 1;
+	public const JOBS_TABLE = self::TABLE_PREFIX . 'jobs';
+	public const LOG_TABLE  = self::TABLE_PREFIX . 'log';
+
+	private const DB_VERSION        = 2;
 	private const DB_VERSION_OPTION = 'dlz_relocate_db_version';
 
 	public function __construct( private \wpdb $wpdb ) {}
@@ -78,6 +81,7 @@ final class Installer {
 				created_at datetime NOT NULL,
 				started_at datetime DEFAULT NULL,
 				finished_at datetime DEFAULT NULL,
+				updated_at datetime NOT NULL,
 				PRIMARY KEY  (id),
 				KEY status (status),
 				KEY created_at (created_at)

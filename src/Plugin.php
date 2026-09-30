@@ -5,6 +5,9 @@ namespace DesignsLabz\Relocate;
 
 use DesignsLabz\Relocate\Admin\Admin;
 use DesignsLabz\Relocate\Database\Schema;
+use DesignsLabz\Relocate\Jobs\JobRepository;
+use DesignsLabz\Relocate\Jobs\JobRunner;
+use DesignsLabz\Relocate\Rest\JobsController;
 
 /**
  * Builds the plugin's objects and hooks them into WordPress.
@@ -31,11 +34,17 @@ final class Plugin {
 		add_filter( 'map_meta_cap', array( $this, 'map_capability' ), 10, 3 );
 		add_action( 'init', array( $this, 'load_textdomain' ) );
 
+		$settings = new Settings();
+		$schema   = new Schema( $this->wpdb );
+		$logger   = new Logger( $this->wpdb );
+		$jobs     = new JobRepository( $this->wpdb );
+
 		( new Installer( $this->wpdb ) )->register();
+		( new JobsController( $jobs, new JobRunner( $this->wpdb, $schema, $jobs, $settings, $logger ), $schema, $logger ) )->register();
 
 		if ( is_admin() ) {
-			( new Settings() )->register();
-			( new Admin( $this->file, new Schema( $this->wpdb ) ) )->register();
+			$settings->register();
+			( new Admin( $this->file, $schema ) )->register();
 		}
 	}
 

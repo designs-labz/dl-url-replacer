@@ -32,3 +32,99 @@
 	font-variant-numeric: tabular-nums;
 	white-space: nowrap;
 }
+
+.dlz-relocate .dlz-picker-actions {
+	margin-top: 0;
+}
+
+.dlz-relocate .dlz-picker-group {
+	margin-bottom: 1em;
+}
+
+.dlz-relocate .dlz-picker-group summary {
+	cursor: pointer;
+	font-weight: 600;
+	padding: 0.25em 0;
+}
+
+.dlz-relocate .dlz-picker-count {
+	font-weight: 400;
+}
+
+.dlz-relocate .dlz-picker-list {
+	max-height: 18em;
+	overflow-y: auto;
+	margin: 0.5em 0 0;
+	padding: 0.5em 0.75em;
+	border: 1px solid #c3c4c7;
+	background: #fff;
+}
+
+.dlz-relocate .dlz-picker-list li {
+	margin: 0;
+	padding: 0.2em 0;
+}
+
+.dlz-relocate .dlz-picker-list code {
+	padding: 0;
+	background: none;
+}
+
+.dlz-relocate .dlz-picker-meta {
+	color: #646970;
+}
+
+.dlz-relocate .dlz-progress {
+	max-width: 40em;
+}
+
+.dlz-relocate .dlz-progress progress {
+	width: 100%;
+	height: 1.25em;
+}
+
+.dlz-relocate .dlz-status {
+	font-size: 14px;
+}
+
+.dlz-relocate .dlz-status .dashicons {
+	vertical-align: text-bottom;
+}
+
+.dlz-relocate .dlz-results h2:focus {
+	outline: none;
+}
+
+.dlz-relocate .dlz-results h2:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+}
+
+.dlz-relocate .dlz-samples ol {
+	margin-left: 1.5em;
+}
+
+.dlz-relocate .dlz-sample {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 0.25em 1em;
+	margin: 0 0 1.5em;
+}
+
+.dlz-relocate .dlz-sample dt {
+	font-weight: 600;
+}
+
+.dlz-relocate .dlz-sample dd {
+	margin: 0;
+	min-width: 0;
+}
+
+.dlz-relocate .dlz-sample pre {
+	margin: 0;
+	padding: 0.5em;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}

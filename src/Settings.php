@@ -11,8 +11,12 @@ final class Settings {
 	public const OPTION = 'dlz_relocate_settings';
 
 	private const DEFAULTS = array(
+		'batch_size'  => 500,
 		'delete_data' => false,
 	);
+
+	private const MIN_BATCH_SIZE = 50;
+	private const MAX_BATCH_SIZE = 5000;
 
 	public function register(): void {
 		add_action( 'admin_init', array( $this, 'register_setting' ) );
@@ -30,6 +34,17 @@ final class Settings {
 			)
 		);
 
+		add_settings_section( 'processing', __( 'Processing', 'designslabz-relocate' ), '__return_false', self::OPTION );
+
+		add_settings_field(
+			'batch_size',
+			__( 'Rows per batch', 'designslabz-relocate' ),
+			array( $this, 'render_batch_size_field' ),
+			self::OPTION,
+			'processing',
+			array( 'label_for' => 'dlz-relocate-batch-size' )
+		);
+
 		add_settings_section( 'data', __( 'Data', 'designslabz-relocate' ), '__return_false', self::OPTION );
 
 		add_settings_field(
@@ -43,13 +58,25 @@ final class Settings {
 
 	/**
 	 * @param mixed $input Raw submitted value.
-	 * @return array{delete_data: bool}
+	 * @return array{batch_size: int, delete_data: bool}
 	 */
 	public function sanitize( mixed $input ): array {
 		$input = is_array( $input ) ? $input : array();
 
 		return array(
+			'batch_size'  => min( self::MAX_BATCH_SIZE, max( self::MIN_BATCH_SIZE, absint( $input['batch_size'] ?? self::DEFAULTS['batch_size'] ) ) ),
 			'delete_data' => ! empty( $input['delete_data'] ),
+		);
+	}
+
+	public function render_batch_size_field(): void {
+		printf(
+			'<input type="number" id="dlz-relocate-batch-size" name="%1$s[batch_size]" value="%2$d" min="%3$d" max="%4$d" step="50" class="small-text" aria-describedby="dlz-relocate-batch-size-description"><p class="description" id="dlz-relocate-batch-size-description">%5$s</p>',
+			esc_attr( self::OPTION ),
+			(int) $this->batch_size(),
+			(int) self::MIN_BATCH_SIZE,
+			(int) self::MAX_BATCH_SIZE,
+			esc_html__( 'How many rows are read from a table at a time. Lower it if processing runs out of memory on tables with very large rows, such as page builder content.', 'designslabz-relocate' )
 		);
 	}
 
@@ -64,12 +91,16 @@ final class Settings {
 		);
 	}
 
+	public function batch_size(): int {
+		return (int) $this->all()['batch_size'];
+	}
+
 	public function delete_data_on_uninstall(): bool {
 		return (bool) $this->all()['delete_data'];
 	}
 
 	/**
-	 * @return array{delete_data: bool}
+	 * @return array{batch_size: int, delete_data: bool}
 	 */
 	private function all(): array {
 		$saved = get_option( self::OPTION, array() );

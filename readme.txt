@@ -2,7 +2,7 @@
 Contributors: designs_labz
 Tags: search replace, migration, database, urls, serialized
 Requires at least: 6.5
-Tested up to: 6.8
+Tested up to: 7.1
 Requires PHP: 8.1
 Stable tag: 0.1.0
 License: GPLv3 or later
@@ -29,4 +29,4 @@ Only users who can manage options and post unfiltered HTML, which by default mea
 == Changelog ==
 
 = 0.1.0 =
-* Development release: admin screen, database overview and settings.
+* Development release: dry-run search and replace, database overview and settings.

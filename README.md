@@ -17,7 +17,16 @@ Search and replace URLs and text across a WordPress database without breaking se
 composer install
 composer lint      # PHPCS (WordPress-Extra)
 composer analyse   # PHPStan level 6
+composer test      # Unit tests (no WordPress or database needed)
 ```
+
+Integration tests run against a real WordPress and MySQL. They drop and recreate the tables in the database you point them at, so use an empty one:
+
+```bash
+WP_TESTS_DB_HOST=127.0.0.1:3306 WP_TESTS_DB_NAME=relocate_tests composer test:integration
+```
+
+`WP_TESTS_DB_USER` and `WP_TESTS_DB_PASSWORD` default to `root` and an empty password.
 
 Classes live in `src/` under the `DesignsLabz\Relocate` namespace and are loaded by the PSR-4 autoloader in `designslabz-relocate.php`, so the plugin runs straight from a Git checkout without `composer install`. Composer is only needed for dev tooling.
 
