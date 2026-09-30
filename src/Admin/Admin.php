@@ -169,7 +169,7 @@ final class Admin {
 			Plugin::CAPABILITY,
 			self::PAGE,
 			array( $this, 'render_page' ),
-			'dashicons-migrate',
+			$this->menu_icon(),
 			80
 		);
 		$this->hooks[ $hook ] = 'dashboard';
@@ -294,8 +294,21 @@ final class Admin {
 			array(
 				'sections' => $sections,
 				'current'  => $current,
+				'logo'     => plugins_url( 'assets/images/logo.svg', $this->file ),
 			) + $args
 		);
+	}
+
+	/**
+	 * The DesignsLabz mark as a one-colour SVG. WordPress repaints a base64 SVG
+	 * menu icon to match the admin colour scheme, so it looks native in the menu.
+	 */
+	private function menu_icon(): string {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- A small file inside the plugin.
+		$svg = (string) file_get_contents( dirname( $this->file ) . '/assets/images/menu-icon.svg' );
+
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- The data URI format WordPress requires for menu icons.
+		return 'data:image/svg+xml;base64,' . base64_encode( $svg );
 	}
 
 	private static function page_slug( string $section ): string {

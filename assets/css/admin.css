@@ -1,14 +1,15 @@
 /*
  * DL Relocate DB admin screens.
  *
- * Colours follow the user's admin colour scheme through --wp-admin-theme-color.
+ * The accent is the DesignsLabz brand purple, #7801e7. It has a 7:1 contrast
+ * ratio against white, so it is safe for text, links and white-on-purple.
  * Every animation is switched off for people who prefer reduced motion.
  */
 
 .dlz-relocate {
-	--dlz-accent: var(--wp-admin-theme-color, #2271b1);
-	--dlz-accent-dark: var(--wp-admin-theme-color-darker-20, #135e96);
-	--dlz-accent-soft: rgba(34, 113, 177, 0.08);
+	--dlz-accent: #7801e7;
+	--dlz-accent-dark: #5c00b3;
+	--dlz-accent-soft: rgba(120, 1, 231, 0.08);
 	--dlz-text: #1d2327;
 	--dlz-muted: #50575e;
 	--dlz-border: #dcdcde;
@@ -48,14 +49,75 @@
 }
 
 .dlz-relocate .dlz-brand-mark {
-	display: grid;
-	place-items: center;
-	width: 38px;
-	height: 38px;
-	font-size: 22px;
+	display: block;
+	width: 40px;
+	height: auto;
+}
+
+/* WordPress controls in the brand colour ------------------------------------ */
+
+.dlz-relocate a {
+	color: var(--dlz-accent);
+}
+
+.dlz-relocate a:hover,
+.dlz-relocate a:active {
+	color: var(--dlz-accent-dark);
+}
+
+.dlz-relocate a:focus {
+	color: var(--dlz-accent-dark);
+	box-shadow: 0 0 0 2px var(--dlz-accent);
+	outline: 2px solid transparent;
+}
+
+.wp-core-ui .dlz-relocate .button-primary {
 	color: #fff;
 	background: var(--dlz-accent);
-	border-radius: 10px;
+	border-color: var(--dlz-accent);
+}
+
+.wp-core-ui .dlz-relocate .button-primary:hover,
+.wp-core-ui .dlz-relocate .button-primary:active {
+	color: #fff;
+	background: var(--dlz-accent-dark);
+	border-color: var(--dlz-accent-dark);
+}
+
+.wp-core-ui .dlz-relocate .button-primary:focus {
+	color: #fff;
+	background: var(--dlz-accent-dark);
+	border-color: var(--dlz-accent-dark);
+	box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--dlz-accent);
+}
+
+.wp-core-ui .dlz-relocate .button:not(.button-primary):not(.button-link-delete):not(:disabled) {
+	color: var(--dlz-accent);
+	border-color: var(--dlz-accent);
+}
+
+.wp-core-ui .dlz-relocate .button:not(.button-primary):not(.button-link-delete):not(:disabled):hover {
+	color: var(--dlz-accent-dark);
+	background: var(--dlz-accent-soft);
+	border-color: var(--dlz-accent-dark);
+}
+
+.wp-core-ui .dlz-relocate .button:focus {
+	box-shadow: 0 0 0 1px var(--dlz-accent);
+}
+
+.dlz-relocate input[type="text"]:focus,
+.dlz-relocate input[type="search"]:focus,
+.dlz-relocate input[type="number"]:focus,
+.dlz-relocate input[type="checkbox"]:focus,
+.dlz-relocate select:focus {
+	border-color: var(--dlz-accent);
+	box-shadow: 0 0 0 1px var(--dlz-accent);
+}
+
+.dlz-relocate input[type="checkbox"]:checked::before {
+	/* WordPress's own tick, in the brand colour instead of the admin blue. */
+	content: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2020%2020%27%3E%3Cpath%20d%3D%27M14.83%204.89l1.34.94-5.81%208.38H9.02L5.78%209.67l1.34-1.25%202.57%202.4z%27%20fill%3D%27%237801e7%27%2F%3E%3C%2Fsvg%3E");
 }
 
 .dlz-relocate .dlz-brand-name {

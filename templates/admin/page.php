@@ -23,7 +23,7 @@ $icons = array(
 <div class="wrap dlz-relocate">
 	<header class="dlz-header">
 		<div class="dlz-brand">
-			<span class="dlz-brand-mark dashicons dashicons-migrate" aria-hidden="true"></span>
+			<img class="dlz-brand-mark" src="<?php echo esc_url( $args['logo'] ); ?>" alt="" width="40" height="37">
 			<h1 class="dlz-brand-name">
 				<?php esc_html_e( 'DL Relocate DB', 'dl-relocate-db' ); ?>
 				<span class="dlz-version"><?php echo esc_html( Plugin::VERSION ); ?></span>
