@@ -4,13 +4,16 @@ declare( strict_types=1 );
 namespace DesignsLabz\Relocate;
 
 use DesignsLabz\Relocate\Admin\Admin;
+use DesignsLabz\Relocate\Cli\Command;
 use DesignsLabz\Relocate\Database\Schema;
 use DesignsLabz\Relocate\Jobs\BeforeImage;
 use DesignsLabz\Relocate\Jobs\Cleanup;
 use DesignsLabz\Relocate\Jobs\JobRepository;
 use DesignsLabz\Relocate\Jobs\JobRunner;
+use DesignsLabz\Relocate\Jobs\JobStarter;
 use DesignsLabz\Relocate\Rest\JobFormatter;
 use DesignsLabz\Relocate\Rest\JobsController;
+use WP_CLI;
 
 /**
  * Builds the plugin's objects and hooks them into WordPress.
@@ -47,7 +50,13 @@ final class Plugin {
 
 		( new Installer( $this->wpdb ) )->register();
 		( new Cleanup( $jobs, $images, $logger, $settings ) )->register();
-		( new JobsController( $jobs, $runner, $schema, $images, $formatter, $logger ) )->register();
+		$starter = new JobStarter( $jobs, $runner, $schema, $images, $logger );
+
+		( new JobsController( $jobs, $runner, $starter, $formatter, $logger ) )->register();
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			WP_CLI::add_command( 'dlz', new Command( new Installer( $this->wpdb ), $schema, $jobs, $runner, $starter, $formatter ) );
+		}
 
 		if ( is_admin() ) {
 			$settings->register();

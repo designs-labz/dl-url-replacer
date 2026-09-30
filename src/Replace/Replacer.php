@@ -101,7 +101,7 @@ final class Replacer {
 		);
 
 		if ( null === $new_value ) {
-			throw new RuntimeException( 'Replacement failed: ' . preg_last_error_msg() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+			throw new RuntimeException( 'Replacement failed: ' . preg_last_error_msg() );
 		}
 
 		return array( $new_value, $count );
@@ -111,7 +111,7 @@ final class Replacer {
 		$matched = preg_match( $pattern, $value );
 
 		if ( false === $matched ) {
-			throw new RuntimeException( 'Search failed: ' . preg_last_error_msg() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+			throw new RuntimeException( 'Search failed: ' . preg_last_error_msg() );
 		}
 
 		return 1 === $matched;

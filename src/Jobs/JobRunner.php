@@ -311,7 +311,7 @@ final class JobRunner {
 	 */
 	private function query( string $sql ): void {
 		if ( false === $this->wpdb->query( $sql ) ) {
-			throw new RuntimeException( $this->wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+			throw new RuntimeException( $this->wpdb->last_error );
 		}
 	}
 

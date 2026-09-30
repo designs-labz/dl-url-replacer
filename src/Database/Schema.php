@@ -180,7 +180,7 @@ final class Schema {
 	 */
 	private function check_error( string $message ): void {
 		if ( '' !== $this->wpdb->last_error ) {
-			throw new RuntimeException( sprintf( $message, $this->wpdb->last_error ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+			throw new RuntimeException( sprintf( $message, $this->wpdb->last_error ) );
 		}
 	}
 }

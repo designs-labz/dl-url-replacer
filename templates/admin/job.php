@@ -50,7 +50,12 @@ $options = array_filter(
 	</dd>
 
 	<dt><?php esc_html_e( 'Started by', 'designslabz-relocate' ); ?></dt>
-	<dd><?php echo esc_html( $user ? $user->display_name : __( 'Unknown user', 'designslabz-relocate' ) ); ?></dd>
+	<dd>
+		<?php
+		// Jobs started from WP-CLI without --user have no user.
+		echo esc_html( $user ? $user->display_name : ( 0 === $job->user_id ? __( 'WP-CLI', 'designslabz-relocate' ) : __( 'Unknown user', 'designslabz-relocate' ) ) );
+		?>
+	</dd>
 
 	<dt><?php esc_html_e( 'Created', 'designslabz-relocate' ); ?></dt>
 	<dd><?php echo esc_html( Admin::format_date( $job->created_at ) ); ?></dd>

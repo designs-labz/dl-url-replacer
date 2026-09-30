@@ -3,17 +3,13 @@ declare( strict_types=1 );
 
 namespace DesignsLabz\Relocate\Rest;
 
-use DesignsLabz\Relocate\Database\Schema;
-use DesignsLabz\Relocate\Jobs\BeforeImage;
 use DesignsLabz\Relocate\Jobs\Job;
 use DesignsLabz\Relocate\Jobs\JobRepository;
+use DesignsLabz\Relocate\Jobs\JobException;
 use DesignsLabz\Relocate\Jobs\JobRunner;
-use DesignsLabz\Relocate\Jobs\JobStatus;
-use DesignsLabz\Relocate\Jobs\Report;
+use DesignsLabz\Relocate\Jobs\JobStarter;
 use DesignsLabz\Relocate\Logger;
 use DesignsLabz\Relocate\Plugin;
-use DesignsLabz\Relocate\Replace\Replacement;
-use InvalidArgumentException;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -33,8 +29,7 @@ final class JobsController {
 	public function __construct(
 		private JobRepository $jobs,
 		private JobRunner $runner,
-		private Schema $schema,
-		private BeforeImage $before_images,
+		private JobStarter $starter,
 		private JobFormatter $formatter,
 		private Logger $logger
 	) {}
@@ -153,83 +148,19 @@ final class JobsController {
 	}
 
 	public function create_job( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$search  = (string) $request['search'];
-		$replace = (string) $request['replace'];
-
-		if ( '' === $search ) {
-			return $this->error( 'dlz_relocate_empty_search', __( 'Enter the text or URL to search for.', 'designslabz-relocate' ) );
-		}
-
-		if ( $search === $replace ) {
-			return $this->error( 'dlz_relocate_same_values', __( 'The search and replacement values are the same, so there is nothing to change.', 'designslabz-relocate' ) );
-		}
-
-		$settings = array(
-			'case_sensitive' => (bool) $request['case_sensitive'],
-			'whole_words'    => (bool) $request['whole_words'],
-			'url_variants'   => (bool) $request['url_variants'],
-			'skip_guids'     => (bool) $request['skip_guids'],
-			'tables'         => array(),
+		return $this->started(
+			fn(): Job => $this->starter->dry_run(
+				(string) $request['search'],
+				(string) $request['replace'],
+				array(
+					'case_sensitive' => (bool) $request['case_sensitive'],
+					'whole_words'    => (bool) $request['whole_words'],
+					'url_variants'   => (bool) $request['url_variants'],
+					'skip_guids'     => (bool) $request['skip_guids'],
+				),
+				array_values( array_map( 'strval', (array) $request['tables'] ) )
+			)
 		);
-
-		try {
-			new Replacement( $search, $replace, $settings['case_sensitive'], $settings['whole_words'], $settings['url_variants'] );
-		} catch ( InvalidArgumentException ) {
-			return $this->error( 'dlz_relocate_invalid_values', __( 'The search and replacement values must be valid UTF-8 text.', 'designslabz-relocate' ) );
-		}
-
-		try {
-			$available = $this->schema->searchable_tables();
-		} catch ( RuntimeException $e ) {
-			return $this->error( 'dlz_relocate_database_error', $e->getMessage(), 500 );
-		}
-
-		$requested = array_map( 'strval', (array) $request['tables'] );
-		$unknown   = array_diff( $requested, array_keys( $available ) );
-
-		if ( ! $requested ) {
-			return $this->error( 'dlz_relocate_no_tables', __( 'Select at least one table to search.', 'designslabz-relocate' ) );
-		}
-
-		if ( $unknown ) {
-			return $this->error(
-				'dlz_relocate_invalid_tables',
-				/* translators: %s: comma-separated table names. */
-				sprintf( __( 'These tables do not exist or cannot be searched: %s', 'designslabz-relocate' ), implode( ', ', $unknown ) )
-			);
-		}
-
-		// Keep the database's own order, so jobs always walk tables the same way.
-		$settings['tables'] = array_values( array_intersect( array_keys( $available ), $requested ) );
-
-		$job = new Job(
-			0,
-			null,
-			true,
-			JobStatus::Pending,
-			$search,
-			$replace,
-			$settings,
-			array(
-				'table_index' => 0,
-				'last_key'    => null,
-				'total_rows'  => array_sum( array_map( fn( string $name ): int => $available[ $name ]->approx_rows, $settings['tables'] ) ),
-			),
-			new Report(),
-			get_current_user_id(),
-			gmdate( 'Y-m-d H:i:s' )
-		);
-
-		try {
-			$this->jobs->create( $job );
-		} catch ( RuntimeException $e ) {
-			$this->logger->error( 'Could not create a job.', array( 'error' => $e->getMessage() ) );
-			return $this->error( 'dlz_relocate_database_error', __( 'The job could not be saved to the database.', 'designslabz-relocate' ), 500 );
-		}
-
-		$this->logger->info( 'Dry run created.', array( 'tables' => count( $settings['tables'] ) ), $job->id );
-
-		return new WP_REST_Response( $this->formatter->format( $job ), 201 );
 	}
 
 	public function get_job( WP_REST_Request $request ): WP_REST_Response|WP_Error {
@@ -260,9 +191,7 @@ final class JobsController {
 	}
 
 	/**
-	 * Starts the live replacement a completed dry run previewed. Everything is
-	 * copied from the dry run on the server, never taken from the request, so
-	 * what runs is exactly what was previewed.
+	 * Starts the live replacement a completed dry run previewed.
 	 */
 	public function execute_job( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$dry_run = $this->jobs->find( (int) $request['id'] );
@@ -275,34 +204,7 @@ final class JobsController {
 			return $this->error( 'dlz_relocate_not_confirmed', __( 'Confirm the replacement before starting it.', 'designslabz-relocate' ) );
 		}
 
-		if ( ! $dry_run->dry_run || JobStatus::Completed !== $dry_run->status ) {
-			return $this->error( 'dlz_relocate_not_executable', __( 'Only a completed dry run can be applied to the database.', 'designslabz-relocate' ) );
-		}
-
-		if ( 0 === $dry_run->report->totals()['rows_changed'] ) {
-			return $this->error( 'dlz_relocate_nothing_to_replace', __( 'The dry run found nothing to replace.', 'designslabz-relocate' ) );
-		}
-
-		$result = $this->runner->exclusive(
-			'execute',
-			function () use ( $dry_run, $request ): Job|WP_Error {
-				if ( null !== $this->jobs->child_id( $dry_run->id ) ) {
-					return $this->error( 'dlz_relocate_already_executed', __( 'This dry run has already been applied. Run a new dry run to replace again.', 'designslabz-relocate' ), 409 );
-				}
-
-				if ( $this->jobs->active_live_job() ) {
-					return $this->error( 'dlz_relocate_job_running', __( 'Another replacement is still running. Wait for it to finish or cancel it first.', 'designslabz-relocate' ), 409 );
-				}
-
-				return $this->start_live_job( $dry_run, (bool) $request['before_image'] );
-			}
-		);
-
-		if ( null === $result ) {
-			return $this->error( 'dlz_relocate_job_busy', __( 'Another replacement is being started. Try again in a few seconds.', 'designslabz-relocate' ), 409 );
-		}
-
-		return $result instanceof WP_Error ? $result : new WP_REST_Response( $this->formatter->format( $result ), 201 );
+		return $this->started( fn(): Job => $this->starter->replacement( $dry_run, (bool) $request['before_image'] ) );
 	}
 
 	public function resume_job( WP_REST_Request $request ): WP_REST_Response|WP_Error {
@@ -347,60 +249,15 @@ final class JobsController {
 		return rest_ensure_response( $this->formatter->format( $job ) );
 	}
 
-	private function start_live_job( Job $dry_run, bool $before_image ): Job|WP_Error {
-		$job = new Job(
-			0,
-			$dry_run->id,
-			false,
-			JobStatus::Pending,
-			$dry_run->search,
-			$dry_run->replace,
-			array( 'before_image' => $before_image ) + $dry_run->settings,
-			array(
-				'table_index' => 0,
-				'last_key'    => null,
-				'total_rows'  => $dry_run->report->totals()['rows_scanned'],
-			),
-			new Report(),
-			get_current_user_id(),
-			gmdate( 'Y-m-d H:i:s' )
-		);
-
+	/**
+	 * @param callable(): Job $start
+	 */
+	private function started( callable $start ): WP_REST_Response|WP_Error {
 		try {
-			$this->jobs->create( $job );
-		} catch ( RuntimeException $e ) {
-			$this->logger->error( 'Could not create a job.', array( 'error' => $e->getMessage() ) );
-			return $this->error( 'dlz_relocate_database_error', __( 'The job could not be saved to the database.', 'designslabz-relocate' ), 500 );
+			return new WP_REST_Response( $this->formatter->format( $start() ), 201 );
+		} catch ( JobException $e ) {
+			return $this->error( $e->error_code, $e->getMessage(), $e->status );
 		}
-
-		if ( $before_image ) {
-			try {
-				$job->before_image = $this->before_images->create( $job );
-				$this->jobs->save( $job );
-			} catch ( RuntimeException $e ) {
-				$job->finish( JobStatus::Failed, $e->getMessage() );
-				$this->jobs->save( $job );
-				$this->logger->error( 'Could not create the before-image file.', array( 'error' => $e->getMessage() ), $job->id );
-
-				return $this->error(
-					'dlz_relocate_before_image_failed',
-					/* translators: %s: error message. */
-					sprintf( __( 'The file for the original values could not be created, so nothing was changed. %s', 'designslabz-relocate' ), $e->getMessage() ),
-					500
-				);
-			}
-		}
-
-		$this->logger->info(
-			'Replacement started.',
-			array(
-				'dry_run'      => $dry_run->id,
-				'before_image' => $before_image,
-			),
-			$job->id
-		);
-
-		return $job;
 	}
 
 	private function error( string $code, string $message, int $status = 400 ): WP_Error {

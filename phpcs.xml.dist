@@ -20,6 +20,9 @@
 		<!-- This sniff only recognises prepare() on a variable literally named $wpdb, so it flags every
 		     $this->wpdb->prepare() call. InterpolatedNotPrepared still catches variables in SQL strings. -->
 		<exclude name="WordPress.DB.PreparedSQL.NotPrepared"/>
+		<!-- Exception messages are data, not output: they are escaped where they are shown
+		     (esc_html in templates, JSON in REST responses, plain text in WP-CLI). -->
+		<exclude name="WordPress.Security.EscapeOutput.ExceptionNotEscaped"/>
 	</rule>
 
 	<rule ref="WordPress.WP.I18n">

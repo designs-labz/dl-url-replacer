@@ -26,7 +26,7 @@ final class JobRepository {
 		$row['user_id']      = $job->user_id;
 
 		if ( false === $this->wpdb->insert( $this->table(), $row ) ) {
-			throw new RuntimeException( 'Could not create the job: ' . $this->wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+			throw new RuntimeException( 'Could not create the job: ' . $this->wpdb->last_error );
 		}
 
 		$job->id = (int) $this->wpdb->insert_id;
@@ -133,7 +133,7 @@ final class JobRepository {
 		);
 
 		if ( false === $deleted ) {
-			throw new RuntimeException( 'Could not delete old jobs: ' . $this->wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+			throw new RuntimeException( 'Could not delete old jobs: ' . $this->wpdb->last_error );
 		}
 
 		return array_values( array_filter( array_map( fn( object $row ): string => (string) $row->before_image, $rows ) ) );
@@ -163,7 +163,7 @@ final class JobRepository {
 	 */
 	public function save( Job $job ): void {
 		if ( false === $this->wpdb->update( $this->table(), $this->to_row( $job ), array( 'id' => $job->id ) ) ) {
-			throw new RuntimeException( 'Could not save the job: ' . $this->wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+			throw new RuntimeException( 'Could not save the job: ' . $this->wpdb->last_error );
 		}
 	}
 

@@ -35,7 +35,7 @@ final class BeforeImage {
 		$directory = $this->directory();
 
 		if ( ! wp_mkdir_p( $directory ) ) {
-			throw new RuntimeException( sprintf( 'Could not create the folder %s.', $directory ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+			throw new RuntimeException( sprintf( 'Could not create the folder %s.', $directory ) );
 		}
 
 		$this->protect( $directory );
@@ -143,13 +143,13 @@ final class BeforeImage {
 		$handle = gzopen( $path, 'ab' );
 
 		if ( false === $handle ) {
-			throw new RuntimeException( sprintf( 'Could not open %s for writing.', $path ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+			throw new RuntimeException( sprintf( 'Could not open %s for writing.', $path ) );
 		}
 
 		$written = gzwrite( $handle, $contents );
 
 		if ( ! gzclose( $handle ) || strlen( $contents ) !== $written ) {
-			throw new RuntimeException( sprintf( 'Could not write to %s. The disk may be full.', $path ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+			throw new RuntimeException( sprintf( 'Could not write to %s. The disk may be full.', $path ) );
 		}
 	}
 

@@ -114,7 +114,7 @@ final class TableBatch {
 				// wpdb refuses, without a database error, values the column's character set cannot store.
 				$error = '' !== $this->wpdb->last_error ? $this->wpdb->last_error : 'A new value contains characters the column cannot store.';
 
-				throw new RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+				throw new RuntimeException( $error );
 			}
 		}
 	}
@@ -260,7 +260,7 @@ final class TableBatch {
 		$rows = $this->wpdb->get_results( $this->wpdb->prepare( $sql, $args ), ARRAY_A );
 
 		if ( '' !== $this->wpdb->last_error ) {
-			throw new RuntimeException( $this->wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+			throw new RuntimeException( $this->wpdb->last_error );
 		}
 
 		return $rows;
