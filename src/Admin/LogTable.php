@@ -10,7 +10,8 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 }
 
 /**
- * The plugin's log on the History tab.
+ * The plugin's log on the History screen: searchable, sortable, paged, and
+ * filterable by level or by job.
  */
 final class LogTable extends \WP_List_Table {
 
@@ -39,7 +40,20 @@ final class LogTable extends \WP_List_Table {
 	}
 
 	public function prepare_items(): void {
-		[ $this->items, $total ] = $this->logger->entries( $this->get_pagenum(), self::PER_PAGE, null, $this->level_filter() );
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only sorting.
+		$orderby = isset( $_GET['orderby'] ) && 'level' === $_GET['orderby'] ? 'level' : 'id';
+		$order   = isset( $_GET['order'] ) && 'asc' === $_GET['order'] ? 'asc' : 'desc';
+		// phpcs:enable
+
+		[ $this->items, $total ] = $this->logger->entries(
+			$this->get_pagenum(),
+			self::PER_PAGE,
+			$this->job_filter(),
+			$this->level_filter(),
+			$this->search_term(),
+			$order,
+			$orderby
+		);
 
 		$this->set_pagination_args(
 			array(
@@ -48,11 +62,36 @@ final class LogTable extends \WP_List_Table {
 			)
 		);
 
-		$this->_column_headers = array( $this->get_columns(), array(), array(), 'message' );
+		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'message' );
 	}
 
 	public function no_items(): void {
+		if ( '' !== $this->search_term() || $this->job_filter() || $this->level_filter() ) {
+			esc_html_e( 'No log entries match.', 'designslabz-relocate' );
+			return;
+		}
+
 		esc_html_e( 'The log is empty.', 'designslabz-relocate' );
+	}
+
+	/**
+	 * The job whose entries are shown, if the list is narrowed to one.
+	 */
+	public function job_filter(): ?int {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter.
+		$job = isset( $_GET['log_job'] ) ? absint( $_GET['log_job'] ) : 0;
+
+		return $job ? $job : null;
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: bool}>
+	 */
+	protected function get_sortable_columns(): array {
+		return array(
+			'created_at' => array( 'id', true ),
+			'level'      => array( 'level', false ),
+		);
 	}
 
 	/**
@@ -63,7 +102,13 @@ final class LogTable extends \WP_List_Table {
 		$links   = array();
 
 		foreach ( array( '' => __( 'All', 'designslabz-relocate' ) ) + self::levels() as $level => $label ) {
-			$args = array( 'view' => 'log' ) + ( '' === $level ? array() : array( 'level' => $level ) );
+			$args = array_filter(
+				array(
+					'view'    => 'log',
+					'level'   => $level,
+					'log_job' => (int) $this->job_filter(),
+				)
+			);
 
 			$links[ '' === $level ? 'all' : $level ] = sprintf(
 				'<a href="%1$s"%2$s>%3$s</a>',
@@ -154,6 +199,11 @@ final class LogTable extends \WP_List_Table {
 			Logger::WARNING => __( 'Warnings', 'designslabz-relocate' ),
 			Logger::INFO    => __( 'Information', 'designslabz-relocate' ),
 		);
+	}
+
+	private function search_term(): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only search.
+		return isset( $_GET['s'] ) ? trim( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) : '';
 	}
 
 	private function level_filter(): ?string {

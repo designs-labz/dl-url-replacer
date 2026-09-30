@@ -26,11 +26,26 @@ $options = array_filter(
 		! $job->dry_run && empty( $job->settings['before_image'] ) ? __( 'Original values not saved', 'designslabz-relocate' ) : '',
 	)
 );
+
+$excluded = array();
+foreach ( $job->settings['exclude_columns'] ?? array() as $table_name => $table_columns ) {
+	foreach ( $table_columns as $column ) {
+		$excluded[] = $table_name . '.' . $column;
+	}
+}
 ?>
-<p><a href="<?php echo esc_url( Admin::url( 'history' ) ); ?>">&larr; <?php esc_html_e( 'All jobs', 'designslabz-relocate' ); ?></a></p>
+<p class="dlz-back"><a href="<?php echo esc_url( Admin::url( 'history' ) ); ?>">&larr; <?php esc_html_e( 'All jobs', 'designslabz-relocate' ); ?></a></p>
 
-<h2><?php echo esc_html( Admin::job_title( $job ) ); ?> <?php echo Admin::status_badge( $job ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped HTML. ?></h2>
+<div class="dlz-title-row">
+	<h2 class="dlz-title"><?php echo esc_html( Admin::job_title( $job ) ); ?> <?php echo Admin::status_badge( $job ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped HTML. ?></h2>
+	<?php if ( Admin::can_delete( $job ) ) : ?>
+		<a href="<?php echo esc_url( Admin::delete_url( $job->id ) ); ?>" class="button button-link-delete dlz-delete-job" data-job="<?php echo esc_attr( Admin::job_title( $job ) ); ?>">
+			<span class="dashicons dashicons-trash" aria-hidden="true"></span> <?php esc_html_e( 'Delete job', 'designslabz-relocate' ); ?>
+		</a>
+	<?php endif; ?>
+</div>
 
+<section class="dlz-card" aria-label="<?php esc_attr_e( 'Job details', 'designslabz-relocate' ); ?>">
 <dl class="dlz-summary">
 	<dt><?php esc_html_e( 'Search for', 'designslabz-relocate' ); ?></dt>
 	<dd><code><?php echo esc_html( $job->search ); ?></code></dd>
@@ -40,6 +55,11 @@ $options = array_filter(
 
 	<dt><?php esc_html_e( 'Options', 'designslabz-relocate' ); ?></dt>
 	<dd><?php echo esc_html( $options ? implode( ', ', $options ) : __( 'Defaults', 'designslabz-relocate' ) ); ?></dd>
+
+	<?php if ( $excluded ) : ?>
+		<dt><?php esc_html_e( 'Columns left out', 'designslabz-relocate' ); ?></dt>
+		<dd><code><?php echo esc_html( implode( ', ', $excluded ) ); ?></code></dd>
+	<?php endif; ?>
 
 	<dt><?php esc_html_e( 'Tables', 'designslabz-relocate' ); ?></dt>
 	<dd>
@@ -87,10 +107,12 @@ $options = array_filter(
 		</dd>
 	<?php endif; ?>
 </dl>
+</section>
 
 <?php require __DIR__ . '/partials/runner.php'; ?>
 
-<h2><?php esc_html_e( 'Log', 'designslabz-relocate' ); ?></h2>
+<section class="dlz-card" aria-labelledby="dlz-job-log">
+<h3 id="dlz-job-log" class="dlz-card-title"><?php esc_html_e( 'Log', 'designslabz-relocate' ); ?></h3>
 <?php if ( $args['logs'] ) : ?>
 	<div class="dlz-table-scroll">
 		<table class="widefat striped dlz-tables">
@@ -113,6 +135,30 @@ $options = array_filter(
 			</tbody>
 		</table>
 	</div>
+	<?php if ( $args['log_total'] > count( $args['logs'] ) ) : ?>
+		<p>
+			<a href="
+			<?php
+			echo esc_url(
+				Admin::url(
+					'history',
+					array(
+						'view'    => 'log',
+						'log_job' => $job->id,
+					)
+				)
+			);
+			?>
+						">
+				<?php
+				/* translators: %s: number of log entries. */
+				echo esc_html( sprintf( __( 'View all %s entries', 'designslabz-relocate' ), number_format_i18n( $args['log_total'] ) ) );
+				?>
+				<span aria-hidden="true">→</span>
+			</a>
+		</p>
+	<?php endif; ?>
 <?php else : ?>
-	<p><?php esc_html_e( 'No log entries for this job.', 'designslabz-relocate' ); ?></p>
+	<p class="dlz-empty"><?php esc_html_e( 'No log entries for this job.', 'designslabz-relocate' ); ?></p>
 <?php endif; ?>
+</section>

@@ -26,7 +26,7 @@ The admin screens and WP-CLI create jobs through `JobStarter` and drive them wit
 
 ## Hooks
 
-- `dlz_relocate_step_seconds` (filter): how long one step may work before saving and returning. Default 10.
+- `dlz_relocate_step_seconds` (filter): how long one step may work before saving and returning. Default 4.
 - The `dlz_relocate_manage` capability maps to `manage_options` plus `unfiltered_html`. Change it with a `map_meta_cap` filter.
 
 ## WP-CLI

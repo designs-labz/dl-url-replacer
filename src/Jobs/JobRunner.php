@@ -27,7 +27,8 @@ use RuntimeException;
  */
 final class JobRunner {
 
-	private const STEP_SECONDS = 10.0;
+	// Short enough for the progress bar to move steadily, long enough that request overhead stays small.
+	private const STEP_SECONDS = 4.0;
 
 	// Changing these moves the login cookie's name and path, so they are changed last.
 	private const SITE_ADDRESS_OPTIONS = array( 'siteurl', 'home' );
@@ -335,6 +336,10 @@ final class JobRunner {
 				$layout = $layout->without( 'guid' );
 			}
 
+			foreach ( $layout ? $job->settings['exclude_columns'][ $table ] ?? array() : array() as $column ) {
+				$layout = $layout->without( $column );
+			}
+
 			$this->layouts[ $table ] = $layout;
 		}
 
@@ -383,7 +388,7 @@ final class JobRunner {
 		 * Lower it on hosts whose proxy or PHP time limits are strict. Each step
 		 * always finishes at least one window, so 0 means one window per request.
 		 *
-		 * @param float $seconds Default 10.
+		 * @param float $seconds Default 4.
 		 */
 		$seconds = (float) apply_filters( 'dlz_relocate_step_seconds', self::STEP_SECONDS );
 		$limit   = (int) ini_get( 'max_execution_time' );

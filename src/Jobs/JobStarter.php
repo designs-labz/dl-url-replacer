@@ -28,9 +28,10 @@ final class JobStarter {
 	/**
 	 * @param array{case_sensitive: bool, whole_words: bool, url_variants: bool, skip_guids: bool} $options
 	 * @param list<string>                                                                         $tables
+	 * @param array<string, list<string>>                                                          $exclude_columns Table => columns to leave out.
 	 * @throws JobException When the request is invalid or the job cannot be saved.
 	 */
-	public function dry_run( string $search, string $replace, array $options, array $tables ): Job {
+	public function dry_run( string $search, string $replace, array $options, array $tables, array $exclude_columns = array() ): Job {
 		if ( '' === $search ) {
 			throw new JobException( 'dlz_relocate_empty_search', __( 'Enter the text or URL to search for.', 'designslabz-relocate' ) );
 		}
@@ -68,6 +69,8 @@ final class JobStarter {
 		// Keep the database's own order, so jobs always walk tables the same way.
 		$tables = array_values( array_intersect( array_keys( $available ), $tables ) );
 
+		$exclude_columns = $this->validate_columns( $exclude_columns, $tables );
+
 		$job = $this->create(
 			new Job(
 				0,
@@ -76,7 +79,10 @@ final class JobStarter {
 				JobStatus::Pending,
 				$search,
 				$replace,
-				$options + array( 'tables' => $tables ),
+				$options + array(
+					'tables'          => $tables,
+					'exclude_columns' => $exclude_columns,
+				),
 				array(
 					'table_index' => 0,
 					'last_key'    => null,
@@ -157,6 +163,52 @@ final class JobStarter {
 		);
 
 		return $job;
+	}
+
+	/**
+	 * Column names come from the request, so each one must be a searchable
+	 * column of a table the job actually searches.
+	 *
+	 * @param array<string, list<string>> $exclude Table => columns.
+	 * @param list<string>                $tables  Tables the job searches.
+	 * @return array<string, list<string>>
+	 * @throws JobException When a column is unknown.
+	 */
+	private function validate_columns( array $exclude, array $tables ): array {
+		$exclude = array_filter( $exclude );
+
+		if ( ! $exclude ) {
+			return array();
+		}
+
+		try {
+			$searchable = $this->schema->searchable_columns();
+		} catch ( RuntimeException $e ) {
+			throw new JobException( 'dlz_relocate_database_error', $e->getMessage(), 500 );
+		}
+
+		$valid   = array();
+		$unknown = array();
+
+		foreach ( $exclude as $table => $columns ) {
+			foreach ( array_unique( array_map( 'strval', (array) $columns ) ) as $column ) {
+				if ( in_array( $table, $tables, true ) && in_array( $column, $searchable[ $table ] ?? array(), true ) ) {
+					$valid[ $table ][] = $column;
+				} else {
+					$unknown[] = $table . '.' . $column;
+				}
+			}
+		}
+
+		if ( $unknown ) {
+			throw new JobException(
+				'dlz_relocate_invalid_columns',
+				/* translators: %s: comma-separated table.column names. */
+				sprintf( __( 'These columns do not exist or are not searched: %s', 'designslabz-relocate' ), implode( ', ', $unknown ) )
+			);
+		}
+
+		return $valid;
 	}
 
 	/**

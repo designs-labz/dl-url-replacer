@@ -16,7 +16,7 @@ use DesignsLabz\Relocate\Settings;
 use RuntimeException;
 
 /**
- * The Tools → DesignsLabz Relocate screen.
+ * The plugin's own admin menu: Dashboard, Search & Replace, History, Database and Settings.
  */
 final class Admin {
 
@@ -24,9 +24,12 @@ final class Admin {
 
 	private const DOWNLOAD_ACTION = 'dlz_relocate_before_image';
 
+	private const DELETE_ACTION = 'dlz_relocate_delete_jobs';
+
 	private const QUICK_ACTION = 'dlz_relocate_quick';
 
-	private string $hook_suffix = '';
+	/** @var array<string, string> Hook suffix => section. */
+	private array $hooks = array();
 
 	public function __construct(
 		private string $file,
@@ -39,7 +42,7 @@ final class Admin {
 	) {}
 
 	public function register(): void {
-		add_action( 'admin_menu', array( $this, 'add_page' ) );
+		add_action( 'admin_menu', array( $this, 'add_pages' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_post_' . self::DOWNLOAD_ACTION, array( $this, 'download_before_image' ) );
 	}
@@ -47,16 +50,8 @@ final class Admin {
 	/**
 	 * @param array<string, string|int> $args Extra query arguments.
 	 */
-	public static function url( string $tab = '', array $args = array() ): string {
-		return add_query_arg(
-			array_filter(
-				array(
-					'page' => self::PAGE,
-					'tab'  => $tab,
-				) + $args
-			),
-			admin_url( 'tools.php' )
-		);
+	public static function url( string $section = 'dashboard', array $args = array() ): string {
+		return add_query_arg( array( 'page' => self::page_slug( $section ) ) + $args, admin_url( 'admin.php' ) );
 	}
 
 	public static function job_url( int $job_id ): string {
@@ -74,6 +69,17 @@ final class Admin {
 				'_wpnonce' => wp_create_nonce( self::DOWNLOAD_ACTION . '_' . $job_id ),
 			),
 			admin_url( 'admin-post.php' )
+		);
+	}
+
+	public static function delete_url( int $job_id ): string {
+		return self::url(
+			'history',
+			array(
+				'dlz_action' => 'delete',
+				'job_ids'    => $job_id,
+				'_wpnonce'   => wp_create_nonce( self::DELETE_ACTION ),
+			)
 		);
 	}
 
@@ -120,6 +126,13 @@ final class Admin {
 	}
 
 	/**
+	 * A job that is being processed right now must not be deleted from under the runner.
+	 */
+	public static function can_delete( Job $job ): bool {
+		return $job->status->is_finished() || $job->is_interrupted();
+	}
+
+	/**
 	 * Streams a job's before-image file. The files are never linked directly.
 	 */
 	public function download_before_image(): void {
@@ -147,26 +160,103 @@ final class Admin {
 		exit;
 	}
 
-	public function add_page(): void {
-		$this->hook_suffix = (string) add_management_page(
+	public function add_pages(): void {
+		$sections = $this->sections();
+
+		$hook                 = add_menu_page(
 			__( 'DesignsLabz Relocate', 'designslabz-relocate' ),
-			__( 'DesignsLabz Relocate', 'designslabz-relocate' ),
+			__( 'Relocate', 'designslabz-relocate' ),
 			Plugin::CAPABILITY,
 			self::PAGE,
-			array( $this, 'render_page' )
+			array( $this, 'render_page' ),
+			'dashicons-migrate',
+			80
 		);
+		$this->hooks[ $hook ] = 'dashboard';
+
+		foreach ( $sections as $section => $label ) {
+			$hook = (string) add_submenu_page(
+				self::PAGE,
+				$label . ' ‹ ' . __( 'DesignsLabz Relocate', 'designslabz-relocate' ),
+				$label,
+				Plugin::CAPABILITY,
+				self::page_slug( $section ),
+				array( $this, 'render_page' )
+			);
+
+			$this->hooks[ $hook ] = $section;
+		}
+
+		$history = array_search( 'history', $this->hooks, true );
+		if ( false !== $history ) {
+			add_action( 'load-' . $history, array( $this, 'handle_history_actions' ) );
+		}
+	}
+
+	/**
+	 * Deletes jobs from a row link or the bulk action, then redirects back.
+	 * Runs before any output, so it can redirect.
+	 */
+	public function handle_history_actions(): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Only reads which action was asked for; the nonce is checked before acting.
+		$row  = isset( $_GET['dlz_action'] ) && 'delete' === $_GET['dlz_action'];
+		$bulk = ( isset( $_GET['action'] ) && 'delete' === $_GET['action'] ) || ( isset( $_GET['action2'] ) && 'delete' === $_GET['action2'] );
+		// phpcs:enable
+
+		if ( ! $row && ! $bulk ) {
+			return;
+		}
+
+		check_admin_referer( $row ? self::DELETE_ACTION : 'bulk-jobs' );
+
+		if ( ! current_user_can( Plugin::CAPABILITY ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to delete jobs.', 'designslabz-relocate' ), '', array( 'response' => 403 ) );
+		}
+
+		$ids     = isset( $_GET['job_ids'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['job_ids'] ) ) : array();
+		$deleted = 0;
+		$kept    = 0;
+
+		foreach ( array_filter( $ids ) as $id ) {
+			$job = $this->jobs->find( $id );
+
+			if ( ! $job ) {
+				continue;
+			}
+
+			if ( ! self::can_delete( $job ) ) {
+				++$kept;
+				continue;
+			}
+
+			$this->jobs->delete( $job->id );
+			$this->logger->delete_for_job( $job->id );
+			$this->before_images->delete( $job->before_image );
+			++$deleted;
+		}
+
+		wp_safe_redirect(
+			self::url(
+				'history',
+				array(
+					'deleted' => $deleted,
+					'kept'    => $kept,
+				)
+			)
+		);
+		exit;
 	}
 
 	public function enqueue_assets( string $hook_suffix ): void {
-		if ( $hook_suffix !== $this->hook_suffix ) {
+		$section = $this->hooks[ $hook_suffix ] ?? null;
+
+		if ( null === $section ) {
 			return;
 		}
 
 		wp_enqueue_style( 'dlz-relocate-admin', plugins_url( 'assets/css/admin.css', $this->file ), array( 'dashicons' ), Plugin::VERSION );
 
-		$tab = $this->current_tab( $this->tabs() );
-
-		if ( 'search-replace' === $tab || ( 'history' === $tab && $this->requested_job_id() ) ) {
+		if ( 'search-replace' === $section || ( 'history' === $section && $this->requested_job_id() ) ) {
 			wp_enqueue_script(
 				'dlz-relocate-search-replace',
 				plugins_url( 'assets/js/search-replace.js', $this->file ),
@@ -176,21 +266,23 @@ final class Admin {
 			);
 			wp_set_script_translations( 'dlz-relocate-search-replace', 'designslabz-relocate', dirname( $this->file ) . '/languages' );
 		}
+
+		if ( 'history' === $section ) {
+			wp_enqueue_script( 'dlz-relocate-history', plugins_url( 'assets/js/history.js', $this->file ), array( 'wp-i18n' ), Plugin::VERSION, array( 'in_footer' => true ) );
+			wp_set_script_translations( 'dlz-relocate-history', 'designslabz-relocate', dirname( $this->file ) . '/languages' );
+		}
 	}
 
 	public function render_page(): void {
-		$tabs    = $this->tabs();
-		$current = $this->current_tab( $tabs );
+		$sections = $this->sections();
+		$current  = $this->current_section();
 
 		try {
 			$args = match ( $current ) {
 				'dashboard'      => $this->dashboard_args(),
 				'search-replace' => $this->search_replace_args(),
 				'history'        => $this->history_args(),
-				'database'       => array(
-					'tables' => $this->schema->tables(),
-					'server' => $this->schema->server_info(),
-				),
+				'database'       => $this->database_args(),
 				default          => array(),
 			};
 		} catch ( RuntimeException $e ) {
@@ -200,16 +292,20 @@ final class Admin {
 		$this->template(
 			'page',
 			array(
-				'tabs'    => $tabs,
-				'current' => $current,
+				'sections' => $sections,
+				'current'  => $current,
 			) + $args
 		);
 	}
 
+	private static function page_slug( string $section ): string {
+		return 'dashboard' === $section ? self::PAGE : self::PAGE . '-' . $section;
+	}
+
 	/**
-	 * @return array<string, string> Tab slug => label.
+	 * @return array<string, string> Section => label.
 	 */
-	private function tabs(): array {
+	private function sections(): array {
 		return array(
 			'dashboard'      => __( 'Dashboard', 'designslabz-relocate' ),
 			'search-replace' => __( 'Search & Replace', 'designslabz-relocate' ),
@@ -219,14 +315,17 @@ final class Admin {
 		);
 	}
 
-	/**
-	 * @param array<string, string> $tabs Available tabs.
-	 */
-	private function current_tab( array $tabs ): string {
+	private function current_section(): string {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation.
-		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 
-		return isset( $tabs[ $tab ] ) ? $tab : (string) array_key_first( $tabs );
+		foreach ( array_keys( $this->sections() ) as $section ) {
+			if ( self::page_slug( $section ) === $page ) {
+				return $section;
+			}
+		}
+
+		return 'dashboard';
 	}
 
 	private function requested_job_id(): int {
@@ -243,11 +342,16 @@ final class Admin {
 		$uploads   = wp_upload_dir( null, false );
 		$retention = $this->settings->retention_days();
 		$cleanup   = wp_next_scheduled( Cleanup::HOOK );
+		$tables    = $this->schema->tables();
 
 		return array(
 			'attention'    => $this->jobs->needing_attention(),
 			'latest'       => $this->jobs->latest_live_job(),
 			'recent'       => $recent,
+			'stats'        => $this->jobs->stats() + array(
+				'tables' => count( $tables ),
+				'size'   => array_sum( array_map( fn( $table ): int => $table->size(), $tables ) ),
+			),
 			'quick_action' => self::QUICK_ACTION,
 			'status'       => array(
 				__( 'Plugin version', 'designslabz-relocate' ) => Plugin::VERSION,
@@ -294,6 +398,7 @@ final class Admin {
 
 		return array(
 			'tables'  => $this->schema->searchable_tables(),
+			'columns' => $this->schema->searchable_columns(),
 			'prefix'  => $this->schema->server_info()['prefix'],
 			'prefill' => $prefill,
 		);
@@ -308,15 +413,20 @@ final class Admin {
 		if ( $job_id ) {
 			$job = $this->jobs->find( $job_id );
 
-			return $job
-				? array(
-					'view'     => 'job',
-					'job'      => $job,
-					'job_data' => $this->formatter->format( $job ),
-					'child_id' => $job->dry_run ? $this->jobs->child_id( $job->id ) : null,
-					'logs'     => $this->logger->entries( 1, 200, $job->id )[0],
-				)
-				: array( 'error' => __( 'That job does not exist. It may have been removed by the history clean-up.', 'designslabz-relocate' ) );
+			if ( ! $job ) {
+				return array( 'error' => __( 'That job does not exist. It may have been deleted or removed by the history clean-up.', 'designslabz-relocate' ) );
+			}
+
+			[ $logs, $log_total ] = $this->logger->entries( 1, 20, $job->id );
+
+			return array(
+				'view'      => 'job',
+				'job'       => $job,
+				'job_data'  => $this->formatter->format( $job ),
+				'child_id'  => $job->dry_run ? $this->jobs->child_id( $job->id ) : null,
+				'logs'      => $logs,
+				'log_total' => $log_total,
+			);
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation.
@@ -325,8 +435,29 @@ final class Admin {
 		$table->prepare_items();
 
 		return array(
-			'view'  => $view,
-			'table' => $table,
+			'view'    => $view,
+			'table'   => $table,
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Counts for the notice after a redirect.
+			'deleted' => isset( $_GET['deleted'] ) ? absint( $_GET['deleted'] ) : null,
+			'kept'    => isset( $_GET['kept'] ) ? absint( $_GET['kept'] ) : 0,
+			// phpcs:enable
+		);
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function database_args(): array {
+		$tables = $this->schema->tables();
+		$list   = new TablesTable( $tables );
+		$list->prepare_items();
+
+		return array(
+			'server' => $this->schema->server_info(),
+			'list'   => $list,
+			'count'  => count( $tables ),
+			'size'   => array_sum( array_map( fn( $table ): int => $table->size(), $tables ) ),
+			'rows'   => array_sum( array_map( fn( $table ): int => $table->approx_rows, $tables ) ),
 		);
 	}
 

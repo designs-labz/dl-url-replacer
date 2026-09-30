@@ -50,6 +50,69 @@ final class HistoryTest extends WP_UnitTestCase {
 		$this->assertFalse( $live[0]->dry_run );
 	}
 
+	public function test_pages_can_be_searched_and_sorted(): void {
+		global $wpdb;
+
+		$small = $this->job( true, JobStatus::Completed, 'one.test' );
+		$big   = $this->job( true, JobStatus::Completed, 'two.test' );
+		$wpdb->update( $wpdb->prefix . Installer::JOBS_TABLE, array( 'replacements' => 5 ), array( 'id' => $small->id ) );
+		$wpdb->update( $wpdb->prefix . Installer::JOBS_TABLE, array( 'replacements' => 50 ), array( 'id' => $big->id ) );
+
+		[ $found, $total ] = $this->jobs->page( 1, 10, null, 'id', 'desc', 'two.' );
+		[ $by_count ]      = $this->jobs->page( 1, 10, null, 'replacements', 'desc' );
+		[ $unsafe ]        = $this->jobs->page( 1, 10, null, 'id; DROP TABLE x', 'sideways' );
+
+		$this->assertSame( 1, $total );
+		$this->assertSame( $big->id, $found[0]->id );
+		$this->assertSame( $big->id, $by_count[0]->id );
+		$this->assertCount( 2, $unsafe, 'Unknown sort columns fall back to id.' );
+	}
+
+	public function test_delete_removes_the_job_and_its_log(): void {
+		global $wpdb;
+
+		$logger = new Logger( $wpdb );
+		$job    = $this->job( true );
+		$other  = $this->job( true );
+		$logger->info( 'Mine.', array(), $job->id );
+		$logger->info( 'Not mine.', array(), $other->id );
+
+		$this->jobs->delete( $job->id );
+		$logger->delete_for_job( $job->id );
+
+		$this->assertNull( $this->jobs->find( $job->id ) );
+		$this->assertNotNull( $this->jobs->find( $other->id ) );
+		$this->assertSame( 0, $logger->entries( 1, 10, $job->id )[1] );
+		$this->assertSame( 1, $logger->entries( 1, 10, $other->id )[1] );
+	}
+
+	public function test_log_search(): void {
+		global $wpdb;
+
+		$logger = new Logger( $wpdb );
+		$logger->warning( 'Value left unchanged.', array( 'table' => 'wptests_special' ) );
+		$logger->info( 'Job completed.' );
+
+		$this->assertSame( array( 'Value left unchanged.' ), array_column( $logger->entries( 1, 10, null, null, 'wptests_special' )[0], 'message' ) );
+	}
+
+	public function test_stats(): void {
+		global $wpdb;
+
+		$live = $this->job( false );
+		$this->job( true );
+		$wpdb->update( $wpdb->prefix . Installer::JOBS_TABLE, array( 'replacements' => 7 ), array( 'id' => $live->id ) );
+
+		$this->assertSame(
+			array(
+				'jobs'              => 2,
+				'replacements_run'  => 1,
+				'replacements_made' => 7,
+			),
+			$this->jobs->stats()
+		);
+	}
+
 	public function test_a_quiet_unfinished_job_is_interrupted(): void {
 		$running = $this->job( true, JobStatus::Running );
 		$stale   = $this->job( true, JobStatus::Running );
@@ -124,14 +187,14 @@ final class HistoryTest extends WP_UnitTestCase {
 		return new Cleanup( $this->jobs, new BeforeImage( $wpdb ), new Logger( $wpdb ), new Settings() );
 	}
 
-	private function job( bool $dry_run, JobStatus $status = JobStatus::Completed ): Job {
+	private function job( bool $dry_run, JobStatus $status = JobStatus::Completed, string $search = 'old' ): Job {
 		$job = $this->jobs->create(
 			new Job(
 				0,
 				null,
 				$dry_run,
 				$status,
-				'old',
+				$search,
 				'new',
 				array(
 					'case_sensitive' => true,

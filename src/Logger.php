@@ -39,11 +39,10 @@ final class Logger {
 	}
 
 	/**
-	 * Newest first.
-	 *
+	 * @param string $search Matched against the message and its details.
 	 * @return array{0: list<object>, 1: int} The page of entries and the total number of matching entries.
 	 */
-	public function entries( int $page, int $per_page, ?int $job_id = null, ?string $level = null ): array {
+	public function entries( int $page, int $per_page, ?int $job_id = null, ?string $level = null, string $search = '', string $order = 'desc', string $orderby = 'id' ): array {
 		$conditions = array();
 		$args       = array( $this->table() );
 
@@ -57,18 +56,30 @@ final class Logger {
 			$args[]       = $level;
 		}
 
-		$where = $conditions ? ' WHERE ' . implode( ' AND ', $conditions ) : '';
+		if ( '' !== $search ) {
+			$like         = '%' . $this->wpdb->esc_like( $search ) . '%';
+			$conditions[] = '(message LIKE %s OR context LIKE %s)';
+			array_push( $args, $like, $like );
+		}
+
+		$where   = $conditions ? ' WHERE ' . implode( ' AND ', $conditions ) : '';
+		$orderby = 'level' === $orderby ? 'level' : 'id';
+		$order   = 'asc' === strtolower( $order ) ? 'ASC' : 'DESC';
 
 		$entries = $this->wpdb->get_results(
 			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Placeholders and values are built together.
 			$this->wpdb->prepare(
-				'SELECT * FROM %i' . $where . ' ORDER BY id DESC LIMIT %d OFFSET %d',
-				array_merge( $args, array( $per_page, max( 0, $page - 1 ) * $per_page ) )
+				'SELECT * FROM %i' . $where . ' ORDER BY %i ' . $order . ', id ' . $order . ' LIMIT %d OFFSET %d',
+				array_merge( $args, array( $orderby, $per_page, max( 0, $page - 1 ) * $per_page ) )
 			)
 		);
 		$total = (int) $this->wpdb->get_var( $this->wpdb->prepare( 'SELECT COUNT(*) FROM %i' . $where, $args ) );
 
 		return array( $entries, $total );
+	}
+
+	public function delete_for_job( int $job_id ): void {
+		$this->wpdb->delete( $this->table(), array( 'job_id' => $job_id ), array( '%d' ) );
 	}
 
 	/**

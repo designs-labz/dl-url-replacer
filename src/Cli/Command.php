@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace DesignsLabz\Relocate\Cli;
 
+use DesignsLabz\Relocate\Admin\Admin;
 use DesignsLabz\Relocate\Database\Schema;
 use DesignsLabz\Relocate\Installer;
 use DesignsLabz\Relocate\Jobs\Job;
@@ -75,6 +76,9 @@ final class Command {
 	 * [--include-guids]
 	 * : Also replace inside post GUIDs.
 	 *
+	 * [--skip-columns=<columns>]
+	 * : Comma-separated table.column pairs to leave out, e.g. wp_options.option_value.
+	 *
 	 * [--[no-]before-image]
 	 * : Save the original values of everything that changes to a file. On by default.
 	 *
@@ -125,7 +129,8 @@ final class Command {
 					'url_variants'   => (bool) Utils\get_flag_value( $assoc_args, 'url-variants', false ),
 					'skip_guids'     => ! Utils\get_flag_value( $assoc_args, 'include-guids', false ),
 				),
-				$this->tables( $assoc_args )
+				$this->tables( $assoc_args ),
+				$this->skip_columns( $assoc_args )
 			);
 		} catch ( JobException $e ) {
 			WP_CLI::error( $e->getMessage() );
@@ -231,6 +236,26 @@ final class Command {
 
 	/**
 	 * @param array<string, string|bool> $assoc_args
+	 * @return array<string, list<string>> Table => columns.
+	 */
+	private function skip_columns( array $assoc_args ): array {
+		$skip = array();
+
+		foreach ( array_filter( array_map( 'trim', explode( ',', (string) Utils\get_flag_value( $assoc_args, 'skip-columns', '' ) ) ) ) as $pair ) {
+			$dot = strrpos( $pair, '.' );
+
+			if ( false === $dot ) {
+				WP_CLI::error( sprintf( '"%s" is not a table.column pair.', $pair ) );
+			}
+
+			$skip[ substr( $pair, 0, $dot ) ][] = substr( $pair, $dot + 1 );
+		}
+
+		return $skip;
+	}
+
+	/**
+	 * @param array<string, string|bool> $assoc_args
 	 * @return list<string>
 	 */
 	private function tables( array $assoc_args ): array {
@@ -290,7 +315,7 @@ final class Command {
 		}
 
 		if ( $job->before_image && ! $this->quiet ) {
-			WP_CLI::log( sprintf( 'Original values saved. Download them from the job page: %s', admin_url( 'tools.php?page=designslabz-relocate&tab=history&job=' . $job->id ) ) );
+			WP_CLI::log( sprintf( 'Original values saved. Download them from the job page: %s', Admin::job_url( $job->id ) ) );
 		}
 
 		match ( $job->status ) {

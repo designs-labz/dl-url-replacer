@@ -107,6 +107,9 @@ final class JobsControllerTest extends WP_UnitTestCase {
 			// WordPress turns a comma-separated string into a list; it still goes through the allowlist.
 			'comma string'    => array( array( 'tables' => 'wptests_posts,wptests_nope' ), 'dlz_relocate_invalid_tables' ),
 			'tables not list' => array( array( 'tables' => array( array( 'nested' ) ) ), 'rest_invalid_param' ),
+			'unknown column'  => array( array( 'exclude_columns' => array( 'wptests_posts' => array( 'no_such_column' ) ) ), 'dlz_relocate_invalid_columns' ),
+			'key column'      => array( array( 'exclude_columns' => array( 'wptests_posts' => array( 'ID' ) ) ), 'dlz_relocate_invalid_columns' ),
+			'other table'     => array( array( 'exclude_columns' => array( 'wptests_users' => array( 'user_url' ) ) ), 'dlz_relocate_invalid_columns' ),
 		);
 	}
 

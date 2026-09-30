@@ -141,6 +141,15 @@ final class JobRunnerTest extends WP_UnitTestCase {
 		$this->assertCount( 20, $job->report->samples() );
 	}
 
+	public function test_excluded_columns_are_not_searched(): void {
+		[ $job ] = $this->run_to_end( $this->create_job( array( self::table( 'content' ) ), array( 'exclude_columns' => array( self::table( 'content' ) => array( 'body' ) ) ) ) );
+
+		$stats = $job->report->tables()[ self::table( 'content' ) ];
+
+		$this->assertArrayNotHasKey( 'body', $stats['columns'] );
+		$this->assertArrayHasKey( 'meta', $stats['columns'] );
+	}
+
 	public function test_case_insensitive_search_finds_matches_in_binary_collation_columns(): void {
 		[ $job ] = $this->run_to_end( $this->create_job( array( self::table( 'content' ) ), array( 'case_sensitive' => false ) ) );
 

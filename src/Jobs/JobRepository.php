@@ -50,25 +50,66 @@ final class JobRepository {
 	}
 
 	/**
-	 * Newest first.
-	 *
+	 * Columns the history list can be sorted by. Anything else falls back to id.
+	 */
+	public const SORTABLE = array( 'id', 'rows_changed', 'replacements', 'status' );
+
+	/**
 	 * @param bool|null $dry_run Only dry runs (true), only live jobs (false), or both (null).
+	 * @param string    $search  Matched against the search and replacement values.
 	 * @return array{0: list<Job>, 1: int} The page of jobs and the total number of matching jobs.
 	 */
-	public function page( int $page, int $per_page, ?bool $dry_run = null ): array {
-		$where = null === $dry_run ? '' : ' WHERE dry_run = %d';
-		$args  = null === $dry_run ? array() : array( (int) $dry_run );
+	public function page( int $page, int $per_page, ?bool $dry_run = null, string $orderby = 'id', string $order = 'desc', string $search = '' ): array {
+		$conditions = array();
+		$args       = array();
+
+		if ( null !== $dry_run ) {
+			$conditions[] = 'dry_run = %d';
+			$args[]       = (int) $dry_run;
+		}
+
+		if ( '' !== $search ) {
+			$like         = '%' . $this->wpdb->esc_like( $search ) . '%';
+			$conditions[] = '(search LIKE %s OR replace_with LIKE %s)';
+			array_push( $args, $like, $like );
+		}
+
+		$where   = $conditions ? ' WHERE ' . implode( ' AND ', $conditions ) : '';
+		$orderby = in_array( $orderby, self::SORTABLE, true ) ? $orderby : 'id';
+		$order   = 'asc' === strtolower( $order ) ? 'ASC' : 'DESC';
 
 		$rows = $this->wpdb->get_results(
 			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Placeholders and values are built together.
 			$this->wpdb->prepare(
-				'SELECT * FROM %i' . $where . ' ORDER BY id DESC LIMIT %d OFFSET %d',
-				array_merge( array( $this->table() ), $args, array( $per_page, max( 0, $page - 1 ) * $per_page ) )
+				'SELECT * FROM %i' . $where . ' ORDER BY %i ' . $order . ', id ' . $order . ' LIMIT %d OFFSET %d',
+				array_merge( array( $this->table() ), $args, array( $orderby, $per_page, max( 0, $page - 1 ) * $per_page ) )
 			)
 		);
 		$total = (int) $this->wpdb->get_var( $this->wpdb->prepare( 'SELECT COUNT(*) FROM %i' . $where, array_merge( array( $this->table() ), $args ) ) );
 
 		return array( array_map( array( $this, 'from_row' ), $rows ), $total );
+	}
+
+	/**
+	 * @return array{jobs: int, replacements_run: int, replacements_made: int}
+	 */
+	public function stats(): array {
+		$row = $this->wpdb->get_row(
+			$this->wpdb->prepare(
+				'SELECT COUNT(*) AS jobs, SUM(dry_run = 0) AS runs, SUM(CASE WHEN dry_run = 0 THEN replacements ELSE 0 END) AS replacements FROM %i',
+				$this->table()
+			)
+		);
+
+		return array(
+			'jobs'              => (int) ( $row->jobs ?? 0 ),
+			'replacements_run'  => (int) ( $row->runs ?? 0 ),
+			'replacements_made' => (int) ( $row->replacements ?? 0 ),
+		);
+	}
+
+	public function delete( int $id ): void {
+		$this->wpdb->delete( $this->table(), array( 'id' => $id ), array( '%d' ) );
 	}
 
 	public function latest_live_job(): ?Job {

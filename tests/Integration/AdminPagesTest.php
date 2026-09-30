@@ -145,6 +145,70 @@ final class AdminPagesTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'That job does not exist.', $html );
 	}
 
+	public function test_history_search_and_sort(): void {
+		$alpha = $this->job( true, JobStatus::Completed, 'alpha-domain.test' );
+		$beta  = $this->job( true, JobStatus::Completed, 'beta-domain.test' );
+
+		$found = $this->render(
+			array(
+				'tab' => 'history',
+				's'   => 'alpha',
+			)
+		);
+
+		$this->assertStringContainsString( 'Dry run #' . $alpha->id, $found );
+		$this->assertStringNotContainsString( 'Dry run #' . $beta->id, $found );
+
+		$oldest_first = $this->render(
+			array(
+				'tab'     => 'history',
+				'orderby' => 'id',
+				'order'   => 'asc',
+			)
+		);
+
+		$this->assertLessThan( strpos( $oldest_first, 'Dry run #' . $beta->id ), strpos( $oldest_first, 'Dry run #' . $alpha->id ) );
+		$this->assertStringContainsString( 'name="job_ids[]"', $oldest_first, 'Finished jobs can be selected for deletion.' );
+	}
+
+	public function test_running_jobs_cannot_be_deleted(): void {
+		$running = $this->job( false, JobStatus::Running );
+
+		$html = $this->render( array( 'tab' => 'history' ) );
+
+		$this->assertStringNotContainsString( 'value="' . $running->id . '"', $html );
+	}
+
+	public function test_database_list_search_and_sort(): void {
+		$search = $this->render(
+			array(
+				'tab' => 'database',
+				's'   => 'post',
+			)
+		);
+
+		$this->assertStringContainsString( '<code>wptests_posts</code>', $search );
+		$this->assertStringContainsString( '<code>wptests_postmeta</code>', $search );
+		$this->assertStringNotContainsString( '<code>wptests_users</code>', $search );
+
+		$sorted = $this->render(
+			array(
+				'tab'     => 'database',
+				'orderby' => 'name',
+				'order'   => 'desc',
+			)
+		);
+
+		$this->assertLessThan( strpos( $sorted, '<code>wptests_comments</code>' ), strpos( $sorted, '<code>wptests_users</code>' ) );
+	}
+
+	public function test_picker_lists_text_columns_but_not_primary_keys(): void {
+		$html = $this->render( array( 'tab' => 'search-replace' ) );
+
+		$this->assertStringContainsString( 'name="columns[wptests_posts][]" value="post_content"', $html );
+		$this->assertStringNotContainsString( 'name="columns[wptests_posts][]" value="ID"', $html );
+	}
+
 	public function test_database_and_settings(): void {
 		$this->assertStringContainsString( 'Database information', $this->render( array( 'tab' => 'database' ) ) );
 		$this->assertStringContainsString( 'action="options.php"', $this->render( array( 'tab' => 'settings' ) ) );
@@ -156,7 +220,10 @@ final class AdminPagesTest extends WP_UnitTestCase {
 	private function render( array $query ): string {
 		global $wpdb;
 
-		$_GET = array_map( 'strval', $query );
+		// Each section is its own submenu page: designslabz-relocate-<section>.
+		$section = $query['tab'] ?? 'dashboard';
+		unset( $query['tab'] );
+		$_GET = array( 'page' => 'dashboard' === $section ? Admin::PAGE : Admin::PAGE . '-' . $section ) + array_map( 'strval', $query );
 
 		$jobs   = new JobRepository( $wpdb );
 		$schema = new Schema( $wpdb );
@@ -176,7 +243,7 @@ final class AdminPagesTest extends WP_UnitTestCase {
 		return (string) ob_get_clean();
 	}
 
-	private function job( bool $dry_run, JobStatus $status = JobStatus::Completed ): Job {
+	private function job( bool $dry_run, JobStatus $status = JobStatus::Completed, string $search = '<old>' ): Job {
 		global $wpdb;
 
 		return ( new JobRepository( $wpdb ) )->create(
@@ -185,7 +252,7 @@ final class AdminPagesTest extends WP_UnitTestCase {
 				null,
 				$dry_run,
 				$status,
-				'<old>',
+				$search,
 				'new',
 				array(
 					'case_sensitive' => true,

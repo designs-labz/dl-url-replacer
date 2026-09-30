@@ -41,15 +41,17 @@ Tables are processed in small batches by primary key, a few seconds per request,
 
 = Also included =
 
+* Choose the tables to search, and leave out individual columns.
 * Case-insensitive and whole-word matching, and matching the http:// and protocol-relative versions of a URL.
-* A history of every job, a log, and automatic clean-up of old history.
+* A live progress view with the current table, rows scanned, changes found and time remaining.
+* A searchable, sortable history of every job, a log, and automatic clean-up. Old jobs can also be deleted by hand.
 * WP-CLI commands: `wp dlz search-replace` and `wp dlz resume`.
 
 == Installation ==
 
 1. Upload the plugin to `/wp-content/plugins/designslabz-relocate`, or install it from the Plugins screen.
 2. Activate it.
-3. Go to Tools → DesignsLabz Relocate.
+3. Open **Relocate** in the admin menu.
 
 == Frequently Asked Questions ==
 
@@ -75,7 +77,7 @@ Not yet. On a Multisite network the plugin shows a notice and does not run.
 
 = Which tables does it search? =
 
-The tables you tick. By default those are the tables with your WordPress prefix. Other tables in the same database can be added. The plugin's own tables are never searched.
+The tables you tick. By default those are the tables with your WordPress prefix. Other tables in the same database can be added, and each table's text columns can be switched off one by one. The plugin's own tables are never searched.
 
 = How do I use it from WP-CLI? =
 

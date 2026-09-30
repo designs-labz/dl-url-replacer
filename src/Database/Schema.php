@@ -71,6 +71,44 @@ final class Schema {
 	}
 
 	/**
+	 * Text columns of every table, in two queries rather than two per table,
+	 * for the column picker. Primary key columns are left out: they are never changed.
+	 *
+	 * @return array<string, list<string>> Table => columns.
+	 * @throws RuntimeException When the columns cannot be read.
+	 */
+	public function searchable_columns(): array {
+		// The type list is this class's own constant, not input.
+		$columns = $this->wpdb->get_results(
+			"SELECT TABLE_NAME AS table_name, COLUMN_NAME AS name FROM information_schema.COLUMNS
+			WHERE TABLE_SCHEMA = DATABASE() AND DATA_TYPE IN ('" . implode( "', '", self::TEXT_TYPES ) . "')
+			ORDER BY TABLE_NAME, ORDINAL_POSITION"
+		);
+
+		/* translators: %s: database error message. */
+		$this->check_error( __( 'Could not read the columns of a table: %s', 'designslabz-relocate' ) );
+
+		$keys = $this->wpdb->get_results(
+			"SELECT TABLE_NAME AS table_name, COLUMN_NAME AS name FROM information_schema.STATISTICS
+			WHERE TABLE_SCHEMA = DATABASE() AND INDEX_NAME = 'PRIMARY'"
+		);
+
+		$primary = array();
+		foreach ( $keys as $key ) {
+			$primary[ $key->table_name . '.' . $key->name ] = true;
+		}
+
+		$searchable = array();
+		foreach ( $columns as $column ) {
+			if ( ! isset( $primary[ $column->table_name . '.' . $column->name ] ) ) {
+				$searchable[ (string) $column->table_name ][] = (string) $column->name;
+			}
+		}
+
+		return $searchable;
+	}
+
+	/**
 	 * @return TableLayout|null Null when the table does not exist.
 	 * @throws RuntimeException When the table cannot be inspected.
 	 */

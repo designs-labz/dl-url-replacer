@@ -47,35 +47,44 @@ final class JobsController {
 				'callback'            => array( $this, 'create_job' ),
 				'permission_callback' => array( $this, 'can_manage' ),
 				'args'                => array(
-					'search'         => array(
+					'search'          => array(
 						'type'     => 'string',
 						'required' => true,
 					),
-					'replace'        => array(
+					'replace'         => array(
 						'type'     => 'string',
 						'required' => true,
 					),
-					'case_sensitive' => array(
+					'case_sensitive'  => array(
 						'type'    => 'boolean',
 						'default' => true,
 					),
-					'whole_words'    => array(
+					'whole_words'     => array(
 						'type'    => 'boolean',
 						'default' => false,
 					),
-					'url_variants'   => array(
+					'url_variants'    => array(
 						'type'    => 'boolean',
 						'default' => false,
 					),
-					'skip_guids'     => array(
+					'skip_guids'      => array(
 						'type'    => 'boolean',
 						'default' => true,
 					),
-					'tables'         => array(
+					'tables'          => array(
 						'type'        => 'array',
 						'items'       => array( 'type' => 'string' ),
 						'required'    => true,
 						'uniqueItems' => true,
+					),
+					'exclude_columns' => array(
+						'description'          => 'Columns not to search, by table.',
+						'type'                 => 'object',
+						'default'              => array(),
+						'additionalProperties' => array(
+							'type'  => 'array',
+							'items' => array( 'type' => 'string' ),
+						),
 					),
 				),
 			)
@@ -158,7 +167,8 @@ final class JobsController {
 					'url_variants'   => (bool) $request['url_variants'],
 					'skip_guids'     => (bool) $request['skip_guids'],
 				),
-				array_values( array_map( 'strval', (array) $request['tables'] ) )
+				array_values( array_map( 'strval', (array) $request['tables'] ) ),
+				(array) $request['exclude_columns']
 			)
 		);
 	}
