@@ -47,13 +47,28 @@ final class JobsController {
 				'callback'            => array( $this, 'create_job' ),
 				'permission_callback' => array( $this, 'can_manage' ),
 				'args'                => array(
-					'search'          => array(
-						'type'     => 'string',
-						'required' => true,
+					// Either a list of pairs, or a single search and replace.
+					'pairs'           => array(
+						'type'  => 'array',
+						'items' => array(
+							'type'                 => 'object',
+							'properties'           => array(
+								'search'  => array(
+									'type'     => 'string',
+									'required' => true,
+								),
+								'replace' => array(
+									'type'     => 'string',
+									'required' => true,
+								),
+							),
+							'additionalProperties' => false,
+						),
 					),
+					'search'          => array( 'type' => 'string' ),
 					'replace'         => array(
-						'type'     => 'string',
-						'required' => true,
+						'type'    => 'string',
+						'default' => '',
 					),
 					'case_sensitive'  => array(
 						'type'    => 'boolean',
@@ -159,8 +174,7 @@ final class JobsController {
 	public function create_job( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		return $this->started(
 			fn(): Job => $this->starter->dry_run(
-				(string) $request['search'],
-				(string) $request['replace'],
+				$this->pairs( $request ),
 				array(
 					'case_sensitive' => (bool) $request['case_sensitive'],
 					'whole_words'    => (bool) $request['whole_words'],
@@ -257,6 +271,22 @@ final class JobsController {
 		}
 
 		return rest_ensure_response( $this->formatter->format( $job ) );
+	}
+
+	/**
+	 * @return list<array{0: string, 1: string}>
+	 */
+	private function pairs( WP_REST_Request $request ): array {
+		if ( is_array( $request['pairs'] ) && $request['pairs'] ) {
+			return array_values(
+				array_map(
+					fn( array $pair ): array => array( (string) $pair['search'], (string) $pair['replace'] ),
+					$request['pairs']
+				)
+			);
+		}
+
+		return array( array( (string) $request['search'], (string) $request['replace'] ) );
 	}
 
 	/**

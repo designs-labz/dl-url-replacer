@@ -55,6 +55,9 @@ final class Command {
 	 * <replace>
 	 * : The replacement. Pass '' to remove the matches.
 	 *
+	 * [<more>...]
+	 * : More search and replacement pairs, up to five pairs in all. All pairs are applied together in one pass.
+	 *
 	 * [--tables=<tables>]
 	 * : Comma-separated tables to search. Defaults to every table with the WordPress prefix.
 	 *
@@ -104,25 +107,31 @@ final class Command {
 	 *     # Replace across all WordPress tables, after confirming.
 	 *     $ wp dlz search-replace https://staging.example.com https://example.com
 	 *
+	 *     # Two pairs at once.
+	 *     $ wp dlz search-replace https://staging.example.com https://example.com /home/staging /home/live
+	 *
 	 *     # Replace in two tables without asking.
 	 *     $ wp dlz search-replace "Old Name" "New Name" --tables=wp_posts,wp_postmeta --yes
 	 *
 	 * @subcommand search-replace
 	 *
-	 * @param array{0: string, 1: string} $args
-	 * @param array<string, string|bool>  $assoc_args
+	 * @param list<string>               $args
+	 * @param array<string, string|bool> $assoc_args
 	 */
 	public function search_replace( array $args, array $assoc_args ): void {
 		$this->installer->maybe_upgrade();
 
-		[ $search, $replace ] = $args;
-		$format               = (string) Utils\get_flag_value( $assoc_args, 'format', 'table' );
-		$this->quiet          = 'table' !== $format;
+		if ( 0 !== count( $args ) % 2 ) {
+			WP_CLI::error( 'Every search value needs a replacement. Pass \'\' to remove matches.' );
+		}
+
+		$format      = (string) Utils\get_flag_value( $assoc_args, 'format', 'table' );
+		$this->quiet = 'table' !== $format;
+		$pairs       = array_map( fn( array $pair ): array => array( (string) $pair[0], (string) $pair[1] ), array_chunk( $args, 2 ) );
 
 		try {
 			$dry_run = $this->starter->dry_run(
-				$search,
-				$replace,
+				$pairs,
 				array(
 					'case_sensitive' => ! Utils\get_flag_value( $assoc_args, 'case-insensitive', false ),
 					'whole_words'    => (bool) Utils\get_flag_value( $assoc_args, 'whole-words', false ),

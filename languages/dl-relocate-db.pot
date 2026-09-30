@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-30T08:47:01+00:00\n"
+"POT-Creation-Date: 2026-09-30T08:59:04+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dl-relocate-db\n"
@@ -52,14 +52,14 @@ msgstr ""
 
 #. translators: %d: job number.
 #: src/Admin/Admin.php:89
-#: templates/admin/job.php:92
+#: templates/admin/job.php:99
 #, php-format
 msgid "Dry run #%d"
 msgstr ""
 
 #. translators: %d: job number.
 #: src/Admin/Admin.php:91
-#: templates/admin/job.php:104
+#: templates/admin/job.php:111
 #, php-format
 msgid "Replacement #%d"
 msgstr ""
@@ -84,109 +84,109 @@ msgstr ""
 msgid "Sorry, you are not allowed to delete jobs."
 msgstr ""
 
-#: src/Admin/Admin.php:310
+#: src/Admin/Admin.php:323
 #: templates/admin/dashboard.php:30
 msgid "Dashboard"
 msgstr ""
 
-#: src/Admin/Admin.php:311
-#: templates/admin/search-replace.php:33
+#: src/Admin/Admin.php:324
+#: templates/admin/search-replace.php:35
 msgid "Search & Replace"
 msgstr ""
 
-#: src/Admin/Admin.php:312
+#: src/Admin/Admin.php:325
 #: templates/admin/history.php:50
 msgid "History"
 msgstr ""
 
-#: src/Admin/Admin.php:313
+#: src/Admin/Admin.php:326
 #: templates/admin/database.php:27
 msgid "Database"
 msgstr ""
 
-#: src/Admin/Admin.php:314
+#: src/Admin/Admin.php:327
 #: templates/admin/settings.php:15
 msgid "Settings"
 msgstr ""
 
-#: src/Admin/Admin.php:357
+#: src/Admin/Admin.php:370
 msgid "Plugin version"
 msgstr ""
 
-#: src/Admin/Admin.php:358
+#: src/Admin/Admin.php:371
 msgid "WordPress"
 msgstr ""
 
-#: src/Admin/Admin.php:359
+#: src/Admin/Admin.php:372
 msgid "PHP"
 msgstr ""
 
-#: src/Admin/Admin.php:360
+#: src/Admin/Admin.php:373
 msgid "Database server"
 msgstr ""
 
-#: src/Admin/Admin.php:361
+#: src/Admin/Admin.php:374
 msgid "PHP time limit"
 msgstr ""
 
-#: src/Admin/Admin.php:362
+#: src/Admin/Admin.php:375
 msgid "PHP memory limit"
 msgstr ""
 
-#: src/Admin/Admin.php:363
+#: src/Admin/Admin.php:376
 msgid "Persistent object cache"
 msgstr ""
 
-#: src/Admin/Admin.php:364
+#: src/Admin/Admin.php:377
 msgid "Yes. It is flushed after every replacement."
 msgstr ""
 
-#: src/Admin/Admin.php:365
+#: src/Admin/Admin.php:378
 msgid "No"
 msgstr ""
 
-#: src/Admin/Admin.php:366
+#: src/Admin/Admin.php:379
 msgid "Folder for original values"
 msgstr ""
 
-#: src/Admin/Admin.php:367
+#: src/Admin/Admin.php:380
 msgid "Writable"
 msgstr ""
 
-#: src/Admin/Admin.php:368
+#: src/Admin/Admin.php:381
 msgid "Not writable: replacements can only run without saving original values."
 msgstr ""
 
-#: src/Admin/Admin.php:369
+#: src/Admin/Admin.php:382
 msgid "History clean-up"
 msgstr ""
 
-#: src/Admin/Admin.php:370
+#: src/Admin/Admin.php:383
 msgid "Off: all history is kept."
 msgstr ""
 
 #. translators: 1: number of days, 2: date of the next clean-up.
-#: src/Admin/Admin.php:373
+#: src/Admin/Admin.php:386
 #, php-format
 msgid "After %1$s day. Next run: %2$s"
 msgid_plural "After %1$s days. Next run: %2$s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Admin/Admin.php:375
+#: src/Admin/Admin.php:388
 msgid "not scheduled yet"
 msgstr ""
 
-#: src/Admin/Admin.php:417
+#: src/Admin/Admin.php:430
 msgid "That job does not exist. It may have been deleted or removed by the history clean-up."
 msgstr ""
 
-#: src/Admin/Admin.php:468
+#: src/Admin/Admin.php:481
 msgid "None"
 msgstr ""
 
 #. translators: %s: number of seconds.
-#: src/Admin/Admin.php:470
+#: src/Admin/Admin.php:483
 #, php-format
 msgid "%s second"
 msgid_plural "%s seconds"
@@ -195,7 +195,7 @@ msgstr[1] ""
 
 #: src/Admin/HistoryTable.php:37
 #: src/Admin/LogTable.php:37
-#: templates/admin/dashboard.php:127
+#: templates/admin/dashboard.php:137
 msgid "Job"
 msgstr ""
 
@@ -205,33 +205,33 @@ msgstr ""
 
 #: src/Admin/HistoryTable.php:39
 #: templates/admin/database.php:21
-#: templates/admin/job.php:64
+#: templates/admin/job.php:71
 #: templates/admin/partials/runner.php:40
 msgid "Tables"
 msgstr ""
 
 #: src/Admin/HistoryTable.php:40
-#: templates/admin/dashboard.php:99
-#: assets/js/search-replace.js:339
-#: assets/js/search-replace.js:542
-#: assets/js/search-replace.js:570
+#: templates/admin/dashboard.php:109
+#: assets/js/search-replace.js:425
+#: assets/js/search-replace.js:628
+#: assets/js/search-replace.js:656
 msgid "Rows changed"
 msgstr ""
 
 #: src/Admin/HistoryTable.php:41
 #: src/Admin/HistoryTable.php:97
-#: templates/admin/dashboard.php:101
-#: templates/admin/dashboard.php:129
+#: templates/admin/dashboard.php:111
+#: templates/admin/dashboard.php:139
 #: templates/admin/partials/runner.php:34
-#: assets/js/search-replace.js:482
-#: assets/js/search-replace.js:543
-#: assets/js/search-replace.js:639
+#: assets/js/search-replace.js:568
+#: assets/js/search-replace.js:629
+#: assets/js/search-replace.js:725
 msgid "Replacements"
 msgstr ""
 
 #: src/Admin/HistoryTable.php:42
-#: templates/admin/dashboard.php:110
-#: templates/admin/dashboard.php:130
+#: templates/admin/dashboard.php:120
+#: templates/admin/dashboard.php:140
 msgid "Status"
 msgstr ""
 
@@ -268,26 +268,36 @@ msgstr ""
 msgid "View"
 msgstr ""
 
-#: src/Admin/HistoryTable.php:156
+#: src/Admin/HistoryTable.php:158
+#: templates/admin/job.php:56
+#: assets/js/search-replace.js:926
 msgid "replaced with"
 msgstr ""
 
-#: src/Admin/HistoryTable.php:157
+#: src/Admin/HistoryTable.php:159
 msgid "(nothing)"
 msgstr ""
 
+#. translators: %s: number of further search and replacement pairs.
+#: src/Admin/HistoryTable.php:162
+#, php-format
+msgid "+ %s more"
+msgid_plural "+ %s more"
+msgstr[0] ""
+msgstr[1] ""
+
 #: src/Admin/LogTable.php:35
-#: templates/admin/job.php:122
+#: templates/admin/job.php:129
 msgid "Time"
 msgstr ""
 
 #: src/Admin/LogTable.php:36
-#: templates/admin/job.php:123
+#: templates/admin/job.php:130
 msgid "Level"
 msgstr ""
 
 #: src/Admin/LogTable.php:38
-#: templates/admin/job.php:124
+#: templates/admin/job.php:131
 msgid "Message"
 msgstr ""
 
@@ -328,7 +338,7 @@ msgid "Information"
 msgstr ""
 
 #: src/Admin/TablesTable.php:38
-#: assets/js/search-replace.js:636
+#: assets/js/search-replace.js:722
 msgid "Table"
 msgstr ""
 
@@ -386,61 +396,80 @@ msgstr ""
 msgid "The job stopped while processing %1$s: %2$s"
 msgstr ""
 
-#: src/Jobs/JobStarter.php:36
-msgid "Enter the text or URL to search for."
-msgstr ""
-
-#: src/Jobs/JobStarter.php:40
-msgid "The search and replacement values are the same, so there is nothing to change."
-msgstr ""
-
-#: src/Jobs/JobStarter.php:46
+#: src/Jobs/JobStarter.php:57
 msgid "The search and replacement values must be valid UTF-8 text."
 msgstr ""
 
-#: src/Jobs/JobStarter.php:50
-#: assets/js/search-replace.js:174
+#: src/Jobs/JobStarter.php:61
+#: assets/js/search-replace.js:249
 msgid "Select at least one table to search."
 msgstr ""
 
 #. translators: %s: comma-separated table names.
-#: src/Jobs/JobStarter.php:65
+#: src/Jobs/JobStarter.php:76
 #, php-format
 msgid "These tables do not exist or cannot be searched: %s"
 msgstr ""
 
-#: src/Jobs/JobStarter.php:107
+#: src/Jobs/JobStarter.php:119
 msgid "Only a completed dry run can be applied to the database."
 msgstr ""
 
-#: src/Jobs/JobStarter.php:111
+#: src/Jobs/JobStarter.php:123
 msgid "The dry run found nothing to replace."
 msgstr ""
 
-#: src/Jobs/JobStarter.php:119
+#: src/Jobs/JobStarter.php:131
 msgid "This dry run has already been applied. Run a new dry run to replace again."
 msgstr ""
 
-#: src/Jobs/JobStarter.php:123
+#: src/Jobs/JobStarter.php:135
 msgid "Another replacement is still running. Wait for it to finish or cancel it first."
 msgstr ""
 
-#: src/Jobs/JobStarter.php:149
+#: src/Jobs/JobStarter.php:161
 msgid "Another replacement is being started. Try again in a few seconds."
 msgstr ""
 
+#: src/Jobs/JobStarter.php:188
+#: src/Jobs/JobStarter.php:206
+msgid "Enter the text or URL to search for."
+msgstr ""
+
+#. translators: %d: maximum number of pairs.
+#: src/Jobs/JobStarter.php:195
+#, php-format
+msgid "You can search for up to %d value at a time."
+msgid_plural "You can search for up to %d values at a time."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: pair number.
+#: src/Jobs/JobStarter.php:203
+#, php-format
+msgid "(pair %d)"
+msgstr ""
+
+#: src/Jobs/JobStarter.php:210
+msgid "The search and replacement values are the same, so there is nothing to change."
+msgstr ""
+
+#: src/Jobs/JobStarter.php:216
+msgid "The same search value is entered twice."
+msgstr ""
+
 #. translators: %s: comma-separated table.column names.
-#: src/Jobs/JobStarter.php:207
+#: src/Jobs/JobStarter.php:262
 #, php-format
 msgid "These columns do not exist or are not searched: %s"
 msgstr ""
 
-#: src/Jobs/JobStarter.php:222
+#: src/Jobs/JobStarter.php:277
 msgid "The job could not be saved to the database."
 msgstr ""
 
 #. translators: %s: error message.
-#: src/Jobs/JobStarter.php:244
+#: src/Jobs/JobStarter.php:299
 #, php-format
 msgid "The file for the original values could not be created, so nothing was changed. %s"
 msgstr ""
@@ -465,60 +494,60 @@ msgstr ""
 msgid "Cancelled"
 msgstr ""
 
-#: src/Rest/JobFormatter.php:80
+#: src/Rest/JobFormatter.php:87
 msgid "Skipped: the table no longer exists."
 msgstr ""
 
-#: src/Rest/JobFormatter.php:81
+#: src/Rest/JobFormatter.php:88
 msgid "Skipped: the table has no primary key or suitable unique key, so its rows cannot be updated one at a time safely."
 msgstr ""
 
-#: src/Rest/JobFormatter.php:82
+#: src/Rest/JobFormatter.php:89
 msgid "Skipped: the table has no text columns to search."
 msgstr ""
 
-#: src/Rest/JobFormatter.php:89
+#: src/Rest/JobFormatter.php:96
 msgid "Serialized data that is already corrupt, or would not read back correctly after the change"
 msgstr ""
 
-#: src/Rest/JobFormatter.php:90
+#: src/Rest/JobFormatter.php:97
 msgid "Match inside a custom serialized object format that cannot be edited safely"
 msgstr ""
 
-#: src/Rest/JobFormatter.php:91
+#: src/Rest/JobFormatter.php:98
 msgid "The change would turn valid JSON into invalid JSON"
 msgstr ""
 
-#: src/Rest/JobFormatter.php:92
+#: src/Rest/JobFormatter.php:99
 msgid "The value could not be searched"
 msgstr ""
 
-#: src/Rest/JobsController.php:193
+#: src/Rest/JobsController.php:207
 msgid "The job’s progress could not be saved to the database."
 msgstr ""
 
-#: src/Rest/JobsController.php:197
-#: src/Rest/JobsController.php:235
+#: src/Rest/JobsController.php:211
+#: src/Rest/JobsController.php:249
 msgid "This job is already being processed in another browser tab."
 msgstr ""
 
-#: src/Rest/JobsController.php:214
+#: src/Rest/JobsController.php:228
 msgid "Confirm the replacement before starting it."
 msgstr ""
 
-#: src/Rest/JobsController.php:231
+#: src/Rest/JobsController.php:245
 msgid "The job could not be resumed."
 msgstr ""
 
-#: src/Rest/JobsController.php:252
+#: src/Rest/JobsController.php:266
 msgid "The job could not be cancelled."
 msgstr ""
 
-#: src/Rest/JobsController.php:256
+#: src/Rest/JobsController.php:270
 msgid "The job is busy. Try cancelling again in a few seconds."
 msgstr ""
 
-#: src/Rest/JobsController.php:278
+#: src/Rest/JobsController.php:308
 msgid "That job does not exist."
 msgstr ""
 
@@ -597,17 +626,15 @@ msgstr ""
 
 #: templates/admin/dashboard.php:71
 #: templates/admin/dashboard.php:95
-#: templates/admin/job.php:50
-#: templates/admin/search-replace.php:41
-#: assets/js/search-replace.js:835
+#: templates/admin/search-replace.php:42
+#: templates/admin/search-replace.php:50
 msgid "Search for"
 msgstr ""
 
 #: templates/admin/dashboard.php:75
 #: templates/admin/dashboard.php:97
-#: templates/admin/job.php:53
-#: templates/admin/search-replace.php:47
-#: assets/js/search-replace.js:837
+#: templates/admin/search-replace.php:44
+#: templates/admin/search-replace.php:53
 msgid "Replace with"
 msgstr ""
 
@@ -623,25 +650,37 @@ msgstr ""
 msgid "When"
 msgstr ""
 
+#: templates/admin/dashboard.php:100
+msgid "Also"
+msgstr ""
+
+#. translators: %s: number of further search and replacement pairs.
 #: templates/admin/dashboard.php:105
+#, php-format
+msgid "%s more pair"
+msgid_plural "%s more pairs"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/admin/dashboard.php:115
 msgid "Nothing has been replaced yet."
 msgstr ""
 
-#: templates/admin/dashboard.php:120
-#: templates/admin/dashboard.php:124
+#: templates/admin/dashboard.php:130
+#: templates/admin/dashboard.php:134
 msgid "Recent jobs"
 msgstr ""
 
-#: templates/admin/dashboard.php:128
-#: templates/admin/job.php:80
+#: templates/admin/dashboard.php:138
+#: templates/admin/job.php:87
 msgid "Created"
 msgstr ""
 
-#: templates/admin/dashboard.php:145
+#: templates/admin/dashboard.php:155
 msgid "View all history"
 msgstr ""
 
-#: templates/admin/dashboard.php:147
+#: templates/admin/dashboard.php:157
 msgid "No jobs yet."
 msgstr ""
 
@@ -706,7 +745,7 @@ msgid "Jobs"
 msgstr ""
 
 #: templates/admin/history.php:54
-#: templates/admin/job.php:115
+#: templates/admin/job.php:122
 msgid "Log"
 msgstr ""
 
@@ -729,7 +768,7 @@ msgid "Search jobs"
 msgstr ""
 
 #: templates/admin/job.php:22
-#: templates/admin/search-replace.php:27
+#: templates/admin/search-replace.php:29
 msgid "Ignore upper and lower case"
 msgstr ""
 
@@ -761,60 +800,66 @@ msgstr ""
 msgid "Job details"
 msgstr ""
 
-#: templates/admin/job.php:54
-#: assets/js/search-replace.js:838
-msgid "(nothing: matches are removed)"
+#: templates/admin/job.php:50
+msgid "Search and replace"
+msgid_plural "Search and replace"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/admin/job.php:57
+#: assets/js/search-replace.js:927
+msgid "(nothing: removed)"
 msgstr ""
 
-#: templates/admin/job.php:56
-#: templates/admin/search-replace.php:55
-#: templates/admin/search-replace.php:57
+#: templates/admin/job.php:63
+#: templates/admin/search-replace.php:90
+#: templates/admin/search-replace.php:92
 msgid "Options"
 msgstr ""
 
-#: templates/admin/job.php:57
+#: templates/admin/job.php:64
 msgid "Defaults"
 msgstr ""
 
-#: templates/admin/job.php:60
+#: templates/admin/job.php:67
 msgid "Columns left out"
 msgstr ""
 
-#: templates/admin/job.php:72
+#: templates/admin/job.php:79
 msgid "Started by"
 msgstr ""
 
-#: templates/admin/job.php:76
+#: templates/admin/job.php:83
 msgid "WP-CLI"
 msgstr ""
 
-#: templates/admin/job.php:76
+#: templates/admin/job.php:83
 msgid "Unknown user"
 msgstr ""
 
-#: templates/admin/job.php:83
+#: templates/admin/job.php:90
 msgid "Finished"
 msgstr ""
 
-#: templates/admin/job.php:87
+#: templates/admin/job.php:94
 msgid "Previewed by"
 msgstr ""
 
-#: templates/admin/job.php:99
+#: templates/admin/job.php:106
 msgid "Applied by"
 msgstr ""
 
-#: templates/admin/job.php:119
+#: templates/admin/job.php:126
 msgid "Log entries for this job"
 msgstr ""
 
 #. translators: %s: number of log entries.
-#: templates/admin/job.php:155
+#: templates/admin/job.php:162
 #, php-format
 msgid "View all %s entries"
 msgstr ""
 
-#: templates/admin/job.php:162
+#: templates/admin/job.php:169
 msgid "No log entries for this job."
 msgstr ""
 
@@ -823,20 +868,20 @@ msgid "DL Relocate DB sections"
 msgstr ""
 
 #: templates/admin/partials/runner.php:21
-#: assets/js/search-replace.js:335
+#: assets/js/search-replace.js:421
 msgid "Dry run in progress"
 msgstr ""
 
 #: templates/admin/partials/runner.php:32
-#: assets/js/search-replace.js:480
-#: assets/js/search-replace.js:541
-#: assets/js/search-replace.js:637
+#: assets/js/search-replace.js:566
+#: assets/js/search-replace.js:627
+#: assets/js/search-replace.js:723
 msgid "Rows scanned"
 msgstr ""
 
 #: templates/admin/partials/runner.php:33
-#: assets/js/search-replace.js:338
-#: assets/js/search-replace.js:493
+#: assets/js/search-replace.js:424
+#: assets/js/search-replace.js:579
 msgid "Rows to change"
 msgstr ""
 
@@ -850,7 +895,7 @@ msgstr ""
 
 #: templates/admin/partials/runner.php:45
 #: templates/admin/partials/runner.php:69
-#: assets/js/search-replace.js:345
+#: assets/js/search-replace.js:431
 msgid "Cancel"
 msgstr ""
 
@@ -870,121 +915,125 @@ msgstr ""
 msgid "Replace now"
 msgstr ""
 
-#: templates/admin/search-replace.php:27
+#: templates/admin/search-replace.php:29
 msgid "“Example” also matches “EXAMPLE” and “example”."
 msgstr ""
 
-#: templates/admin/search-replace.php:28
+#: templates/admin/search-replace.php:30
 msgid "Match whole words only"
 msgstr ""
 
-#: templates/admin/search-replace.php:28
+#: templates/admin/search-replace.php:30
 msgid "“cat” matches “cat.” but not “concatenate”."
 msgstr ""
 
-#: templates/admin/search-replace.php:29
+#: templates/admin/search-replace.php:31
 msgid "Include other versions of the URL"
 msgstr ""
 
-#: templates/admin/search-replace.php:29
+#: templates/admin/search-replace.php:31
 msgid "For https://old.com, also replace http://old.com and //old.com."
 msgstr ""
 
-#: templates/admin/search-replace.php:30
+#: templates/admin/search-replace.php:32
 msgid "Leave post GUIDs unchanged"
 msgstr ""
 
-#: templates/admin/search-replace.php:30
+#: templates/admin/search-replace.php:32
 msgid "Recommended. Feed readers use GUIDs to recognise posts they have already seen."
 msgstr ""
 
-#: templates/admin/search-replace.php:34
+#: templates/admin/search-replace.php:36
 msgid "Start with a dry run: it changes nothing and shows exactly what would be replaced. You can apply it afterwards."
 msgstr ""
 
-#: templates/admin/search-replace.php:38
+#: templates/admin/search-replace.php:40
 msgid "What to find"
 msgstr ""
 
-#: templates/admin/search-replace.php:43
-msgid "Matched exactly as typed, including any spaces."
+#: templates/admin/search-replace.php:73
+msgid "Add another"
 msgstr ""
 
-#: templates/admin/search-replace.php:49
-msgid "Leave empty to remove the matched text."
-msgstr ""
+#. translators: %d: maximum number of pairs.
+#: templates/admin/search-replace.php:82
+#, php-format
+msgid "Matched exactly as typed, including any spaces. Leave a replacement empty to remove the matched text. Up to %d pair."
+msgid_plural "Matched exactly as typed, including any spaces. Leave a replacement empty to remove the matched text. Up to %d pairs, all replaced together in one pass."
+msgstr[0] ""
+msgstr[1] ""
 
-#: templates/admin/search-replace.php:71
+#: templates/admin/search-replace.php:106
 msgid "Tables and columns"
 msgstr ""
 
-#: templates/admin/search-replace.php:74
-#: assets/js/search-replace.js:644
+#: templates/admin/search-replace.php:109
+#: assets/js/search-replace.js:730
 msgid "Filter tables"
 msgstr ""
 
-#: templates/admin/search-replace.php:75
-#: assets/js/search-replace.js:643
+#: templates/admin/search-replace.php:110
+#: assets/js/search-replace.js:729
 msgid "Filter tables…"
 msgstr ""
 
-#: templates/admin/search-replace.php:77
+#: templates/admin/search-replace.php:112
 msgid "Select all"
 msgstr ""
 
-#: templates/admin/search-replace.php:78
+#: templates/admin/search-replace.php:113
 msgid "WordPress tables"
 msgstr ""
 
-#: templates/admin/search-replace.php:79
+#: templates/admin/search-replace.php:114
 msgid "Select none"
 msgstr ""
 
-#: templates/admin/search-replace.php:85
+#: templates/admin/search-replace.php:120
 msgid "Tables to search"
 msgstr ""
 
 #. translators: %s: database table prefix, e.g. wp_.
-#: templates/admin/search-replace.php:95
+#: templates/admin/search-replace.php:130
 #, php-format
 msgid "WordPress tables (prefix %s)"
 msgstr ""
 
-#: templates/admin/search-replace.php:96
+#: templates/admin/search-replace.php:131
 msgid "Other tables in this database"
 msgstr ""
 
 #. translators: 1: approximate row count, 2: table size.
-#: templates/admin/search-replace.php:112
+#: templates/admin/search-replace.php:147
 #, php-format
 msgid "%1$s rows · %2$s"
 msgstr ""
 
 #. translators: 1: columns selected, 2: text columns in the table.
-#: templates/admin/search-replace.php:124
+#: templates/admin/search-replace.php:159
 #, php-format
 msgid "Columns: %1$s of %2$s"
 msgstr ""
 
 #. translators: %s: table name.
-#: templates/admin/search-replace.php:132
+#: templates/admin/search-replace.php:167
 #, php-format
 msgid "Columns of %s to search"
 msgstr ""
 
-#: templates/admin/search-replace.php:139
+#: templates/admin/search-replace.php:174
 msgid "No text columns"
 msgstr ""
 
-#: templates/admin/search-replace.php:146
+#: templates/admin/search-replace.php:181
 msgid "No tables match the filter."
 msgstr ""
 
-#: templates/admin/search-replace.php:153
+#: templates/admin/search-replace.php:188
 msgid "Run dry run"
 msgstr ""
 
-#: templates/admin/search-replace.php:155
+#: templates/admin/search-replace.php:190
 msgid "Nothing is changed until you review the results and confirm."
 msgstr ""
 
@@ -1005,264 +1054,292 @@ msgid "Stopping after the current batch…"
 msgstr ""
 
 #. translators: 1: selected tables, 2: all tables.
-#: assets/js/search-replace.js:103
+#: assets/js/search-replace.js:105
 #, js-format
 msgid "%1$s of %2$s tables selected"
 msgstr ""
 
-#: assets/js/search-replace.js:204
+#. translators: %d: pair number.
+#: assets/js/search-replace.js:194
+#, js-format
+msgid "Search for, pair %d"
+msgstr ""
+
+#. translators: %d: pair number.
+#: assets/js/search-replace.js:196
+#, js-format
+msgid "Replace with, pair %d"
+msgstr ""
+
+#. translators: %d: pair number.
+#: assets/js/search-replace.js:198
+#, js-format
+msgid "Remove pair %d"
+msgstr ""
+
+#. translators: 1: pairs in use, 2: maximum pairs.
+#: assets/js/search-replace.js:205
+#, js-format
+msgid "%1$s of %2$s"
+msgstr ""
+
+#: assets/js/search-replace.js:234
+msgid "Pair removed."
+msgstr ""
+
+#: assets/js/search-replace.js:278
 msgid "Dry run started."
 msgstr ""
 
-#: assets/js/search-replace.js:249
+#: assets/js/search-replace.js:335
 msgid "This job stopped before it finished, probably because the page running it was closed. Continuing carries on from the last completed batch."
 msgstr ""
 
-#: assets/js/search-replace.js:250
+#: assets/js/search-replace.js:336
 msgid "This job is still running, possibly in another tab. If that tab was closed, continue it here."
 msgstr ""
 
-#: assets/js/search-replace.js:252
+#: assets/js/search-replace.js:338
 msgid "Continue"
 msgstr ""
 
-#: assets/js/search-replace.js:312
+#: assets/js/search-replace.js:398
 msgid "Replacement started."
 msgstr ""
 
-#: assets/js/search-replace.js:336
+#: assets/js/search-replace.js:422
 msgid "Replacing in the database"
 msgstr ""
 
-#: assets/js/search-replace.js:341
+#: assets/js/search-replace.js:427
 msgid "Starting…"
 msgstr ""
 
-#: assets/js/search-replace.js:342
+#: assets/js/search-replace.js:428
 msgid "Starting… Keep this page open until the replacement finishes."
 msgstr ""
 
-#: assets/js/search-replace.js:345
+#: assets/js/search-replace.js:431
 msgid "Stop after this batch"
 msgstr ""
 
 #. translators: 1: table name, 2: table number, 3: number of tables.
-#: assets/js/search-replace.js:381
+#: assets/js/search-replace.js:467
 #, js-format
 msgid "Working on %1$s (table %2$s of %3$s)"
 msgstr ""
 
-#: assets/js/search-replace.js:386
+#: assets/js/search-replace.js:472
 msgid "Finishing…"
 msgstr ""
 
 #. translators: %s: percentage.
-#: assets/js/search-replace.js:400
+#: assets/js/search-replace.js:486
 #, js-format
 msgid "%s percent done."
 msgstr ""
 
-#: assets/js/search-replace.js:413
+#: assets/js/search-replace.js:499
 msgid "Done."
 msgstr ""
 
 #. translators: %s: time, e.g. 2:15.
-#: assets/js/search-replace.js:454
+#: assets/js/search-replace.js:540
 #, js-format
 msgid "about %s"
 msgstr ""
 
-#: assets/js/search-replace.js:466
+#: assets/js/search-replace.js:552
 msgid "Dry run results"
 msgstr ""
 
-#: assets/js/search-replace.js:469
+#: assets/js/search-replace.js:555
 msgid "Dry run complete. Nothing in the database was changed."
 msgstr ""
 
-#: assets/js/search-replace.js:471
+#: assets/js/search-replace.js:557
 msgid "Dry run cancelled. The figures below cover only the part that was searched."
 msgstr ""
 
-#: assets/js/search-replace.js:473
+#: assets/js/search-replace.js:559
 msgid "The dry run stopped because of an error."
 msgstr ""
 
-#: assets/js/search-replace.js:479
+#: assets/js/search-replace.js:565
 msgid "Tables searched"
 msgstr ""
 
-#: assets/js/search-replace.js:481
+#: assets/js/search-replace.js:567
 msgid "Rows that would change"
 msgstr ""
 
-#: assets/js/search-replace.js:483
-#: assets/js/search-replace.js:544
+#: assets/js/search-replace.js:569
+#: assets/js/search-replace.js:630
 msgid "Left unchanged"
 msgstr ""
 
-#: assets/js/search-replace.js:490
+#: assets/js/search-replace.js:576
 msgid "No matches were found, so there is nothing to replace."
 msgstr ""
 
 #. translators: 1: number of replacements, 2: number of rows.
-#: assets/js/search-replace.js:497
+#: assets/js/search-replace.js:583
 #, js-format
 msgid "Dry run finished: %1$s replacement in %2$s rows."
 msgid_plural "Dry run finished: %1$s replacements in %2$s rows."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/search-replace.js:509
+#: assets/js/search-replace.js:595
 msgid "Replacement results"
 msgstr ""
 
-#: assets/js/search-replace.js:513
+#: assets/js/search-replace.js:599
 msgid "Replacement complete. The changes below have been written to the database."
 msgstr ""
 
-#: assets/js/search-replace.js:516
+#: assets/js/search-replace.js:602
 msgid "Replacement stopped. Batches finished before stopping were written to the database; the rest was not touched."
 msgstr ""
 
-#: assets/js/search-replace.js:519
+#: assets/js/search-replace.js:605
 msgid "The replacement stopped because of an error."
 msgstr ""
 
-#: assets/js/search-replace.js:522
+#: assets/js/search-replace.js:608
 msgid "Batches finished before the error were written to the database. The batch that failed was rolled back completely. Resuming carries on from there."
 msgstr ""
 
-#: assets/js/search-replace.js:532
+#: assets/js/search-replace.js:618
 msgid "The site address (siteurl and home) was changed, so you will need to log in again at the new address."
 msgstr ""
 
-#: assets/js/search-replace.js:533
+#: assets/js/search-replace.js:619
 msgid "Log in at the new address"
 msgstr ""
 
-#: assets/js/search-replace.js:540
+#: assets/js/search-replace.js:626
 msgid "Tables processed"
 msgstr ""
 
-#: assets/js/search-replace.js:553
+#: assets/js/search-replace.js:639
 msgid "Original values"
 msgstr ""
 
-#: assets/js/search-replace.js:554
+#: assets/js/search-replace.js:640
 msgid "Importing this file into the database puts every changed value back as it was, overwriting any edits made to those values since."
 msgstr ""
 
-#: assets/js/search-replace.js:563
+#: assets/js/search-replace.js:649
 msgid "Download original values (.sql.gz)"
 msgstr ""
 
-#: assets/js/search-replace.js:579
+#: assets/js/search-replace.js:665
 msgid "Replace in database…"
 msgstr ""
 
-#: assets/js/search-replace.js:587
+#: assets/js/search-replace.js:673
 msgid "Apply these changes"
 msgstr ""
 
-#: assets/js/search-replace.js:591
+#: assets/js/search-replace.js:677
 msgid "This writes the replacements shown here to the database, using exactly the search, replacement, tables and columns of this dry run. Rows are processed in batches; each batch is saved completely or not at all."
 msgstr ""
 
-#: assets/js/search-replace.js:603
+#: assets/js/search-replace.js:689
 msgid "Some matching values are left unchanged because changing them could corrupt data. The reasons are listed per table below."
 msgstr ""
 
-#: assets/js/search-replace.js:616
-#: assets/js/search-replace.js:704
+#: assets/js/search-replace.js:702
+#: assets/js/search-replace.js:790
 msgid "Results per table"
 msgstr ""
 
-#: assets/js/search-replace.js:662
+#: assets/js/search-replace.js:748
 msgid "Columns"
 msgstr ""
 
-#: assets/js/search-replace.js:663
+#: assets/js/search-replace.js:749
 msgid "Notes"
 msgstr ""
 
-#: assets/js/search-replace.js:701
+#: assets/js/search-replace.js:787
 msgid "No tables match."
 msgstr ""
 
 #. translators: 1: tables shown, 2: tables matching.
-#: assets/js/search-replace.js:707
+#: assets/js/search-replace.js:793
 #, js-format
 msgid "Showing %1$s of %2$s tables."
 msgstr ""
 
-#: assets/js/search-replace.js:714
+#: assets/js/search-replace.js:800
 msgid "Previous"
 msgstr ""
 
-#: assets/js/search-replace.js:715
+#: assets/js/search-replace.js:801
 msgid "Next"
 msgstr ""
 
 #. translators: 1: current page, 2: number of pages.
-#: assets/js/search-replace.js:726
+#: assets/js/search-replace.js:812
 #, js-format
 msgid "Page %1$s of %2$s"
 msgstr ""
 
-#: assets/js/search-replace.js:742
+#: assets/js/search-replace.js:828
 msgid "Only tables with changes or notes"
 msgstr ""
 
 #. translators: 1: number of values, 2: reason.
-#: assets/js/search-replace.js:763
+#: assets/js/search-replace.js:849
 #, js-format
 msgid "%1$s left unchanged: %2$s"
 msgstr ""
 
-#: assets/js/search-replace.js:787
+#: assets/js/search-replace.js:873
 msgid "Examples"
 msgstr ""
 
 #. translators: %s: number of examples.
-#: assets/js/search-replace.js:793
+#: assets/js/search-replace.js:879
 #, js-format
 msgid "The first %s changes found, with a little surrounding text."
 msgstr ""
 
-#: assets/js/search-replace.js:807
+#: assets/js/search-replace.js:893
 msgid "Before"
 msgstr ""
 
-#: assets/js/search-replace.js:809
+#: assets/js/search-replace.js:895
 msgid "After"
 msgstr ""
 
 #. translators: 1: number of replacements, 2: number of rows, 3: number of tables.
-#: assets/js/search-replace.js:826
+#: assets/js/search-replace.js:912
 #, js-format
 msgid "%1$s replacements in %2$s rows across %3$s tables will be written to the database."
 msgstr ""
 
 #. translators: %s: comma-separated table names.
-#: assets/js/search-replace.js:859
+#: assets/js/search-replace.js:949
 #, js-format
 msgid "These tables do not support transactions, so if the replacement is interrupted a batch in them could be left partly written: %s"
 msgstr ""
 
-#: assets/js/search-replace.js:865
+#: assets/js/search-replace.js:955
 msgid "The replacement contains the search text. Running this same replacement a second time would apply it again."
 msgstr ""
 
-#: assets/js/search-replace.js:869
+#: assets/js/search-replace.js:959
 msgid "If this changes the site address (siteurl or home), it is changed last and you will need to log in again at the new address."
 msgstr ""
 
-#: assets/js/search-replace.js:912
-#: assets/js/search-replace.js:937
+#: assets/js/search-replace.js:1002
+#: assets/js/search-replace.js:1027
 msgid "Resume"
 msgstr ""
 
-#: assets/js/search-replace.js:980
+#: assets/js/search-replace.js:1070
 msgid "The request failed. Check your connection and try again."
 msgstr ""

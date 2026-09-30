@@ -47,11 +47,18 @@ foreach ( $job->settings['exclude_columns'] ?? array() as $table_name => $table_
 
 <section class="dlz-card" aria-label="<?php esc_attr_e( 'Job details', 'dl-relocate-db' ); ?>">
 <dl class="dlz-summary">
-	<dt><?php esc_html_e( 'Search for', 'dl-relocate-db' ); ?></dt>
-	<dd><code><?php echo esc_html( $job->search ); ?></code></dd>
-
-	<dt><?php esc_html_e( 'Replace with', 'dl-relocate-db' ); ?></dt>
-	<dd><?php echo '' === $job->replace ? '<em>' . esc_html__( '(nothing: matches are removed)', 'dl-relocate-db' ) . '</em>' : '<code>' . esc_html( $job->replace ) . '</code>'; ?></dd>
+	<dt><?php echo esc_html( _n( 'Search and replace', 'Search and replace', count( $job->pairs() ), 'dl-relocate-db' ) ); ?></dt>
+	<dd>
+		<ul class="dlz-pair-list">
+			<?php foreach ( $job->pairs() as [ $pair_search, $pair_replace ] ) : ?>
+				<li>
+					<code><?php echo esc_html( $pair_search ); ?></code>
+					<span aria-hidden="true">→</span><span class="screen-reader-text"><?php esc_html_e( 'replaced with', 'dl-relocate-db' ); ?></span>
+					<?php echo '' === $pair_replace ? '<em>' . esc_html__( '(nothing: removed)', 'dl-relocate-db' ) . '</em>' : '<code>' . esc_html( $pair_replace ) . '</code>'; ?>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+	</dd>
 
 	<dt><?php esc_html_e( 'Options', 'dl-relocate-db' ); ?></dt>
 	<dd><?php echo esc_html( $options ? implode( ', ', $options ) : __( 'Defaults', 'dl-relocate-db' ) ); ?></dd>

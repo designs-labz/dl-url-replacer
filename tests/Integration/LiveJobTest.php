@@ -111,7 +111,7 @@ final class LiveJobTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'completed', $live['status'] );
 		$this->assertSame( $dry_run['totals'], $live['totals'] );
-		$this->assertSame( $this->expected( $original, new Replacement( self::OLD, self::NEW ) ), $this->rows() );
+		$this->assertSame( $this->expected( $original, new Replacement( array( array( self::OLD, self::NEW ) ) ) ), $this->rows() );
 	}
 
 	public function test_serialized_values_still_unserialize_after_replacement(): void {
@@ -201,7 +201,7 @@ final class LiveJobTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'completed', $live['status'] );
 		$this->assertSame( $dry_run['totals'], $live['totals'] );
-		$this->assertSame( $this->expected( $original, new Replacement( $search, $replace ) ), $this->rows() );
+		$this->assertSame( $this->expected( $original, new Replacement( array( array( $search, $replace ) ) ) ), $this->rows() );
 	}
 
 	public function test_site_address_is_changed_last(): void {

@@ -96,6 +96,16 @@ $tiles = array(
 				<dd><code><?php echo esc_html( $latest->search ); ?></code></dd>
 				<dt><?php esc_html_e( 'Replace with', 'dl-relocate-db' ); ?></dt>
 				<dd><code><?php echo esc_html( $latest->replace ); ?></code></dd>
+				<?php if ( count( $latest->pairs() ) > 1 ) : ?>
+					<dt><?php esc_html_e( 'Also', 'dl-relocate-db' ); ?></dt>
+					<dd>
+						<?php
+						$more_pairs = count( $latest->pairs() ) - 1;
+						/* translators: %s: number of further search and replacement pairs. */
+						echo esc_html( sprintf( _n( '%s more pair', '%s more pairs', $more_pairs, 'dl-relocate-db' ), number_format_i18n( $more_pairs ) ) );
+						?>
+					</dd>
+				<?php endif; ?>
 				<dt><?php esc_html_e( 'Rows changed', 'dl-relocate-db' ); ?></dt>
 				<dd><?php echo esc_html( number_format_i18n( $latest_totals['rows_changed'] ) ); ?></dd>
 				<dt><?php esc_html_e( 'Replacements', 'dl-relocate-db' ); ?></dt>

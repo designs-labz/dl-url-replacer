@@ -14,6 +14,8 @@ if ( isset( $args['error'] ) ) {
 	return;
 }
 
+$max_pairs = \DesignsLabz\Relocate\Jobs\JobStarter::max_pairs();
+
 /** @var array<string, \DesignsLabz\Relocate\Database\Table> $tables */
 $tables  = $args['tables'];
 $columns = $args['columns'];
@@ -36,19 +38,52 @@ $options = array(
 <form id="dlz-search-replace" class="dlz-form">
 	<section class="dlz-card" aria-labelledby="dlz-step-find">
 		<h3 id="dlz-step-find" class="dlz-card-title"><span class="dlz-step" aria-hidden="true">1</span> <?php esc_html_e( 'What to find', 'dl-relocate-db' ); ?></h3>
-		<div class="dlz-pair">
-			<p class="dlz-field">
-				<label for="dlz-search"><?php esc_html_e( 'Search for', 'dl-relocate-db' ); ?></label>
-				<input type="text" id="dlz-search" name="search" value="<?php echo esc_attr( $args['prefill']['search'] ); ?>" class="large-text code" required spellcheck="false" autocomplete="off" placeholder="https://staging.example.com" aria-describedby="dlz-search-description">
-				<span class="description" id="dlz-search-description"><?php esc_html_e( 'Matched exactly as typed, including any spaces.', 'dl-relocate-db' ); ?></span>
-			</p>
-			<span class="dlz-pair-arrow dashicons dashicons-arrow-right-alt" aria-hidden="true"></span>
-			<p class="dlz-field">
-				<label for="dlz-replace"><?php esc_html_e( 'Replace with', 'dl-relocate-db' ); ?></label>
-				<input type="text" id="dlz-replace" name="replace" value="<?php echo esc_attr( $args['prefill']['replace'] ); ?>" class="large-text code" spellcheck="false" autocomplete="off" placeholder="https://example.com" aria-describedby="dlz-replace-description">
-				<span class="description" id="dlz-replace-description"><?php esc_html_e( 'Leave empty to remove the matched text.', 'dl-relocate-db' ); ?></span>
-			</p>
+		<div class="dlz-pair-head" aria-hidden="true">
+			<span><?php esc_html_e( 'Search for', 'dl-relocate-db' ); ?></span>
+			<span></span>
+			<span><?php esc_html_e( 'Replace with', 'dl-relocate-db' ); ?></span>
+			<span></span>
 		</div>
+
+		<ol id="dlz-pairs" class="dlz-pairs" data-max="<?php echo esc_attr( (string) $max_pairs ); ?>">
+			<li class="dlz-pair">
+				<label class="screen-reader-text" for="dlz-search-1"><?php esc_html_e( 'Search for', 'dl-relocate-db' ); ?></label>
+				<input type="text" id="dlz-search-1" name="search[]" value="<?php echo esc_attr( $args['prefill']['search'] ); ?>" class="large-text code" required spellcheck="false" autocomplete="off" placeholder="https://staging.example.com" aria-describedby="dlz-pairs-help">
+				<span class="dlz-pair-arrow dashicons dashicons-arrow-right-alt" aria-hidden="true"></span>
+				<label class="screen-reader-text" for="dlz-replace-1"><?php esc_html_e( 'Replace with', 'dl-relocate-db' ); ?></label>
+				<input type="text" id="dlz-replace-1" name="replace[]" value="<?php echo esc_attr( $args['prefill']['replace'] ); ?>" class="large-text code" spellcheck="false" autocomplete="off" placeholder="https://example.com" aria-describedby="dlz-pairs-help">
+				<span class="dlz-pair-remove-slot"></span>
+			</li>
+		</ol>
+
+		<template id="dlz-pair-template">
+			<li class="dlz-pair">
+				<label class="screen-reader-text" data-for="search"></label>
+				<input type="text" name="search[]" class="large-text code" required spellcheck="false" autocomplete="off" aria-describedby="dlz-pairs-help">
+				<span class="dlz-pair-arrow dashicons dashicons-arrow-right-alt" aria-hidden="true"></span>
+				<label class="screen-reader-text" data-for="replace"></label>
+				<input type="text" name="replace[]" class="large-text code" spellcheck="false" autocomplete="off" aria-describedby="dlz-pairs-help">
+				<button type="button" class="button dlz-pair-remove"><span class="dashicons dashicons-no-alt" aria-hidden="true"></span><span class="screen-reader-text"></span></button>
+			</li>
+		</template>
+
+		<div class="dlz-pairs-footer">
+			<button type="button" id="dlz-add-pair" class="button">
+				<span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span>
+				<?php esc_html_e( 'Add another', 'dl-relocate-db' ); ?>
+			</button>
+			<span id="dlz-pairs-count" class="dlz-pairs-count" aria-live="polite"></span>
+		</div>
+
+		<p class="description" id="dlz-pairs-help">
+			<?php
+			printf(
+				/* translators: %d: maximum number of pairs. */
+				esc_html( _n( 'Matched exactly as typed, including any spaces. Leave a replacement empty to remove the matched text. Up to %d pair.', 'Matched exactly as typed, including any spaces. Leave a replacement empty to remove the matched text. Up to %d pairs, all replaced together in one pass.', $max_pairs, 'dl-relocate-db' ) ),
+				(int) $max_pairs
+			);
+			?>
+		</p>
 	</section>
 
 	<section class="dlz-card" aria-labelledby="dlz-step-options">

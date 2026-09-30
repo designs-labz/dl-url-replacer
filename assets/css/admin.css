@@ -109,15 +109,67 @@
 .dlz-relocate input[type="text"]:focus,
 .dlz-relocate input[type="search"]:focus,
 .dlz-relocate input[type="number"]:focus,
-.dlz-relocate input[type="checkbox"]:focus,
 .dlz-relocate select:focus {
 	border-color: var(--dlz-accent);
 	box-shadow: 0 0 0 1px var(--dlz-accent);
 }
 
+/*
+ * Checkboxes: a solid brand-coloured box with a white tick when checked,
+ * replacing WordPress's outlined box so the state reads at a glance.
+ */
+.dlz-relocate input[type="checkbox"] {
+	flex: none;
+	width: 18px;
+	height: 18px;
+	min-width: 18px;
+	margin: 0;
+	background: #fff;
+	border: 1.5px solid #8c8f94;
+	border-radius: 5px;
+	box-shadow: none;
+	cursor: pointer;
+	transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dlz-relocate input[type="checkbox"]:hover {
+	border-color: var(--dlz-accent);
+}
+
+.dlz-relocate input[type="checkbox"]:focus {
+	border-color: var(--dlz-accent);
+	box-shadow: none;
+	outline: 2px solid transparent;
+}
+
+.dlz-relocate input[type="checkbox"]:focus-visible {
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--dlz-accent);
+}
+
+.dlz-relocate input[type="checkbox"]:checked {
+	background: var(--dlz-accent);
+	border-color: var(--dlz-accent);
+}
+
 .dlz-relocate input[type="checkbox"]:checked::before {
-	/* WordPress's own tick, in the brand colour instead of the admin blue. */
-	content: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2020%2020%27%3E%3Cpath%20d%3D%27M14.83%204.89l1.34.94-5.81%208.38H9.02L5.78%209.67l1.34-1.25%202.57%202.4z%27%20fill%3D%27%237801e7%27%2F%3E%3C%2Fsvg%3E");
+	content: "";
+	display: block;
+	float: none;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	background: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%3E%3Cpath%20d%3D%27M3.5%208.5l3%203%206-7%27%20fill%3D%27none%27%20stroke%3D%27%23fff%27%20stroke-width%3D%272.2%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%2F%3E%3C%2Fsvg%3E") center / 14px 14px no-repeat;
+}
+
+.dlz-relocate input[type="checkbox"]:disabled {
+	background: var(--dlz-subtle);
+	border-color: var(--dlz-border);
+	cursor: not-allowed;
+}
+
+.dlz-relocate input[type="checkbox"]:disabled:checked {
+	background: #c3c4c7;
+	border-color: #c3c4c7;
 }
 
 .dlz-relocate .dlz-brand-name {
@@ -430,18 +482,6 @@
 
 .dlz-relocate .dlz-stack p {
 	margin: 0;
-}
-
-.dlz-relocate .dlz-pair {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-	align-items: start;
-	gap: 16px;
-}
-
-.dlz-relocate .dlz-pair-arrow {
-	margin-top: 36px;
-	color: var(--dlz-muted);
 }
 
 .dlz-relocate .dlz-step {
@@ -1101,10 +1141,104 @@
 	.dlz-relocate .dlz-card { padding: 16px; }
 	.dlz-relocate .dlz-dashboard,
 	.dlz-relocate .dlz-options { grid-template-columns: minmax(0, 1fr); }
-	.dlz-relocate .dlz-pair { grid-template-columns: minmax(0, 1fr); }
-	.dlz-relocate .dlz-pair-arrow { display: none; }
 	.dlz-relocate .dlz-progress-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.dlz-relocate .dlz-toolbar-count { margin-left: 0; }
 	.dlz-relocate .dlz-summary { grid-template-columns: minmax(0, 1fr); gap: 2px; }
 	.dlz-relocate .dlz-summary dd { margin-bottom: 8px; }
+}
+
+/* Search and replacement pairs ------------------------------------------------ */
+
+.dlz-relocate .dlz-pair-head,
+.dlz-relocate .dlz-pair {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr) 40px;
+	align-items: center;
+	gap: 12px;
+}
+
+.dlz-relocate .dlz-pair-head {
+	margin-bottom: 6px;
+	font-weight: 600;
+}
+
+.dlz-relocate .dlz-pairs {
+	display: grid;
+	gap: 10px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.dlz-relocate .dlz-pair {
+	margin: 0;
+	animation: dlz-rise 0.2s var(--dlz-ease);
+}
+
+.dlz-relocate .dlz-pair input[type="text"] {
+	min-height: 40px;
+	padding: 6px 12px;
+	font-size: 14px;
+	border-radius: 6px;
+}
+
+.dlz-relocate .dlz-pair .dlz-pair-arrow {
+	margin: 0;
+	color: var(--dlz-muted);
+}
+
+.wp-core-ui .dlz-relocate .button.dlz-pair-remove {
+	justify-content: center;
+	width: 40px;
+	min-height: 40px;
+	padding: 0;
+	color: var(--dlz-muted);
+	border-color: var(--dlz-border);
+	border-radius: 6px;
+}
+
+.wp-core-ui .dlz-relocate .button.dlz-pair-remove:hover {
+	color: var(--dlz-danger);
+	background: #fcf0f1;
+	border-color: var(--dlz-danger);
+}
+
+.dlz-relocate .dlz-pairs-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	margin: 12px 0 8px;
+}
+
+.dlz-relocate .dlz-pairs-count {
+	color: var(--dlz-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.dlz-relocate .dlz-pair-list {
+	margin: 0;
+}
+
+.dlz-relocate .dlz-pair-list li {
+	margin: 0 0 4px;
+}
+
+.dlz-relocate .column-values .dlz-more {
+	display: inline-block;
+	margin-top: 4px;
+	padding: 0 8px;
+	font-size: 12px;
+	color: var(--dlz-accent);
+	background: var(--dlz-accent-soft);
+	border-radius: 999px;
+}
+
+@media (max-width: 782px) {
+	.dlz-relocate .dlz-pair-head { display: none; }
+	.dlz-relocate .dlz-pair { grid-template-columns: minmax(0, 1fr) 40px; }
+	.dlz-relocate .dlz-pair .dlz-pair-arrow { display: none; }
+	.dlz-relocate .dlz-pair input[name="search[]"] { grid-column: 1 / -1; }
+	.dlz-relocate .dlz-pair-remove-slot { display: none; }
+	.dlz-relocate .dlz-pair:first-child input[name="replace[]"] { grid-column: 1 / -1; }
 }

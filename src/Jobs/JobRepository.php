@@ -69,9 +69,10 @@ final class JobRepository {
 		}
 
 		if ( '' !== $search ) {
-			$like         = '%' . $this->wpdb->esc_like( $search ) . '%';
-			$conditions[] = '(search LIKE %s OR replace_with LIKE %s)';
-			array_push( $args, $like, $like );
+			$like = '%' . $this->wpdb->esc_like( $search ) . '%';
+			// Extra pairs live in the settings JSON, stored with unescaped slashes and Unicode.
+			$conditions[] = '(search LIKE %s OR replace_with LIKE %s OR settings LIKE %s)';
+			array_push( $args, $like, $like, $like );
 		}
 
 		$where   = $conditions ? ' WHERE ' . implode( ' AND ', $conditions ) : '';

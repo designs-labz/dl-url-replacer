@@ -41,6 +41,7 @@ Tables are processed in small batches by primary key, a few seconds per request,
 
 = Also included =
 
+* Up to five search and replace pairs in one job, applied together in a single pass.
 * Choose the tables to search, and leave out individual columns.
 * Case-insensitive and whole-word matching, and matching the http:// and protocol-relative versions of a URL.
 * A live progress view with the current table, rows scanned, changes found and time remaining.

@@ -18,7 +18,7 @@ final class SerializedDataTest extends TestCase {
 	private Replacer $replacer;
 
 	protected function setUp(): void {
-		$this->replacer = new Replacer( new Replacement( self::OLD, self::NEW ) );
+		$this->replacer = new Replacer( new Replacement( array( array( self::OLD, self::NEW ) ) ) );
 	}
 
 	/**
@@ -152,7 +152,7 @@ final class SerializedDataTest extends TestCase {
 	}
 
 	public function test_skips_the_whole_value_when_nested_json_would_break(): void {
-		$replacer = new Replacer( new Replacement( 'old', 'say "hi"' ) );
+		$replacer = new Replacer( new Replacement( array( array( 'old', 'say "hi"' ) ) ) );
 		$value    = serialize(
 			array(
 				'plain' => 'old',

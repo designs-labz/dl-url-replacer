@@ -17,6 +17,9 @@ use RuntimeException;
  */
 final class JobStarter {
 
+	/** How many search and replacement pairs one job may have, unless filtered. */
+	public const MAX_PAIRS = 5;
+
 	public function __construct(
 		private JobRepository $jobs,
 		private JobRunner $runner,
@@ -26,22 +29,30 @@ final class JobStarter {
 	) {}
 
 	/**
+	/**
+	 * The most search and replacement pairs one job may have.
+	 */
+	public static function max_pairs(): int {
+		/**
+		 * Filters how many search and replacement pairs one job may have.
+		 *
+		 * @param int $max Default 5.
+		 */
+		return max( 1, (int) apply_filters( 'dlz_relocate_max_pairs', self::MAX_PAIRS ) );
+	}
+
+	/**
+	 * @param list<array{0: string, 1: string}>                                                    $pairs  Search and replacement values.
 	 * @param array{case_sensitive: bool, whole_words: bool, url_variants: bool, skip_guids: bool} $options
 	 * @param list<string>                                                                         $tables
 	 * @param array<string, list<string>>                                                          $exclude_columns Table => columns to leave out.
 	 * @throws JobException When the request is invalid or the job cannot be saved.
 	 */
-	public function dry_run( string $search, string $replace, array $options, array $tables, array $exclude_columns = array() ): Job {
-		if ( '' === $search ) {
-			throw new JobException( 'dlz_relocate_empty_search', __( 'Enter the text or URL to search for.', 'dl-relocate-db' ) );
-		}
-
-		if ( $search === $replace ) {
-			throw new JobException( 'dlz_relocate_same_values', __( 'The search and replacement values are the same, so there is nothing to change.', 'dl-relocate-db' ) );
-		}
+	public function dry_run( array $pairs, array $options, array $tables, array $exclude_columns = array() ): Job {
+		$this->validate_pairs( $pairs, $options['case_sensitive'] );
 
 		try {
-			new Replacement( $search, $replace, $options['case_sensitive'], $options['whole_words'], $options['url_variants'] );
+			new Replacement( $pairs, $options['case_sensitive'], $options['whole_words'], $options['url_variants'] );
 		} catch ( InvalidArgumentException ) {
 			throw new JobException( 'dlz_relocate_invalid_values', __( 'The search and replacement values must be valid UTF-8 text.', 'dl-relocate-db' ) );
 		}
@@ -77,11 +88,12 @@ final class JobStarter {
 				null,
 				true,
 				JobStatus::Pending,
-				$search,
-				$replace,
+				$pairs[0][0],
+				$pairs[0][1],
 				$options + array(
 					'tables'          => $tables,
 					'exclude_columns' => $exclude_columns,
+					'pairs'           => $pairs,
 				),
 				array(
 					'table_index' => 0,
@@ -163,6 +175,49 @@ final class JobStarter {
 		);
 
 		return $job;
+	}
+
+	/**
+	 * Checked here, before the Replacement, so each problem gets its own translated message.
+	 *
+	 * @param list<array{0: string, 1: string}> $pairs
+	 * @throws JobException When a pair cannot be used.
+	 */
+	private function validate_pairs( array $pairs, bool $case_sensitive ): void {
+		if ( ! $pairs ) {
+			throw new JobException( 'dlz_relocate_empty_search', __( 'Enter the text or URL to search for.', 'dl-relocate-db' ) );
+		}
+
+		if ( count( $pairs ) > self::max_pairs() ) {
+			throw new JobException(
+				'dlz_relocate_too_many_pairs',
+				/* translators: %d: maximum number of pairs. */
+				sprintf( _n( 'You can search for up to %d value at a time.', 'You can search for up to %d values at a time.', self::max_pairs(), 'dl-relocate-db' ), self::max_pairs() )
+			);
+		}
+
+		$seen = array();
+
+		foreach ( $pairs as $index => [ $search, $replace ] ) {
+			/* translators: %d: pair number. */
+			$which = count( $pairs ) > 1 ? ' ' . sprintf( __( '(pair %d)', 'dl-relocate-db' ), $index + 1 ) : '';
+
+			if ( '' === $search ) {
+				throw new JobException( 'dlz_relocate_empty_search', __( 'Enter the text or URL to search for.', 'dl-relocate-db' ) . $which );
+			}
+
+			if ( $search === $replace ) {
+				throw new JobException( 'dlz_relocate_same_values', __( 'The search and replacement values are the same, so there is nothing to change.', 'dl-relocate-db' ) . $which );
+			}
+
+			$key = $case_sensitive ? $search : strtolower( $search );
+
+			if ( isset( $seen[ $key ] ) ) {
+				throw new JobException( 'dlz_relocate_duplicate_search', __( 'The same search value is entered twice.', 'dl-relocate-db' ) . $which );
+			}
+
+			$seen[ $key ] = true;
+		}
 	}
 
 	/**

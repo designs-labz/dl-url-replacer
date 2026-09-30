@@ -150,11 +150,17 @@ final class HistoryTable extends \WP_List_Table {
 	}
 
 	protected function column_values( Job $job ): string {
+		$more = count( $job->pairs() ) - 1;
+
 		return sprintf(
-			'<span class="dlz-from"><code>%1$s</code></span><span class="dlz-to"><span aria-hidden="true">→</span><span class="screen-reader-text">%2$s</span> <code>%3$s</code></span>',
+			'<span class="dlz-from"><code>%1$s</code></span><span class="dlz-to"><span aria-hidden="true">→</span><span class="screen-reader-text">%2$s</span> <code>%3$s</code></span>%4$s',
 			esc_html( self::excerpt( $job->search ) ),
 			esc_html__( 'replaced with', 'dl-relocate-db' ),
-			esc_html( '' === $job->replace ? __( '(nothing)', 'dl-relocate-db' ) : self::excerpt( $job->replace ) )
+			esc_html( '' === $job->replace ? __( '(nothing)', 'dl-relocate-db' ) : self::excerpt( $job->replace ) ),
+			$more > 0
+				/* translators: %s: number of further search and replacement pairs. */
+				? '<span class="dlz-more">' . esc_html( sprintf( _n( '+ %s more', '+ %s more', $more, 'dl-relocate-db' ), number_format_i18n( $more ) ) ) . '</span>'
+				: ''
 		);
 	}
 

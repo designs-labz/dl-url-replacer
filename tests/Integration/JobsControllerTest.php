@@ -127,6 +127,100 @@ final class JobsControllerTest extends WP_UnitTestCase {
 		$this->assertSame( $code, $response->get_data()['code'] );
 	}
 
+	public function test_several_pairs_in_one_dry_run(): void {
+		wp_set_current_user( self::$admin_id );
+		self::factory()->post->create( array( 'post_content' => 'Hello world from the old house' ) );
+
+		$job = $this->request(
+			'POST',
+			'/jobs',
+			array(
+				'pairs'  => array(
+					array(
+						'search'  => 'Hello world',
+						'replace' => 'Goodbye world',
+					),
+					array(
+						'search'  => 'old house',
+						'replace' => 'new house',
+					),
+				),
+				'tables' => array( 'wptests_posts' ),
+			)
+		)->get_data();
+
+		while ( ! $job['finished'] ) {
+			$job = $this->request( 'POST', "/jobs/{$job['id']}/run" )->get_data();
+		}
+
+		$this->assertCount( 2, $job['pairs'] );
+		$this->assertSame( 'old house', $job['pairs'][1]['search'] );
+		$this->assertGreaterThanOrEqual( 2, $job['totals']['replacements'] );
+	}
+
+	/**
+	 * @return array<string, array{0: int, 1: int, 2: bool}>
+	 */
+	public static function pair_limits(): array {
+		return array(
+			'five is allowed'       => array( 5, 5, true ),
+			'six is too many'       => array( 6, 5, false ),
+			'a filter can raise it' => array( 6, 10, true ),
+		);
+	}
+
+	/**
+	 * @dataProvider pair_limits
+	 */
+	public function test_number_of_pairs_is_limited( int $pairs, int $limit, bool $allowed ): void {
+		wp_set_current_user( self::$admin_id );
+		add_filter( 'dlz_relocate_max_pairs', fn() => $limit );
+
+		$response = $this->request(
+			'POST',
+			'/jobs',
+			array(
+				'pairs'  => array_map(
+					fn( int $i ): array => array(
+						'search'  => "value {$i}",
+						'replace' => "other {$i}",
+					),
+					range( 1, $pairs )
+				),
+				'tables' => array( 'wptests_posts' ),
+			)
+		);
+
+		$this->assertSame( $allowed ? 201 : 400, $response->get_status() );
+		if ( ! $allowed ) {
+			$this->assertSame( 'dlz_relocate_too_many_pairs', $response->get_data()['code'] );
+		}
+	}
+
+	public function test_duplicate_pairs_are_rejected(): void {
+		wp_set_current_user( self::$admin_id );
+
+		$response = $this->request(
+			'POST',
+			'/jobs',
+			array(
+				'pairs'  => array(
+					array(
+						'search'  => 'same',
+						'replace' => 'a',
+					),
+					array(
+						'search'  => 'same',
+						'replace' => 'b',
+					),
+				),
+				'tables' => array( 'wptests_posts' ),
+			)
+		);
+
+		$this->assertSame( 'dlz_relocate_duplicate_search', $response->get_data()['code'] );
+	}
+
 	public function test_unknown_job_is_not_found(): void {
 		wp_set_current_user( self::$admin_id );
 

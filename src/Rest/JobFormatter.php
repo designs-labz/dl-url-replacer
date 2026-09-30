@@ -36,6 +36,13 @@ final class JobFormatter {
 			'dry_run'       => $job->dry_run,
 			'search'        => $job->search,
 			'replace'       => $job->replace,
+			'pairs'         => array_map(
+				fn( array $pair ): array => array(
+					'search'  => $pair[0],
+					'replace' => $pair[1],
+				),
+				$job->pairs()
+			),
 			'tables'        => $job->settings['tables'],
 			'status'        => $job->status->value,
 			'status_label'  => $job->status->label(),

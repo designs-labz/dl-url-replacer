@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 final class ReplacerTest extends TestCase {
 
 	private function replace( string $value, string $search, string $replace, bool $case_sensitive = true, bool $whole_words = false, bool $url_variants = false ): ReplaceResult {
-		return ( new Replacer( new Replacement( $search, $replace, $case_sensitive, $whole_words, $url_variants ) ) )->replace( $value );
+		return ( new Replacer( new Replacement( array( array( $search, $replace ) ), $case_sensitive, $whole_words, $url_variants ) ) )->replace( $value );
 	}
 
 	public function test_plain_text(): void {
@@ -95,6 +95,27 @@ final class ReplacerTest extends TestCase {
 
 		$this->assertSame( 'www.example.test', $result->value );
 		$this->assertSame( 1, $result->count );
+	}
+
+	public function test_several_pairs_are_applied_in_one_pass_without_chaining(): void {
+		$replacer = new Replacer( new Replacement( array( array( 'apple', 'banana' ), array( 'banana', 'cherry' ) ) ) );
+		$result   = $replacer->replace( 'apple banana' );
+
+		$this->assertSame( 'banana cherry', $result->value );
+		$this->assertSame( 2, $result->count );
+	}
+
+	public function test_the_longest_overlapping_search_wins(): void {
+		$replacer = new Replacer(
+			new Replacement(
+				array(
+					array( 'example.test', 'example.org' ),
+					array( 'www.example.test', 'example.org' ),
+				)
+			)
+		);
+
+		$this->assertSame( 'example.org and example.org', $replacer->replace( 'www.example.test and example.test' )->value );
 	}
 
 	public function test_json_with_escaped_slashes(): void {

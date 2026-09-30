@@ -90,6 +90,8 @@
 	/* Form ---------------------------------------------------------------- */
 
 	function initForm() {
+		initPairs();
+
 		const filter = document.getElementById( 'dlz-table-filter' );
 		const count = document.getElementById( 'dlz-table-count' );
 		const none = document.getElementById( 'dlz-table-none' );
@@ -162,6 +164,79 @@
 		updateCount();
 	}
 
+	/**
+	 * The "Add another" button and the rows it creates. The limit comes from the
+	 * server (data-max), which enforces it again when the job is created.
+	 */
+	function initPairs() {
+		const list = document.getElementById( 'dlz-pairs' );
+		const template = document.getElementById( 'dlz-pair-template' );
+		const add = document.getElementById( 'dlz-add-pair' );
+		const count = document.getElementById( 'dlz-pairs-count' );
+		const max = Number( list.dataset.max ) || 1;
+
+		const renumber = () => {
+			const rows = [ ...list.children ];
+
+			rows.forEach( ( row, index ) => {
+				const number = index + 1;
+				const search = row.querySelector( 'input[name="search[]"]' );
+				const replace = row.querySelector( 'input[name="replace[]"]' );
+
+				search.id = `dlz-search-${ number }`;
+				replace.id = `dlz-replace-${ number }`;
+
+				if ( index > 0 ) {
+					const [ searchLabel, replaceLabel ] = row.querySelectorAll( 'label' );
+					searchLabel.htmlFor = search.id;
+					replaceLabel.htmlFor = replace.id;
+					/* translators: %d: pair number. */
+					searchLabel.textContent = sprintf( __( 'Search for, pair %d', 'dl-relocate-db' ), number );
+					/* translators: %d: pair number. */
+					replaceLabel.textContent = sprintf( __( 'Replace with, pair %d', 'dl-relocate-db' ), number );
+					/* translators: %d: pair number. */
+					row.querySelector( '.dlz-pair-remove .screen-reader-text' ).textContent = sprintf( __( 'Remove pair %d', 'dl-relocate-db' ), number );
+				}
+			} );
+
+			add.disabled = rows.length >= max;
+			count.textContent = sprintf(
+				/* translators: 1: pairs in use, 2: maximum pairs. */
+				__( '%1$s of %2$s', 'dl-relocate-db' ),
+				numbers.format( rows.length ),
+				numbers.format( max )
+			);
+		};
+
+		add.addEventListener( 'click', () => {
+			if ( list.children.length >= max ) {
+				return;
+			}
+
+			list.append( template.content.cloneNode( true ) );
+			renumber();
+			list.lastElementChild.querySelector( 'input' ).focus();
+		} );
+
+		list.addEventListener( 'click', ( event ) => {
+			const remove = event.target.closest( '.dlz-pair-remove' );
+
+			if ( ! remove ) {
+				return;
+			}
+
+			const row = remove.closest( '.dlz-pair' );
+			const previous = row.previousElementSibling;
+
+			row.remove();
+			renumber();
+			( previous ? previous.querySelector( 'input' ) : add ).focus();
+			speak( __( 'Pair removed.', 'dl-relocate-db' ) );
+		} );
+
+		renumber();
+	}
+
 	async function onSubmit( event ) {
 		event.preventDefault();
 
@@ -185,8 +260,7 @@
 				path: API,
 				method: 'POST',
 				data: {
-					search: data.get( 'search' ),
-					replace: data.get( 'replace' ),
+					pairs: pairsFrom( data ),
 					case_sensitive: ! data.has( 'case_insensitive' ),
 					whole_words: data.has( 'whole_words' ),
 					url_variants: data.has( 'url_variants' ),
@@ -203,6 +277,18 @@
 
 		speak( __( 'Dry run started.', 'dl-relocate-db' ) );
 		run( job );
+	}
+
+	/**
+	 * @param {FormData} data
+	 * @return {Object[]} Search and replacement pairs, skipping added rows left completely empty.
+	 */
+	function pairsFrom( data ) {
+		const replaces = data.getAll( 'replace[]' );
+
+		return data.getAll( 'search[]' )
+			.map( ( search, index ) => ( { search, replace: replaces[ index ] || '' } ) )
+			.filter( ( pair, index ) => 0 === index || pair.search || pair.replace );
 	}
 
 	/**
@@ -830,12 +916,16 @@
 				)
 			),
 			el(
-				'dl',
-				{ className: 'dlz-summary' },
-				el( 'dt', {}, __( 'Search for', 'dl-relocate-db' ) ),
-				el( 'dd', {}, el( 'code', {}, job.search ) ),
-				el( 'dt', {}, __( 'Replace with', 'dl-relocate-db' ) ),
-				el( 'dd', {}, job.replace ? el( 'code', {}, job.replace ) : el( 'em', {}, __( '(nothing: matches are removed)', 'dl-relocate-db' ) ) )
+				'ul',
+				{ className: 'dlz-pair-list' },
+				...job.pairs.map( ( pair ) => el(
+					'li',
+					{},
+					el( 'code', {}, pair.search ),
+					el( 'span', { ariaHidden: 'true' }, ' → ' ),
+					el( 'span', { className: 'screen-reader-text' }, __( 'replaced with', 'dl-relocate-db' ) ),
+					pair.replace ? el( 'code', {}, pair.replace ) : el( 'em', {}, __( '(nothing: removed)', 'dl-relocate-db' ) )
+				) )
 			)
 		);
 
@@ -861,7 +951,7 @@
 			) );
 		}
 
-		if ( job.replace.includes( job.search ) ) {
+		if ( job.pairs.some( ( pair ) => pair.replace.includes( pair.search ) ) ) {
 			list.push( __( 'The replacement contains the search text. Running this same replacement a second time would apply it again.', 'dl-relocate-db' ) );
 		}
 
