@@ -78,7 +78,7 @@ That address can appear thousands of times: in posts, menus, widgets, page build
 
 | Requirement | Version |
 |---|---|
-| WordPress | 6.5 or newer (a single site; see [Multisite](#-questions)) |
+| WordPress | 6.5 or newer, single site (Multisite is planned for Pro) |
 | PHP | 8.1 or newer |
 | Database | MySQL 5.7+ or MariaDB 10.4+ |
 
@@ -181,7 +181,7 @@ Yes. It works through each table in small batches, a few seconds at a time, so i
 <details>
 <summary><strong>Does it support Multisite?</strong></summary>
 
-Not yet. On a Multisite network it shows a notice and does not run. Multisite support is planned.
+The free plugin works on single sites. Multisite support is planned for **CR Relocate DB Pro**. On a Multisite network the free plugin shows a notice and does not run.
 </details>
 
 <details>
@@ -217,8 +217,13 @@ Run `wp help crq search-replace` to see every option.
 
 ## 🗺️ What's next
 
-- 🌐 **Multisite support**: choose which sites of a network to update.
-- ⭐ **CR Relocate DB Pro** (planned): automatic backups, one-click rollback, saved profiles, scheduled jobs and moving databases between sites.
+⭐ **CR Relocate DB Pro** is planned, with:
+
+- 🌐 **Multisite support**: choose which sites of a network to update
+- 💾 Automatic backups and one-click rollback
+- 🗂️ Saved profiles and scheduled jobs
+- 🔄 Moving databases between sites
+- ➕ More than 5 search and replace pairs per job
 
 Ideas or problems? [Open an issue](https://github.com/designs-labz/dl-relocate-db/issues).
 
@@ -248,6 +253,7 @@ The admin screens and WP-CLI create jobs through `JobStarter` and run them with 
 |---|---|---|
 | `crq_relocate_step_seconds` | filter | How long one step may work before saving and returning. Default `4`. |
 | `crq_relocate_max_pairs` | filter | How many search and replace pairs one job may have. Default `5`. |
+| `crq_relocate_supports_multisite` | filter | Whether the plugin may run on a Multisite network. Default `false`; meant for the Pro add-on. |
 | `crq_relocate_manage` | capability | Required for everything. Maps to `manage_options` plus `unfiltered_html`; change it with a `map_meta_cap` filter. |
 </details>
 

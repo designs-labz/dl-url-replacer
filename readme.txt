@@ -74,7 +74,7 @@ The batch in progress either completes or is rolled back (on InnoDB tables, whic
 
 = Does it support Multisite? =
 
-Not yet. On a Multisite network the plugin shows a notice and does not run.
+The free plugin works on single sites. Multisite support is planned for CR Relocate DB Pro. On a Multisite network the free plugin shows a notice and does not run.
 
 = Which tables does it search? =
 

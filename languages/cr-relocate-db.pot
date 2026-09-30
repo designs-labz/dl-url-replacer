@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-30T09:28:57+00:00\n"
+"POT-Creation-Date: 2026-09-30T09:52:42+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cr-relocate-db\n"
@@ -46,8 +46,8 @@ msgstr ""
 msgid "CR Relocate DB requires PHP 8.1 or newer and is not running."
 msgstr ""
 
-#: cr-relocate-db.php:41
-msgid "CR Relocate DB does not support WordPress Multisite yet, so it is not running on this network."
+#: cr-relocate-db.php:84
+msgid "CR Relocate DB works on single sites. Multisite support is planned for CR Relocate DB Pro, so the plugin is not running on this network."
 msgstr ""
 
 #. translators: %d: job number.

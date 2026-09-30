@@ -33,19 +33,6 @@ if ( version_compare( PHP_VERSION, '8.1', '<' ) ) {
 	return;
 }
 
-if ( is_multisite() ) {
-	add_action(
-		'admin_notices',
-		function () {
-			wp_admin_notice(
-				esc_html__( 'CR Relocate DB does not support WordPress Multisite yet, so it is not running on this network.', 'cr-relocate-db' ),
-				array( 'type' => 'warning' )
-			);
-		}
-	);
-	return;
-}
-
 spl_autoload_register(
 	function ( string $class_name ): void {
 		$prefix = 'CraftRoq\\Relocate\\';
@@ -62,11 +49,27 @@ spl_autoload_register(
 	}
 );
 
+/*
+ * The free plugin runs on single sites only. Multisite support is planned for
+ * the Pro add-on, which switches it on with this filter. Checked when needed,
+ * not at load time, so an add-on that loads after this file can still hook in.
+ */
+$crq_relocate_runs_here = function (): bool {
+	/**
+	 * Filters whether the plugin may run on a Multisite network.
+	 *
+	 * @param bool $supported Default false.
+	 */
+	return ! is_multisite() || (bool) apply_filters( 'crq_relocate_supports_multisite', false );
+};
+
 register_activation_hook(
 	__FILE__,
-	function (): void {
-		global $wpdb;
-		( new CraftRoq\Relocate\Installer( $wpdb ) )->maybe_upgrade();
+	function () use ( $crq_relocate_runs_here ): void {
+		if ( $crq_relocate_runs_here() ) {
+			global $wpdb;
+			( new CraftRoq\Relocate\Installer( $wpdb ) )->maybe_upgrade();
+		}
 	}
 );
 
@@ -74,7 +77,19 @@ register_deactivation_hook( __FILE__, array( CraftRoq\Relocate\Jobs\Cleanup::cla
 
 add_action(
 	'plugins_loaded',
-	function (): void {
+	function () use ( $crq_relocate_runs_here ): void {
+		if ( ! $crq_relocate_runs_here() ) {
+			$notice = function (): void {
+				wp_admin_notice(
+					esc_html__( 'CR Relocate DB works on single sites. Multisite support is planned for CR Relocate DB Pro, so the plugin is not running on this network.', 'cr-relocate-db' ),
+					array( 'type' => 'warning' )
+				);
+			};
+			add_action( 'admin_notices', $notice );
+			add_action( 'network_admin_notices', $notice );
+			return;
+		}
+
 		global $wpdb;
 		( new CraftRoq\Relocate\Plugin( __FILE__, $wpdb ) )->register();
 	}
