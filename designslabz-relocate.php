@@ -70,6 +70,8 @@ register_activation_hook(
 	}
 );
 
+register_deactivation_hook( __FILE__, array( DesignsLabz\Relocate\Jobs\Cleanup::class, 'unschedule' ) );
+
 add_action(
 	'plugins_loaded',
 	function (): void {

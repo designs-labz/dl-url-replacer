@@ -13,6 +13,9 @@ use DesignsLabz\Relocate\Replace\Replacement;
  */
 final class Job {
 
+	// A step saves at least every few seconds, so a job this quiet is not being processed.
+	private const INTERRUPTED_AFTER = 60;
+
 	/**
 	 * @param JobSettings $settings
 	 * @param JobState    $state
@@ -32,7 +35,8 @@ final class Job {
 		public ?string $started_at = null,
 		public ?string $finished_at = null,
 		public ?string $error_message = null,
-		public string $before_image = ''
+		public string $before_image = '',
+		public ?string $updated_at = null
 	) {}
 
 	public function replacement(): Replacement {
@@ -43,6 +47,16 @@ final class Job {
 			$this->settings['whole_words'],
 			$this->settings['url_variants']
 		);
+	}
+
+	/**
+	 * Unfinished, but nothing has worked on it for a while: the page running it
+	 * was closed or lost its connection. Continuing it picks up where it stopped.
+	 */
+	public function is_interrupted(): bool {
+		return ! $this->status->is_finished()
+			&& null !== $this->updated_at
+			&& strtotime( $this->updated_at . ' UTC' ) < time() - self::INTERRUPTED_AFTER;
 	}
 
 	public function current_table(): ?string {

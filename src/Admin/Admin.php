@@ -5,8 +5,14 @@ namespace DesignsLabz\Relocate\Admin;
 
 use DesignsLabz\Relocate\Database\Schema;
 use DesignsLabz\Relocate\Jobs\BeforeImage;
+use DesignsLabz\Relocate\Jobs\Cleanup;
+use DesignsLabz\Relocate\Jobs\Job;
 use DesignsLabz\Relocate\Jobs\JobRepository;
+use DesignsLabz\Relocate\Jobs\JobStatus;
+use DesignsLabz\Relocate\Logger;
 use DesignsLabz\Relocate\Plugin;
+use DesignsLabz\Relocate\Rest\JobFormatter;
+use DesignsLabz\Relocate\Settings;
 use RuntimeException;
 
 /**
@@ -18,13 +24,18 @@ final class Admin {
 
 	private const DOWNLOAD_ACTION = 'dlz_relocate_before_image';
 
+	private const QUICK_ACTION = 'dlz_relocate_quick';
+
 	private string $hook_suffix = '';
 
 	public function __construct(
 		private string $file,
 		private Schema $schema,
 		private JobRepository $jobs,
-		private BeforeImage $before_images
+		private BeforeImage $before_images,
+		private JobFormatter $formatter,
+		private Logger $logger,
+		private Settings $settings
 	) {}
 
 	public function register(): void {
@@ -34,7 +45,26 @@ final class Admin {
 	}
 
 	/**
-	 * Raw URL, not HTML-escaped (wp_nonce_url() would add &amp;): it is sent as JSON.
+	 * @param array<string, string|int> $args Extra query arguments.
+	 */
+	public static function url( string $tab = '', array $args = array() ): string {
+		return add_query_arg(
+			array_filter(
+				array(
+					'page' => self::PAGE,
+					'tab'  => $tab,
+				) + $args
+			),
+			admin_url( 'tools.php' )
+		);
+	}
+
+	public static function job_url( int $job_id ): string {
+		return self::url( 'history', array( 'job' => $job_id ) );
+	}
+
+	/**
+	 * Raw URL, not HTML-escaped (wp_nonce_url() would add &amp;): it is also sent as JSON.
 	 */
 	public static function before_image_url( int $job_id ): string {
 		return add_query_arg(
@@ -44,6 +74,48 @@ final class Admin {
 				'_wpnonce' => wp_create_nonce( self::DOWNLOAD_ACTION . '_' . $job_id ),
 			),
 			admin_url( 'admin-post.php' )
+		);
+	}
+
+	public static function job_title( Job $job ): string {
+		return $job->dry_run
+			/* translators: %d: job number. */
+			? sprintf( __( 'Dry run #%d', 'designslabz-relocate' ), $job->id )
+			/* translators: %d: job number. */
+			: sprintf( __( 'Replacement #%d', 'designslabz-relocate' ), $job->id );
+	}
+
+	/**
+	 * @param string|null $utc UTC datetime as stored.
+	 */
+	public static function format_date( ?string $utc ): string {
+		if ( null === $utc || '' === $utc ) {
+			return '—';
+		}
+
+		return (string) wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) strtotime( $utc . ' UTC' ) );
+	}
+
+	/**
+	 * Status as an icon plus text, so it never relies on colour alone.
+	 *
+	 * @return string Escaped HTML.
+	 */
+	public static function status_badge( Job $job ): string {
+		[ $key, $icon, $label ] = $job->is_interrupted()
+			? array( 'interrupted', 'warning', __( 'Interrupted', 'designslabz-relocate' ) )
+			: match ( $job->status ) {
+				JobStatus::Completed => array( 'completed', 'yes-alt', $job->status->label() ),
+				JobStatus::Failed    => array( 'failed', 'warning', $job->status->label() ),
+				JobStatus::Cancelled => array( 'cancelled', 'dismiss', $job->status->label() ),
+				default              => array( 'running', 'update', $job->status->label() ),
+			};
+
+		return sprintf(
+			'<span class="dlz-badge dlz-badge-%1$s"><span class="dashicons dashicons-%2$s" aria-hidden="true"></span> %3$s</span>',
+			esc_attr( $key ),
+			esc_attr( $icon ),
+			esc_html( $label )
 		);
 	}
 
@@ -75,15 +147,6 @@ final class Admin {
 		exit;
 	}
 
-	public static function url( string $tab = '' ): string {
-		$args = array(
-			'page' => self::PAGE,
-			'tab'  => $tab,
-		);
-
-		return add_query_arg( array_filter( $args ), admin_url( 'tools.php' ) );
-	}
-
 	public function add_page(): void {
 		$this->hook_suffix = (string) add_management_page(
 			__( 'DesignsLabz Relocate', 'designslabz-relocate' ),
@@ -101,7 +164,9 @@ final class Admin {
 
 		wp_enqueue_style( 'dlz-relocate-admin', plugins_url( 'assets/css/admin.css', $this->file ), array( 'dashicons' ), Plugin::VERSION );
 
-		if ( 'search-replace' === $this->current_tab( $this->tabs() ) ) {
+		$tab = $this->current_tab( $this->tabs() );
+
+		if ( 'search-replace' === $tab || ( 'history' === $tab && $this->requested_job_id() ) ) {
 			wp_enqueue_script(
 				'dlz-relocate-search-replace',
 				plugins_url( 'assets/js/search-replace.js', $this->file ),
@@ -117,12 +182,27 @@ final class Admin {
 		$tabs    = $this->tabs();
 		$current = $this->current_tab( $tabs );
 
+		try {
+			$args = match ( $current ) {
+				'dashboard'      => $this->dashboard_args(),
+				'search-replace' => $this->search_replace_args(),
+				'history'        => $this->history_args(),
+				'database'       => array(
+					'tables' => $this->schema->tables(),
+					'server' => $this->schema->server_info(),
+				),
+				default          => array(),
+			};
+		} catch ( RuntimeException $e ) {
+			$args = array( 'error' => $e->getMessage() );
+		}
+
 		$this->template(
 			'page',
 			array(
 				'tabs'    => $tabs,
 				'current' => $current,
-			) + $this->tab_args( $current )
+			) + $args
 		);
 	}
 
@@ -131,7 +211,9 @@ final class Admin {
 	 */
 	private function tabs(): array {
 		return array(
+			'dashboard'      => __( 'Dashboard', 'designslabz-relocate' ),
 			'search-replace' => __( 'Search & Replace', 'designslabz-relocate' ),
+			'history'        => __( 'History', 'designslabz-relocate' ),
 			'database'       => __( 'Database', 'designslabz-relocate' ),
 			'settings'       => __( 'Settings', 'designslabz-relocate' ),
 		);
@@ -141,31 +223,120 @@ final class Admin {
 	 * @param array<string, string> $tabs Available tabs.
 	 */
 	private function current_tab( array $tabs ): string {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only tab navigation.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation.
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
 
 		return isset( $tabs[ $tab ] ) ? $tab : (string) array_key_first( $tabs );
 	}
 
+	private function requested_job_id(): int {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation.
+		return isset( $_GET['job'] ) ? absint( $_GET['job'] ) : 0;
+	}
+
 	/**
 	 * @return array<string, mixed>
 	 */
-	private function tab_args( string $tab ): array {
-		try {
-			return match ( $tab ) {
-				'search-replace' => array(
-					'tables' => $this->schema->searchable_tables(),
-					'prefix' => $this->schema->server_info()['prefix'],
-				),
-				'database'       => array(
-					'tables' => $this->schema->tables(),
-					'server' => $this->schema->server_info(),
-				),
-				default          => array(),
-			};
-		} catch ( RuntimeException $e ) {
-			return array( 'error' => $e->getMessage() );
+	private function dashboard_args(): array {
+		[ $recent ] = $this->jobs->page( 1, 5 );
+
+		$uploads   = wp_upload_dir( null, false );
+		$retention = $this->settings->retention_days();
+		$cleanup   = wp_next_scheduled( Cleanup::HOOK );
+
+		return array(
+			'attention'    => $this->jobs->needing_attention(),
+			'latest'       => $this->jobs->latest_live_job(),
+			'recent'       => $recent,
+			'quick_action' => self::QUICK_ACTION,
+			'status'       => array(
+				__( 'Plugin version', 'designslabz-relocate' ) => Plugin::VERSION,
+				__( 'WordPress', 'designslabz-relocate' ) => get_bloginfo( 'version' ),
+				__( 'PHP', 'designslabz-relocate' )       => PHP_VERSION,
+				__( 'Database server', 'designslabz-relocate' ) => $this->schema->server_info()['version'],
+				__( 'PHP time limit', 'designslabz-relocate' ) => $this->time_limit(),
+				__( 'PHP memory limit', 'designslabz-relocate' ) => (string) ini_get( 'memory_limit' ),
+				__( 'Persistent object cache', 'designslabz-relocate' ) => wp_using_ext_object_cache()
+					? __( 'Yes. It is flushed after every replacement.', 'designslabz-relocate' )
+					: __( 'No', 'designslabz-relocate' ),
+				__( 'Folder for original values', 'designslabz-relocate' ) => wp_is_writable( $uploads['basedir'] )
+					? __( 'Writable', 'designslabz-relocate' )
+					: __( 'Not writable: replacements can only run without saving original values.', 'designslabz-relocate' ),
+				__( 'History clean-up', 'designslabz-relocate' ) => 0 === $retention
+					? __( 'Off: all history is kept.', 'designslabz-relocate' )
+					: sprintf(
+						/* translators: 1: number of days, 2: date of the next clean-up. */
+						_n( 'After %1$s day. Next run: %2$s', 'After %1$s days. Next run: %2$s', $retention, 'designslabz-relocate' ),
+						number_format_i18n( $retention ),
+						$cleanup ? self::format_date( gmdate( 'Y-m-d H:i:s', $cleanup ) ) : __( 'not scheduled yet', 'designslabz-relocate' )
+					),
+			),
+		);
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function search_replace_args(): array {
+		$prefill = array(
+			'search'  => '',
+			'replace' => '',
+		);
+
+		// Values sent from the dashboard's quick form. Only used to fill in the fields.
+		if ( isset( $_POST['_wpnonce'], $_POST['search'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), self::QUICK_ACTION ) ) {
+			// Search values are matched byte for byte, so they are deliberately not sanitized. They are escaped on output.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$prefill['search'] = (string) wp_unslash( $_POST['search'] );
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$prefill['replace'] = isset( $_POST['replace'] ) ? (string) wp_unslash( $_POST['replace'] ) : '';
 		}
+
+		return array(
+			'tables'  => $this->schema->searchable_tables(),
+			'prefix'  => $this->schema->server_info()['prefix'],
+			'prefill' => $prefill,
+		);
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function history_args(): array {
+		$job_id = $this->requested_job_id();
+
+		if ( $job_id ) {
+			$job = $this->jobs->find( $job_id );
+
+			return $job
+				? array(
+					'view'     => 'job',
+					'job'      => $job,
+					'job_data' => $this->formatter->format( $job ),
+					'child_id' => $job->dry_run ? $this->jobs->child_id( $job->id ) : null,
+					'logs'     => $this->logger->entries( 1, 200, $job->id )[0],
+				)
+				: array( 'error' => __( 'That job does not exist. It may have been removed by the history clean-up.', 'designslabz-relocate' ) );
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation.
+		$view  = isset( $_GET['view'] ) && 'log' === $_GET['view'] ? 'log' : 'jobs';
+		$table = 'log' === $view ? new LogTable( $this->logger ) : new HistoryTable( $this->jobs );
+		$table->prepare_items();
+
+		return array(
+			'view'  => $view,
+			'table' => $table,
+		);
+	}
+
+	private function time_limit(): string {
+		$limit = (int) ini_get( 'max_execution_time' );
+
+		return 0 === $limit
+			? __( 'None', 'designslabz-relocate' )
+			/* translators: %s: number of seconds. */
+			: sprintf( _n( '%s second', '%s seconds', $limit, 'designslabz-relocate' ), number_format_i18n( $limit ) );
 	}
 
 	/**

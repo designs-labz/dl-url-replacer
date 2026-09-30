@@ -1,0 +1,210 @@
+<?php
+declare( strict_types=1 );
+
+namespace DesignsLabz\Relocate\Tests\Integration;
+
+use DesignsLabz\Relocate\Admin\Admin;
+use DesignsLabz\Relocate\Database\Schema;
+use DesignsLabz\Relocate\Jobs\BeforeImage;
+use DesignsLabz\Relocate\Jobs\Job;
+use DesignsLabz\Relocate\Jobs\JobRepository;
+use DesignsLabz\Relocate\Jobs\JobStatus;
+use DesignsLabz\Relocate\Jobs\Report;
+use DesignsLabz\Relocate\Logger;
+use DesignsLabz\Relocate\Rest\JobFormatter;
+use DesignsLabz\Relocate\Settings;
+use WP_UnitTestCase;
+
+/**
+ * Renders every screen as an administrator. Any PHP notice, warning or
+ * deprecation fails the test, which is the main point.
+ */
+final class AdminPagesTest extends WP_UnitTestCase {
+
+	private static int $admin_id;
+
+	public static function wpSetUpBeforeClass( \WP_UnitTest_Factory $factory ): void {
+		self::$admin_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	public function set_up(): void {
+		parent::set_up();
+
+		wp_set_current_user( self::$admin_id );
+		set_current_screen( 'tools_page_' . Admin::PAGE );
+	}
+
+	public function tear_down(): void {
+		$_GET  = array();
+		$_POST = array();
+
+		parent::tear_down();
+	}
+
+	public function test_dashboard(): void {
+		$failed = $this->job( false, JobStatus::Failed );
+
+		$html = $this->render( array( 'tab' => 'dashboard' ) );
+
+		$this->assertStringContainsString( 'Needs attention', $html );
+		$this->assertStringContainsString( 'Replacement #' . $failed->id, $html );
+		$this->assertStringContainsString( 'Quick search &amp; replace', $html );
+		$this->assertStringContainsString( 'aria-current="page"', $html );
+	}
+
+	public function test_dashboard_without_any_jobs(): void {
+		$this->assertStringContainsString( 'Nothing has been replaced yet.', $this->render( array() ) );
+	}
+
+	public function test_quick_form_prefills_search_and_replace(): void {
+		$_POST = array(
+			'_wpnonce' => wp_create_nonce( 'dlz_relocate_quick' ),
+			'search'   => 'https://old.test/"quoted"',
+			'replace'  => 'https://new.test',
+		);
+
+		$html = $this->render( array( 'tab' => 'search-replace' ) );
+
+		$this->assertStringContainsString( 'value="https://old.test/&quot;quoted&quot;"', $html );
+		$this->assertStringContainsString( 'value="https://new.test"', $html );
+	}
+
+	public function test_quick_form_values_are_ignored_without_a_valid_nonce(): void {
+		$_POST = array(
+			'_wpnonce' => 'invalid',
+			'search'   => 'https://old.test',
+		);
+
+		$this->assertStringNotContainsString( 'value="https://old.test"', $this->render( array( 'tab' => 'search-replace' ) ) );
+	}
+
+	public function test_search_replace_lists_tables_but_not_the_plugins_own(): void {
+		$html = $this->render( array( 'tab' => 'search-replace' ) );
+
+		$this->assertStringContainsString( 'value="wptests_posts"', $html );
+		$this->assertStringNotContainsString( 'value="wptests_dlz_relocate_jobs"', $html );
+		$this->assertStringContainsString( 'id="dlz-confirm"', $html );
+	}
+
+	public function test_history_list_and_type_filter(): void {
+		$dry  = $this->job( true );
+		$live = $this->job( false );
+
+		$all      = $this->render( array( 'tab' => 'history' ) );
+		$dry_only = $this->render(
+			array(
+				'tab'  => 'history',
+				'type' => 'dry',
+			)
+		);
+
+		$this->assertStringContainsString( 'Dry run #' . $dry->id, $all );
+		$this->assertStringContainsString( 'Replacement #' . $live->id, $all );
+		$this->assertStringContainsString( 'Dry run #' . $dry->id, $dry_only );
+		$this->assertStringNotContainsString( 'Replacement #' . $live->id, $dry_only );
+	}
+
+	public function test_log_view(): void {
+		global $wpdb;
+		( new Logger( $wpdb ) )->warning( 'Something odd.', array( 'table' => 'wptests_posts' ) );
+
+		$html = $this->render(
+			array(
+				'tab'  => 'history',
+				'view' => 'log',
+			)
+		);
+
+		$this->assertStringContainsString( 'Something odd.', $html );
+		$this->assertStringContainsString( '&quot;table&quot;: &quot;wptests_posts&quot;', $html );
+	}
+
+	public function test_job_page_embeds_the_job_for_the_script(): void {
+		$job = $this->job( true );
+
+		$html = $this->render(
+			array(
+				'tab' => 'history',
+				'job' => $job->id,
+			)
+		);
+
+		$this->assertStringContainsString( 'Dry run #' . $job->id, $html );
+		$this->assertMatchesRegularExpression( '/data-job="\{[^"]*&quot;id&quot;:' . $job->id . ',/', $html );
+		$this->assertStringContainsString( '<code>&lt;old&gt;</code>', $html, 'Search values are escaped.' );
+	}
+
+	public function test_missing_job_shows_an_error(): void {
+		$html = $this->render(
+			array(
+				'tab' => 'history',
+				'job' => 999999,
+			)
+		);
+
+		$this->assertStringContainsString( 'That job does not exist.', $html );
+	}
+
+	public function test_database_and_settings(): void {
+		$this->assertStringContainsString( 'Database information', $this->render( array( 'tab' => 'database' ) ) );
+		$this->assertStringContainsString( 'action="options.php"', $this->render( array( 'tab' => 'settings' ) ) );
+	}
+
+	/**
+	 * @param array<string, string|int> $query
+	 */
+	private function render( array $query ): string {
+		global $wpdb;
+
+		$_GET = array_map( 'strval', $query );
+
+		$jobs   = new JobRepository( $wpdb );
+		$schema = new Schema( $wpdb );
+		$images = new BeforeImage( $wpdb );
+		$admin  = new Admin(
+			dirname( __DIR__, 2 ) . '/designslabz-relocate.php',
+			$schema,
+			$jobs,
+			$images,
+			new JobFormatter( $wpdb, $jobs, $schema, $images ),
+			new Logger( $wpdb ),
+			new Settings()
+		);
+
+		ob_start();
+		$admin->render_page();
+		return (string) ob_get_clean();
+	}
+
+	private function job( bool $dry_run, JobStatus $status = JobStatus::Completed ): Job {
+		global $wpdb;
+
+		return ( new JobRepository( $wpdb ) )->create(
+			new Job(
+				0,
+				null,
+				$dry_run,
+				$status,
+				'<old>',
+				'new',
+				array(
+					'case_sensitive' => true,
+					'whole_words'    => false,
+					'url_variants'   => false,
+					'skip_guids'     => true,
+					'tables'         => array( $wpdb->posts ),
+				),
+				array(
+					'table_index' => 1,
+					'last_key'    => null,
+					'total_rows'  => 0,
+				),
+				new Report(),
+				self::$admin_id,
+				gmdate( 'Y-m-d H:i:s' ),
+				gmdate( 'Y-m-d H:i:s' ),
+				gmdate( 'Y-m-d H:i:s' )
+			)
+		);
+	}
+}

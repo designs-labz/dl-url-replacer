@@ -168,3 +168,64 @@
 	gap: 0.5em;
 	margin-bottom: 0;
 }
+
+.dlz-relocate .dlz-dashboard {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(20em, 1fr));
+	gap: 1.25em;
+	margin-top: 1.5em;
+}
+
+.dlz-relocate .dlz-card {
+	padding: 0.5em 1.25em 1em;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	min-width: 0;
+}
+
+.dlz-relocate .dlz-card-wide {
+	grid-column: 1 / -1;
+}
+
+.dlz-relocate .dlz-card-attention {
+	border-left: 4px solid #dba617;
+}
+
+.dlz-relocate .dlz-card h2 {
+	font-size: 1.1em;
+}
+
+.dlz-relocate .dlz-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.2em;
+	white-space: nowrap;
+}
+
+.dlz-relocate .dlz-badge .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+}
+
+.dlz-relocate .dlz-badge-completed .dashicons {
+	color: #00a32a;
+}
+
+.dlz-relocate .dlz-badge-failed .dashicons,
+.dlz-relocate .dlz-badge-error .dashicons {
+	color: #d63638;
+}
+
+.dlz-relocate .dlz-badge-interrupted .dashicons,
+.dlz-relocate .dlz-badge-warning .dashicons {
+	color: #996800;
+}
+
+.dlz-relocate .dlz-log-context pre {
+	max-height: 20em;
+	overflow: auto;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}

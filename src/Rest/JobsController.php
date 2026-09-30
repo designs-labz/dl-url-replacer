@@ -3,7 +3,6 @@ declare( strict_types=1 );
 
 namespace DesignsLabz\Relocate\Rest;
 
-use DesignsLabz\Relocate\Admin\Admin;
 use DesignsLabz\Relocate\Database\Schema;
 use DesignsLabz\Relocate\Jobs\BeforeImage;
 use DesignsLabz\Relocate\Jobs\Job;
@@ -14,7 +13,6 @@ use DesignsLabz\Relocate\Jobs\Report;
 use DesignsLabz\Relocate\Logger;
 use DesignsLabz\Relocate\Plugin;
 use DesignsLabz\Relocate\Replace\Replacement;
-use DesignsLabz\Relocate\Replace\ReplaceResult;
 use InvalidArgumentException;
 use RuntimeException;
 use WP_Error;
@@ -37,6 +35,7 @@ final class JobsController {
 		private JobRunner $runner,
 		private Schema $schema,
 		private BeforeImage $before_images,
+		private JobFormatter $formatter,
 		private Logger $logger
 	) {}
 
@@ -230,13 +229,13 @@ final class JobsController {
 
 		$this->logger->info( 'Dry run created.', array( 'tables' => count( $settings['tables'] ) ), $job->id );
 
-		return new WP_REST_Response( $this->prepare( $job ), 201 );
+		return new WP_REST_Response( $this->formatter->format( $job ), 201 );
 	}
 
 	public function get_job( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$job = $this->jobs->find( (int) $request['id'] );
 
-		return $job ? rest_ensure_response( $this->prepare( $job ) ) : $this->not_found();
+		return $job ? rest_ensure_response( $this->formatter->format( $job ) ) : $this->not_found();
 	}
 
 	public function run_job( WP_REST_Request $request ): WP_REST_Response|WP_Error {
@@ -257,7 +256,7 @@ final class JobsController {
 			return $this->error( 'dlz_relocate_job_busy', __( 'This job is already being processed in another browser tab.', 'designslabz-relocate' ), 409 );
 		}
 
-		return rest_ensure_response( $this->prepare( $job ) );
+		return rest_ensure_response( $this->formatter->format( $job ) );
 	}
 
 	/**
@@ -287,7 +286,7 @@ final class JobsController {
 		$result = $this->runner->exclusive(
 			'execute',
 			function () use ( $dry_run, $request ): Job|WP_Error {
-				if ( $this->jobs->has_child( $dry_run->id ) ) {
+				if ( null !== $this->jobs->child_id( $dry_run->id ) ) {
 					return $this->error( 'dlz_relocate_already_executed', __( 'This dry run has already been applied. Run a new dry run to replace again.', 'designslabz-relocate' ), 409 );
 				}
 
@@ -303,7 +302,7 @@ final class JobsController {
 			return $this->error( 'dlz_relocate_job_busy', __( 'Another replacement is being started. Try again in a few seconds.', 'designslabz-relocate' ), 409 );
 		}
 
-		return $result instanceof WP_Error ? $result : new WP_REST_Response( $this->prepare( $result ), 201 );
+		return $result instanceof WP_Error ? $result : new WP_REST_Response( $this->formatter->format( $result ), 201 );
 	}
 
 	public function resume_job( WP_REST_Request $request ): WP_REST_Response|WP_Error {
@@ -324,7 +323,7 @@ final class JobsController {
 			return $this->error( 'dlz_relocate_job_busy', __( 'This job is already being processed in another browser tab.', 'designslabz-relocate' ), 409 );
 		}
 
-		return rest_ensure_response( $this->prepare( $job ) );
+		return rest_ensure_response( $this->formatter->format( $job ) );
 	}
 
 	public function cancel_job( WP_REST_Request $request ): WP_REST_Response|WP_Error {
@@ -345,7 +344,7 @@ final class JobsController {
 			return $this->error( 'dlz_relocate_job_busy', __( 'The job is busy. Try cancelling again in a few seconds.', 'designslabz-relocate' ), 409 );
 		}
 
-		return rest_ensure_response( $this->prepare( $job ) );
+		return rest_ensure_response( $this->formatter->format( $job ) );
 	}
 
 	private function start_live_job( Job $dry_run, bool $before_image ): Job|WP_Error {
@@ -402,95 +401,6 @@ final class JobsController {
 		);
 
 		return $job;
-	}
-
-	/**
-	 * @return array<string, mixed>
-	 */
-	private function prepare( Job $job ): array {
-		$data = array(
-			'id'            => $job->id,
-			'parent_id'     => $job->parent_id,
-			'dry_run'       => $job->dry_run,
-			'search'        => $job->search,
-			'replace'       => $job->replace,
-			'tables'        => $job->settings['tables'],
-			'status'        => $job->status->value,
-			'status_label'  => $job->status->label(),
-			'finished'      => $job->status->is_finished(),
-			'progress'      => $job->progress(),
-			'current_table' => $job->current_table(),
-			'tables_done'   => min( $job->state['table_index'], count( $job->settings['tables'] ) ),
-			'tables_total'  => count( $job->settings['tables'] ),
-			'totals'        => $job->report->totals(),
-			'error'         => $job->error_message,
-		);
-
-		if ( $job->status->is_finished() ) {
-			$data['report'] = array(
-				'tables'  => $this->prepare_tables( $job->report ),
-				'samples' => $job->report->samples(),
-			);
-		}
-
-		if ( $job->dry_run ) {
-			$data['executable'] = JobStatus::Completed === $job->status
-				&& $data['totals']['rows_changed'] > 0
-				&& ! $this->jobs->has_child( $job->id );
-		} else {
-			$data['before_image_url']     = $this->before_images->path( $job->before_image ) ? Admin::before_image_url( $job->id ) : null;
-			$data['site_address_changed'] = ! empty( $job->state['site_address_changed'] );
-			$data['login_url']            = $data['site_address_changed'] ? wp_login_url( admin_url( 'tools.php?page=' . Admin::PAGE ) ) : null;
-		}
-
-		return $data;
-	}
-
-	/**
-	 * @return list<array<string, mixed>>
-	 */
-	private function prepare_tables( Report $report ): array {
-		$tables = array();
-
-		foreach ( $report->tables() as $name => $stats ) {
-			$skipped = array();
-			foreach ( $stats['skipped'] as $reason => $count ) {
-				$skipped[] = array(
-					'reason' => $this->skip_label( $reason ),
-					'count'  => $count,
-				);
-			}
-
-			$tables[] = array(
-				'name'         => $name,
-				'rows_scanned' => $stats['rows_scanned'],
-				'rows_changed' => $stats['rows_changed'],
-				'replacements' => $stats['replacements'],
-				'columns'      => $stats['columns'],
-				'skipped'      => $skipped,
-				'note'         => null === $stats['note'] ? null : $this->note_label( $stats['note'] ),
-			);
-		}
-
-		return $tables;
-	}
-
-	private function note_label( string $note ): string {
-		return match ( $note ) {
-			Report::NOTE_MISSING_TABLE => __( 'Skipped: the table no longer exists.', 'designslabz-relocate' ),
-			Report::NOTE_NO_KEY        => __( 'Skipped: the table has no primary key or suitable unique key, so its rows cannot be updated one at a time safely.', 'designslabz-relocate' ),
-			Report::NOTE_NO_COLUMNS    => __( 'Skipped: the table has no text columns to search.', 'designslabz-relocate' ),
-			default                    => $note,
-		};
-	}
-
-	private function skip_label( string $reason ): string {
-		return match ( $reason ) {
-			ReplaceResult::INVALID_SERIALIZED     => __( 'Serialized data that is already corrupt, or would not read back correctly after the change', 'designslabz-relocate' ),
-			ReplaceResult::UNSUPPORTED_SERIALIZED => __( 'Match inside a custom serialized object format that cannot be edited safely', 'designslabz-relocate' ),
-			ReplaceResult::BROKEN_JSON            => __( 'The change would turn valid JSON into invalid JSON', 'designslabz-relocate' ),
-			default                               => __( 'The value could not be searched', 'designslabz-relocate' ),
-		};
 	}
 
 	private function error( string $code, string $message, int $status = 400 ): WP_Error {

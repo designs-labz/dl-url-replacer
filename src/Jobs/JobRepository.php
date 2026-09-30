@@ -41,10 +41,102 @@ final class JobRepository {
 	}
 
 	/**
-	 * Whether a live job was already started from this dry run.
+	 * The live job started from this dry run, if there is one.
 	 */
-	public function has_child( int $parent_id ): bool {
-		return null !== $this->wpdb->get_var( $this->wpdb->prepare( 'SELECT id FROM %i WHERE parent_id = %d LIMIT 1', $this->table(), $parent_id ) );
+	public function child_id( int $parent_id ): ?int {
+		$id = $this->wpdb->get_var( $this->wpdb->prepare( 'SELECT id FROM %i WHERE parent_id = %d LIMIT 1', $this->table(), $parent_id ) );
+
+		return null === $id ? null : (int) $id;
+	}
+
+	/**
+	 * Newest first.
+	 *
+	 * @param bool|null $dry_run Only dry runs (true), only live jobs (false), or both (null).
+	 * @return array{0: list<Job>, 1: int} The page of jobs and the total number of matching jobs.
+	 */
+	public function page( int $page, int $per_page, ?bool $dry_run = null ): array {
+		$where = null === $dry_run ? '' : ' WHERE dry_run = %d';
+		$args  = null === $dry_run ? array() : array( (int) $dry_run );
+
+		$rows = $this->wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Placeholders and values are built together.
+			$this->wpdb->prepare(
+				'SELECT * FROM %i' . $where . ' ORDER BY id DESC LIMIT %d OFFSET %d',
+				array_merge( array( $this->table() ), $args, array( $per_page, max( 0, $page - 1 ) * $per_page ) )
+			)
+		);
+		$total = (int) $this->wpdb->get_var( $this->wpdb->prepare( 'SELECT COUNT(*) FROM %i' . $where, array_merge( array( $this->table() ), $args ) ) );
+
+		return array( array_map( array( $this, 'from_row' ), $rows ), $total );
+	}
+
+	public function latest_live_job(): ?Job {
+		$row = $this->wpdb->get_row( $this->wpdb->prepare( 'SELECT * FROM %i WHERE dry_run = 0 ORDER BY id DESC LIMIT 1', $this->table() ) );
+
+		return $row ? $this->from_row( $row ) : null;
+	}
+
+	/**
+	 * Jobs someone should look at: failed replacements, and anything interrupted.
+	 *
+	 * @return list<Job>
+	 */
+	public function needing_attention(): array {
+		$rows = $this->wpdb->get_results(
+			$this->wpdb->prepare(
+				'SELECT * FROM %i WHERE status IN (%s, %s) OR (status = %s AND dry_run = 0) ORDER BY id DESC LIMIT 20',
+				$this->table(),
+				JobStatus::Pending->value,
+				JobStatus::Running->value,
+				JobStatus::Failed->value
+			)
+		);
+
+		return array_values(
+			array_filter(
+				array_map( array( $this, 'from_row' ), $rows ),
+				fn( Job $job ): bool => JobStatus::Failed === $job->status || $job->is_interrupted()
+			)
+		);
+	}
+
+	/**
+	 * Deletes finished jobs last touched before the cutoff.
+	 *
+	 * @param string $cutoff UTC datetime.
+	 * @return list<string> Before-image files of the deleted jobs, for the caller to remove.
+	 */
+	public function delete_finished_before( string $cutoff ): array {
+		$rows = $this->wpdb->get_results(
+			$this->wpdb->prepare(
+				'SELECT id, before_image FROM %i WHERE status IN (%s, %s, %s) AND updated_at < %s',
+				$this->table(),
+				JobStatus::Completed->value,
+				JobStatus::Failed->value,
+				JobStatus::Cancelled->value,
+				$cutoff
+			)
+		);
+
+		if ( ! $rows ) {
+			return array();
+		}
+
+		$ids = array_map( fn( object $row ): int => (int) $row->id, $rows );
+
+		$deleted = $this->wpdb->query(
+			$this->wpdb->prepare(
+				'DELETE FROM %i WHERE id IN (' . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ')',
+				array_merge( array( $this->table() ), $ids )
+			)
+		);
+
+		if ( false === $deleted ) {
+			throw new RuntimeException( 'Could not delete old jobs: ' . $this->wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Escaped where it is displayed.
+		}
+
+		return array_values( array_filter( array_map( fn( object $row ): string => (string) $row->before_image, $rows ) ) );
 	}
 
 	/**
@@ -114,7 +206,8 @@ final class JobRepository {
 			$row->started_at,
 			$row->finished_at,
 			$row->error_message,
-			(string) $row->before_image
+			(string) $row->before_image,
+			$row->updated_at
 		);
 	}
 

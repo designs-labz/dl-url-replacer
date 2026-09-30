@@ -11,12 +11,15 @@ final class Settings {
 	public const OPTION = 'dlz_relocate_settings';
 
 	private const DEFAULTS = array(
-		'batch_size'  => 500,
-		'delete_data' => false,
+		'batch_size'     => 500,
+		'retention_days' => 30,
+		'delete_data'    => false,
 	);
 
 	private const MIN_BATCH_SIZE = 50;
 	private const MAX_BATCH_SIZE = 5000;
+
+	private const MAX_RETENTION_DAYS = 3650;
 
 	public function register(): void {
 		add_action( 'admin_init', array( $this, 'register_setting' ) );
@@ -48,6 +51,15 @@ final class Settings {
 		add_settings_section( 'data', __( 'Data', 'designslabz-relocate' ), '__return_false', self::OPTION );
 
 		add_settings_field(
+			'retention_days',
+			__( 'Keep history for', 'designslabz-relocate' ),
+			array( $this, 'render_retention_days_field' ),
+			self::OPTION,
+			'data',
+			array( 'label_for' => 'dlz-relocate-retention-days' )
+		);
+
+		add_settings_field(
 			'delete_data',
 			__( 'Uninstall', 'designslabz-relocate' ),
 			array( $this, 'render_delete_data_field' ),
@@ -58,14 +70,26 @@ final class Settings {
 
 	/**
 	 * @param mixed $input Raw submitted value.
-	 * @return array{batch_size: int, delete_data: bool}
+	 * @return array{batch_size: int, retention_days: int, delete_data: bool}
 	 */
 	public function sanitize( mixed $input ): array {
 		$input = is_array( $input ) ? $input : array();
 
 		return array(
-			'batch_size'  => min( self::MAX_BATCH_SIZE, max( self::MIN_BATCH_SIZE, absint( $input['batch_size'] ?? self::DEFAULTS['batch_size'] ) ) ),
-			'delete_data' => ! empty( $input['delete_data'] ),
+			'batch_size'     => min( self::MAX_BATCH_SIZE, max( self::MIN_BATCH_SIZE, absint( $input['batch_size'] ?? self::DEFAULTS['batch_size'] ) ) ),
+			'retention_days' => min( self::MAX_RETENTION_DAYS, absint( $input['retention_days'] ?? self::DEFAULTS['retention_days'] ) ),
+			'delete_data'    => ! empty( $input['delete_data'] ),
+		);
+	}
+
+	public function render_retention_days_field(): void {
+		printf(
+			'<input type="number" id="dlz-relocate-retention-days" name="%1$s[retention_days]" value="%2$d" min="0" max="%3$d" class="small-text" aria-describedby="dlz-relocate-retention-days-description"> %4$s<p class="description" id="dlz-relocate-retention-days-description">%5$s</p>',
+			esc_attr( self::OPTION ),
+			(int) $this->retention_days(),
+			(int) self::MAX_RETENTION_DAYS,
+			esc_html__( 'days', 'designslabz-relocate' ),
+			esc_html__( 'Finished jobs, their files of original values, and log entries older than this are deleted once a day. Enter 0 to keep everything.', 'designslabz-relocate' )
 		);
 	}
 
@@ -95,12 +119,16 @@ final class Settings {
 		return (int) $this->all()['batch_size'];
 	}
 
+	public function retention_days(): int {
+		return (int) $this->all()['retention_days'];
+	}
+
 	public function delete_data_on_uninstall(): bool {
 		return (bool) $this->all()['delete_data'];
 	}
 
 	/**
-	 * @return array{batch_size: int, delete_data: bool}
+	 * @return array{batch_size: int, retention_days: int, delete_data: bool}
 	 */
 	private function all(): array {
 		$saved = get_option( self::OPTION, array() );

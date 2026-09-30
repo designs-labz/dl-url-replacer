@@ -1,25 +1,28 @@
 /**
- * Search & Replace tab: creates a dry run over REST, keeps calling its run
- * endpoint until it finishes and renders the report. From a finished dry run
- * the same loop drives the live replacement.
+ * Search & Replace tab and job page: creates a dry run over REST, keeps
+ * calling its run endpoint until it finishes and renders the report. From a
+ * finished dry run the same loop drives the live replacement. The job page
+ * embeds a job in #dlz-runner[data-job], which is rendered on load.
  *
  * Everything from the server is inserted with textContent, never as HTML.
  */
 ( function () {
 	'use strict';
 
-	const form = document.getElementById( 'dlz-search-replace' );
+	const runner = document.getElementById( 'dlz-runner' );
 
-	if ( ! form ) {
+	if ( ! runner ) {
 		return;
 	}
+
+	const form = document.getElementById( 'dlz-search-replace' );
 
 	const { __, _n, sprintf } = wp.i18n;
 	const apiFetch = wp.apiFetch;
 	const speak = wp.a11y.speak;
 	const API = '/dlz-relocate/v1/jobs';
 
-	const submitButton = form.querySelector( '[type="submit"]' );
+	const submitButton = form ? form.querySelector( '[type="submit"]' ) : null;
 	const notices = document.getElementById( 'dlz-notices' );
 	const progress = document.getElementById( 'dlz-progress' );
 	const progressHeading = document.getElementById( 'dlz-progress-heading' );
@@ -37,7 +40,7 @@
 	let dryRun = null;
 	let dialogOpener = null;
 
-	form.addEventListener( 'submit', async ( event ) => {
+	form?.addEventListener( 'submit', async ( event ) => {
 		event.preventDefault();
 
 		const data = new FormData( form );
@@ -85,7 +88,7 @@
 		progressText.textContent = __( 'Stopping after the current batch…', 'designslabz-relocate' );
 	} );
 
-	form.addEventListener( 'click', ( event ) => {
+	form?.addEventListener( 'click', ( event ) => {
 		const button = event.target.closest( '[data-dlz-select]' );
 
 		if ( ! button ) {
@@ -111,6 +114,34 @@
 			execute( dryRun, confirmBeforeImage.checked );
 		}
 	} );
+
+	if ( runner.dataset.job ) {
+		showJob( JSON.parse( runner.dataset.job ) );
+	}
+
+	/**
+	 * A job embedded in the page: its results if it has finished, otherwise an
+	 * offer to carry on from where it stopped.
+	 *
+	 * @param {Object} job Job as returned by the REST API.
+	 */
+	function showJob( job ) {
+		if ( job.finished ) {
+			if ( job.dry_run ) {
+				dryRun = job;
+				renderDryRun( job, false );
+			} else {
+				renderLiveRun( job, false );
+			}
+			return;
+		}
+
+		const message = job.interrupted
+			? __( 'This job stopped before it finished, probably because the page running it was closed. Continuing carries on from the last completed batch.', 'designslabz-relocate' )
+			: __( 'This job is still running, possibly in another tab. If that tab was closed, continue it here.', 'designslabz-relocate' );
+
+		showNotice( 'warning', message, () => run( job ), __( 'Continue', 'designslabz-relocate' ), false );
+	}
 
 	/**
 	 * Drives a job to the end. On a failed request the job is still safe on the
@@ -205,7 +236,7 @@
 			: __( 'Finishing…', 'designslabz-relocate' );
 	}
 
-	function renderDryRun( job ) {
+	function renderDryRun( job, announce = true ) {
 		const heading = startResults( __( 'Dry run results', 'designslabz-relocate' ) );
 
 		if ( 'completed' === job.status ) {
@@ -235,7 +266,7 @@
 			results.append( el( 'p', {}, __( 'No matches were found, so there is nothing to replace.', 'designslabz-relocate' ) ) );
 		}
 
-		finishResults( heading, sprintf(
+		finishResults( heading, announce, sprintf(
 			/* translators: 1: number of replacements, 2: number of rows. */
 			_n(
 				'Dry run finished: %1$s replacement in %2$s rows.',
@@ -248,7 +279,7 @@
 		) );
 	}
 
-	function renderLiveRun( job ) {
+	function renderLiveRun( job, announce = true ) {
 		const heading = startResults( __( 'Replacement results', 'designslabz-relocate' ) );
 		let message;
 
@@ -301,7 +332,7 @@
 		}
 
 		appendReport( job, __( 'Rows changed', 'designslabz-relocate' ) );
-		finishResults( heading, message );
+		finishResults( heading, announce, message );
 	}
 
 	function applySection( job ) {
@@ -355,13 +386,7 @@
 
 	function warnings( job ) {
 		const list = [];
-		const engines = {};
-
-		form.querySelectorAll( 'input[name="tables[]"]' ).forEach( ( input ) => {
-			engines[ input.value ] = input.dataset.engine;
-		} );
-
-		const untransactional = job.tables.filter( ( table ) => engines[ table ] && 'innodb' !== engines[ table ].toLowerCase() );
+		const untransactional = job.untransactional_tables || [];
 
 		if ( untransactional.length ) {
 			list.push( sprintf(
@@ -375,7 +400,7 @@
 			list.push( __( 'The replacement contains the search text. Running this same replacement a second time would apply it again.', 'designslabz-relocate' ) );
 		}
 
-		if ( job.tables.some( ( table ) => /options$/.test( table ) ) ) {
+		if ( job.touches_site_address ) {
 			list.push( __( 'If this changes the site address (siteurl or home), it is changed last and you will need to log in again at the new address.', 'designslabz-relocate' ) );
 		}
 
@@ -498,10 +523,18 @@
 		return heading;
 	}
 
-	function finishResults( heading, announcement ) {
+	/**
+	 * @param {HTMLElement} heading
+	 * @param {boolean}     announce     False when showing a job on page load: moving focus then would be jarring.
+	 * @param {string}      announcement Text for screen readers.
+	 */
+	function finishResults( heading, announce, announcement ) {
 		results.hidden = false;
-		heading.focus();
-		speak( announcement );
+
+		if ( announce ) {
+			heading.focus();
+			speak( announcement );
+		}
 	}
 
 	function summary( items ) {
@@ -529,15 +562,17 @@
 	}
 
 	/**
-	 * @param {string}    type    Notice type: error, warning, success or info.
-	 * @param {string}    message Message text.
-	 * @param {Function=} retry   When given, a button to carry on the job.
+	 * @param {string}    type     Notice type: error, warning, success or info.
+	 * @param {string}    message  Message text.
+	 * @param {Function=} retry    When given, a button to carry on the job.
+	 * @param {string=}   label    Label for that button.
+	 * @param {boolean=}  announce Whether to read the message out straight away.
 	 */
-	function showNotice( type, message, retry ) {
+	function showNotice( type, message, retry, label, announce = true ) {
 		const notice = el( 'div', { className: `notice notice-${ type }` }, el( 'p', {}, message ) );
 
 		if ( retry ) {
-			const button = el( 'button', { type: 'button', className: 'button' }, __( 'Resume', 'designslabz-relocate' ) );
+			const button = el( 'button', { type: 'button', className: 'button' }, label || __( 'Resume', 'designslabz-relocate' ) );
 			button.addEventListener( 'click', () => {
 				notice.remove();
 				retry();
@@ -546,7 +581,10 @@
 		}
 
 		notices.replaceChildren( notice );
-		speak( message, 'assertive' );
+
+		if ( announce ) {
+			speak( message, 'assertive' );
+		}
 	}
 
 	function clearNotices() {
@@ -564,8 +602,11 @@
 	 */
 	function setBusy( busy, live = false ) {
 		progress.hidden = ! busy;
-		submitButton.disabled = busy;
-		form.setAttribute( 'aria-busy', busy ? 'true' : 'false' );
+		runner.setAttribute( 'aria-busy', busy ? 'true' : 'false' );
+
+		if ( submitButton ) {
+			submitButton.disabled = busy;
+		}
 
 		if ( busy && live ) {
 			window.addEventListener( 'beforeunload', warnBeforeLeaving );

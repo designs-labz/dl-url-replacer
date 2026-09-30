@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace DesignsLabz\Relocate;
 
 use DesignsLabz\Relocate\Jobs\BeforeImage;
+use DesignsLabz\Relocate\Jobs\Cleanup;
 
 /**
  * Creates and upgrades the plugin's tables, and removes them on uninstall.
@@ -53,6 +54,7 @@ final class Installer {
 		delete_option( Settings::OPTION );
 
 		( new BeforeImage( $this->wpdb ) )->delete_all();
+		Cleanup::unschedule();
 	}
 
 	private function create_tables(): void {

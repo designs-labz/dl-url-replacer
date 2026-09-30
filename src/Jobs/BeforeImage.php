@@ -103,6 +103,14 @@ final class BeforeImage {
 		return is_file( $path ) ? $path : null;
 	}
 
+	public function delete( string $file ): void {
+		$path = $this->path( $file );
+
+		if ( null !== $path ) {
+			wp_delete_file( $path );
+		}
+	}
+
 	/**
 	 * Removes every before-image file and the folder. Used on uninstall.
 	 */

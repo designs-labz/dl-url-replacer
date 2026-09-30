@@ -29,14 +29,14 @@ $groups = array(
 		<tr>
 			<th scope="row"><label for="dlz-search"><?php esc_html_e( 'Search for', 'designslabz-relocate' ); ?></label></th>
 			<td>
-				<input type="text" id="dlz-search" name="search" class="large-text code" required spellcheck="false" autocomplete="off" placeholder="https://staging.example.com" aria-describedby="dlz-search-description">
+				<input type="text" id="dlz-search" name="search" value="<?php echo esc_attr( $args['prefill']['search'] ); ?>" class="large-text code" required spellcheck="false" autocomplete="off" placeholder="https://staging.example.com" aria-describedby="dlz-search-description">
 				<p class="description" id="dlz-search-description"><?php esc_html_e( 'Matched exactly as typed, including any spaces.', 'designslabz-relocate' ); ?></p>
 			</td>
 		</tr>
 		<tr>
 			<th scope="row"><label for="dlz-replace"><?php esc_html_e( 'Replace with', 'designslabz-relocate' ); ?></label></th>
 			<td>
-				<input type="text" id="dlz-replace" name="replace" class="large-text code" spellcheck="false" autocomplete="off" placeholder="https://example.com" aria-describedby="dlz-replace-description">
+				<input type="text" id="dlz-replace" name="replace" value="<?php echo esc_attr( $args['prefill']['replace'] ); ?>" class="large-text code" spellcheck="false" autocomplete="off" placeholder="https://example.com" aria-describedby="dlz-replace-description">
 				<p class="description" id="dlz-replace-description"><?php esc_html_e( 'Leave empty to remove the matched text.', 'designslabz-relocate' ); ?></p>
 			</td>
 		</tr>
@@ -82,7 +82,7 @@ $groups = array(
 								<?php foreach ( $group_tables as $table ) : ?>
 									<li>
 										<label>
-											<input type="checkbox" name="tables[]" value="<?php echo esc_attr( $table->name ); ?>" data-group="<?php echo esc_attr( $group ); ?>" data-engine="<?php echo esc_attr( $table->engine ); ?>" <?php checked( 'core' === $group ); ?>>
+											<input type="checkbox" name="tables[]" value="<?php echo esc_attr( $table->name ); ?>" data-group="<?php echo esc_attr( $group ); ?>" <?php checked( 'core' === $group ); ?>>
 											<code><?php echo esc_html( $table->name ); ?></code>
 											<span class="dlz-picker-meta">
 												<?php
@@ -111,37 +111,4 @@ $groups = array(
 	</p>
 </form>
 
-<div id="dlz-notices"></div>
-
-<div id="dlz-progress" class="dlz-progress" hidden>
-	<h2 id="dlz-progress-heading"><?php esc_html_e( 'Dry run in progress', 'designslabz-relocate' ); ?></h2>
-	<progress id="dlz-progress-bar" max="100" value="0" aria-labelledby="dlz-progress-heading"></progress>
-	<p id="dlz-progress-text"></p>
-	<button type="button" class="button" id="dlz-cancel"><?php esc_html_e( 'Cancel', 'designslabz-relocate' ); ?></button>
-</div>
-
-<div id="dlz-results" class="dlz-results" hidden></div>
-
-<dialog id="dlz-confirm" class="dlz-dialog" aria-labelledby="dlz-confirm-title">
-	<form method="dialog">
-		<h2 id="dlz-confirm-title"><?php esc_html_e( 'Replace in the database?', 'designslabz-relocate' ); ?></h2>
-		<div id="dlz-confirm-summary"></div>
-		<ul id="dlz-confirm-warnings" class="dlz-warnings"></ul>
-		<p>
-			<label>
-				<input type="checkbox" id="dlz-confirm-before-image" checked>
-				<?php esc_html_e( 'Save the original value of everything that changes to a downloadable file (recommended)', 'designslabz-relocate' ); ?>
-			</label>
-		</p>
-		<p>
-			<label>
-				<input type="checkbox" id="dlz-confirm-backup">
-				<?php esc_html_e( 'I have a recent backup of this database. I understand the replacement is written straight to the database and is not undone automatically.', 'designslabz-relocate' ); ?>
-			</label>
-		</p>
-		<p class="dlz-dialog-actions">
-			<button type="submit" value="cancel" class="button" formnovalidate><?php esc_html_e( 'Cancel', 'designslabz-relocate' ); ?></button>
-			<button type="submit" value="confirm" class="button button-primary" id="dlz-confirm-submit" disabled><?php esc_html_e( 'Replace now', 'designslabz-relocate' ); ?></button>
-		</p>
-	</form>
-</dialog>
+<?php require __DIR__ . '/partials/runner.php'; ?>
